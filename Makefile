@@ -17,7 +17,7 @@ ORIGMODDIR = $(patsubst %/build,%/kernel,$(KERNELDIR))
 
 rpmrelease = devel
 
-LINUX = ../linux-2.6
+LINUX = ./linux-2.6
 
 version = $(shell cd $(LINUX); git describe)
 
