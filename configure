@@ -103,6 +103,7 @@ if [ -n "$no_uname" -a "$want_module" ]; then
 fi
 
 rm -f include/asm include-compat/asm
+mkdir -p include
 ln -sf asm-"$karch" include/asm
 ln -sf asm-"$karch" include-compat/asm
 
