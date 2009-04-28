@@ -641,19 +641,41 @@ static inline int pci_reset_function(struct pci_dev *dev)
 #endif
 
 #include <linux/interrupt.h>
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,20)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
 
-typedef irqreturn_t (*kvm_irq_handler_t)(int, void *, struct pt_regs *);
+typedef irqreturn_t (*kvm_irq_handler_t)(int, void *);
+static kvm_irq_handler_t kvm_irq_handlers[NR_IRQS];
+
+static irqreturn_t kvm_irq_thunk(int irq, void *dev_id, struct pt_regs *regs)
+{
+	kvm_irq_handler_t handler = kvm_irq_handlers[irq];
+	return handler(irq, dev_id);
+}
+
 static inline int kvm_request_irq(unsigned int a, kvm_irq_handler_t handler,
 				  unsigned long c, const char *d, void *e)
 {
-	/* FIXME: allocate thunk, etc. */
-	return -EINVAL;
+	int rc;
+	kvm_irq_handler_t old = kvm_irq_handlers[a];
+	if (old)
+		return -EBUSY;
+	kvm_irq_handlers[a] = handler;
+	rc = request_irq(a, kvm_irq_thunk, c, d, e);
+	if (rc)
+		kvm_irq_handlers[a] = NULL;
+	return rc;
+}
+
+static inline void kvm_free_irq(unsigned int irq, void *dev_id)
+{
+	free_irq(irq, dev_id);
+	kvm_irq_handlers[irq] = NULL;
 }
 
 #else
 
 #define kvm_request_irq request_irq
+#define kvm_free_irq free_irq
 
 #endif
 
