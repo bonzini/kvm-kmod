@@ -116,6 +116,10 @@ int kvm_smp_call_function_single(int cpu, void (*func)(void *info),
 
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
+#define nr_cpu_ids NR_CPUS
+#endif
+
 #include <linux/miscdevice.h>
 #ifndef KVM_MINOR
 #define KVM_MINOR 232
