@@ -224,6 +224,12 @@ int kvm_smp_call_function_mask(cpumask_t mask, void (*func) (void *info),
 
 #define smp_call_function_mask kvm_smp_call_function_mask
 
+void kvm_smp_send_reschedule(int cpu);
+
+#else
+
+#define kvm_smp_send_reschedule smp_send_reschedule
+
 #endif
 
 /* empty_zero_page isn't exported in all kernels */

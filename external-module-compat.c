@@ -221,6 +221,58 @@ out:
 	return 0;
 }
 
+#include <linux/workqueue.h>
+
+static void vcpu_kick_intr(void *info)
+{
+}
+
+struct kvm_kick {
+	int cpu;
+	struct work_struct work;
+};
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,20)
+static void kvm_do_smp_call_function(void *data)
+{
+	int me;
+	struct kvm_kick *kvm_kick = data;
+#else
+static void kvm_do_smp_call_function(struct work_struct *work)
+{
+	int me;
+	struct kvm_kick *kvm_kick = container_of(work, struct kvm_kick, work);
+#endif
+	me = get_cpu();
+
+	if (kvm_kick->cpu != me)
+		smp_call_function_single(kvm_kick->cpu, vcpu_kick_intr,
+					 NULL, 0);
+	kfree(kvm_kick);
+	put_cpu();
+}
+
+void kvm_queue_smp_call_function(int cpu)
+{
+	struct kvm_kick *kvm_kick = kmalloc(sizeof(struct kvm_kick), GFP_ATOMIC);
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,20)
+	INIT_WORK(&kvm_kick->work, kvm_do_smp_call_function, kvm_kick);
+#else
+	INIT_WORK(&kvm_kick->work, kvm_do_smp_call_function);
+#endif
+
+	schedule_work(&kvm_kick->work);
+}
+
+void kvm_smp_send_reschedule(int cpu)
+{
+	if (irqs_disabled()) {
+		kvm_queue_smp_call_function(cpu);
+		return;
+	}
+	smp_call_function_single(cpu, vcpu_kick_intr, NULL, 0);
+}
 #endif
 
 /* manually export hrtimer_init/start/cancel */

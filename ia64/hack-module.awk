@@ -1,4 +1,4 @@
-BEGIN { split("INIT_WORK on_each_cpu smp_call_function " \
+BEGIN { split("INIT_WORK on_each_cpu smp_call_function smp_send_reschedule " \
 	      "hrtimer_add_expires_ns hrtimer_get_expires " \
 	      "hrtimer_get_expires_ns hrtimer_start_expires " \
 	      "hrtimer_expires_remaining " \
