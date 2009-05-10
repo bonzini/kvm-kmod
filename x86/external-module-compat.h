@@ -54,6 +54,50 @@
 #define X86_FEATURE_FXSR_OPT  (1*32+25)
 #endif
 
+#ifndef X86_FEATURE_SSSE3
+#define X86_FEATURE_SSSE3	(4*32+ 9) /* Supplemental SSE-3 */
+#endif
+
+#ifndef X86_FEATURE_XMM4_1
+#define X86_FEATURE_XMM4_1	(4*32+19) /* "sse4_1" SSE-4.1 */
+#endif
+
+#ifndef X86_FEATURE_XMM4_2
+#define X86_FEATURE_XMM4_2	(4*32+20) /* "sse4_2" SSE-4.2 */
+#endif
+
+#ifndef X86_FEATURE_MOVBE
+#define X86_FEATURE_MOVBE	(4*32+22) /* MOVBE instruction */
+#endif
+
+#ifndef X86_FEATURE_POPCNT
+#define X86_FEATURE_POPCNT      (4*32+23) /* POPCNT instruction */
+#endif
+
+#ifndef X86_FEATURE_CR8_LEGACY
+#define X86_FEATURE_CR8_LEGACY	(6*32+ 4) /* CR8 in 32-bit mode */
+#endif
+
+#ifndef X86_FEATURE_ABM
+#define X86_FEATURE_ABM		(6*32+ 5) /* Advanced bit manipulation */
+#endif
+
+#ifndef X86_FEATURE_SSE4A
+#define X86_FEATURE_SSE4A	(6*32+ 6) /* SSE-4A */
+#endif
+
+#ifndef X86_FEATURE_MISALIGNSSE
+#define X86_FEATURE_MISALIGNSSE (6*32+ 7) /* Misaligned SSE mode */
+#endif
+
+#ifndef X86_FEATURE_3DNOWPREFETCH
+#define X86_FEATURE_3DNOWPREFETCH (6*32+ 8) /* 3DNow prefetch instructions */
+#endif
+
+#ifndef X86_FEATURE_SSE5
+#define X86_FEATURE_SSE5	(6*32+11) /* SSE-5 */
+#endif
+
 #include <linux/smp.h>
 
 #ifndef X86_CR0_PE
