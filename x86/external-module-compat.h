@@ -9,6 +9,79 @@
 #include "../external-module-compat-comm.h"
 
 #include <asm/msr.h>
+#include <asm/asm.h>
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26)
+
+#ifdef CONFIG_X86_64
+#define DECLARE_ARGS(val, low, high)	unsigned low, high
+#define EAX_EDX_VAL(val, low, high)	((low) | ((u64)(high) << 32))
+#define EAX_EDX_ARGS(val, low, high)	"a" (low), "d" (high)
+#define EAX_EDX_RET(val, low, high)	"=a" (low), "=d" (high)
+#else
+#define DECLARE_ARGS(val, low, high)	unsigned long long val
+#define EAX_EDX_VAL(val, low, high)	(val)
+#define EAX_EDX_ARGS(val, low, high)	"A" (val)
+#define EAX_EDX_RET(val, low, high)	"=A" (val)
+#endif
+
+#ifndef __ASM_EX_SEC
+# define __ASM_EX_SEC	" .section __ex_table,\"a\"\n"
+#endif
+
+#ifndef _ASM_EXTABLE
+# define _ASM_EXTABLE(from,to) \
+        __ASM_EX_SEC    \
+        _ASM_ALIGN "\n" \
+        _ASM_PTR #from "," #to "\n" \
+        " .previous\n"
+#endif
+
+#ifndef __ASM_SEL
+#ifdef CONFIG_X86_32
+# define __ASM_SEL(a,b) __ASM_FORM(a)
+#else
+# define __ASM_SEL(a,b) __ASM_FORM(b)
+#endif
+#endif
+
+#ifndef __ASM_FORM
+# define __ASM_FORM(x)	" " #x " "
+#endif
+
+#ifndef _ASM_PTR
+#define _ASM_PTR	__ASM_SEL(.long, .quad)
+#endif
+
+#ifndef _ASM_ALIGN
+#define _ASM_ALIGN	__ASM_SEL(.balign 4, .balign 8)
+#endif
+
+static inline unsigned long long native_read_msr_safe(unsigned int msr,
+						      int *err)
+{
+	DECLARE_ARGS(val, low, high);
+
+	asm volatile("2: rdmsr ; xor %[err],%[err]\n"
+		     "1:\n\t"
+		     ".section .fixup,\"ax\"\n\t"
+		     "3:  mov %[fault],%[err] ; jmp 1b\n\t"
+		     ".previous\n\t"
+		     _ASM_EXTABLE(2b, 3b)
+		     : [err] "=r" (*err), EAX_EDX_RET(val, low, high)
+		     : "c" (msr), [fault] "i" (-EFAULT));
+	return EAX_EDX_VAL(val, low, high);
+}
+
+static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
+{
+	int err;
+
+	*p = native_read_msr_safe(msr, &err);
+	return err;
+}
+
+#endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
 
