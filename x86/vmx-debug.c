@@ -17,16 +17,13 @@
 #include <linux/highmem.h>
 
 #include <linux/kvm_host.h>
+#include <asm/vmx.h>
+#include <asm/kvm_host.h>
+#include "mmu.h"
+#include "lapic.h"
 #include "debug.h"
 
 #ifdef KVM_DEBUG
-
-static const char *vmx_msr_name[] = {
-	"MSR_EFER", "MSR_STAR", "MSR_CSTAR",
-	"MSR_KERNEL_GS_BASE", "MSR_SYSCALL_MASK", "MSR_LSTAR"
-};
-
-#define NR_VMX_MSR (sizeof(vmx_msr_name) / sizeof(char*))
 
 static unsigned long vmcs_readl(unsigned long field)
 {
@@ -56,29 +53,21 @@ static u64 vmcs_read64(unsigned long field)
 #endif
 }
 
-void show_msrs(struct kvm_vcpu *vcpu)
-{
-	int i;
-
-	for (i = 0; i < NR_VMX_MSR; ++i) {
-		vcpu_printf(vcpu, "%s: %s=0x%llx\n",
-		       __FUNCTION__,
-		       vmx_msr_name[i],
-		       vcpu->guest_msrs[i].data);
-	}
-}
-
 void show_code(struct kvm_vcpu *vcpu)
 {
 	gva_t rip = vmcs_readl(GUEST_RIP);
 	u8 code[50];
 	char buf[30 + 3 * sizeof code];
 	int i;
+	gpa_t gpa;
 
 	if (!is_long_mode(vcpu))
 		rip += vmcs_readl(GUEST_CS_BASE);
 
-	kvm_read_guest(vcpu, rip, sizeof code, code);
+	gpa = vcpu->arch.mmu.gva_to_gpa(vcpu, rip);
+	if (gpa == UNMAPPED_GVA)
+		return;
+	kvm_read_guest(vcpu->kvm, gpa, code, sizeof code);
 	for (i = 0; i < sizeof code; ++i)
 		sprintf(buf + i * 3, " %02x", code[i]);
 	vcpu_printf(vcpu, "code: %lx%s\n", rip, buf);
@@ -98,6 +87,7 @@ void show_irq(struct kvm_vcpu *vcpu,  int irq)
 	unsigned long idt_base = vmcs_readl(GUEST_IDTR_BASE);
 	unsigned long idt_limit = vmcs_readl(GUEST_IDTR_LIMIT);
 	struct gate_struct gate;
+	gpa_t gpa;
 
 	if (!is_long_mode(vcpu))
 		vcpu_printf(vcpu, "%s: not in long mode\n", __FUNCTION__);
@@ -109,7 +99,11 @@ void show_irq(struct kvm_vcpu *vcpu,  int irq)
 		return;
 	}
 
-	if (kvm_read_guest(vcpu, idt_base + irq * sizeof(gate), sizeof(gate), &gate) != sizeof(gate)) {
+	gpa = vcpu->arch.mmu.gva_to_gpa(vcpu, idt_base + irq * sizeof(gate));
+	if (gpa == UNMAPPED_GVA)
+		return;
+
+	if (kvm_read_guest(vcpu->kvm, gpa, &gate, sizeof(gate)) != sizeof(gate)) {
 		vcpu_printf(vcpu, "%s: 0x%x read_guest err\n",
 			   __FUNCTION__,
 			   irq);
@@ -127,12 +121,16 @@ void show_page(struct kvm_vcpu *vcpu,
 			     gva_t addr)
 {
 	u64 *buf = kmalloc(PAGE_SIZE, GFP_KERNEL);
+	gpa_t gpa;
 
 	if (!buf)
 		return;
 
 	addr &= PAGE_MASK;
-	if (kvm_read_guest(vcpu, addr, PAGE_SIZE, buf)) {
+	gpa = vcpu->arch.mmu.gva_to_gpa(vcpu, addr);
+	if (gpa == UNMAPPED_GVA)
+		return;
+	if (kvm_read_guest(vcpu->kvm, gpa, buf, PAGE_SIZE)) {
 		int i;
 		for (i = 0; i <  PAGE_SIZE / sizeof(u64) ; i++) {
 			u8 *ptr = (u8*)&buf[i];
@@ -150,8 +148,12 @@ void show_page(struct kvm_vcpu *vcpu,
 void show_u64(struct kvm_vcpu *vcpu, gva_t addr)
 {
 	u64 buf;
+	gpa_t gpa;
 
-	if (kvm_read_guest(vcpu, addr, sizeof(u64), &buf) == sizeof(u64)) {
+	gpa = vcpu->arch.mmu.gva_to_gpa(vcpu, addr);
+	if (gpa == UNMAPPED_GVA)
+		return;
+	if (kvm_read_guest(vcpu->kvm, gpa, &buf, sizeof(u64)) == sizeof(u64)) {
 		u8 *ptr = (u8*)&buf;
 		int j;
 		vcpu_printf(vcpu, " 0x%16.16lx:", addr);
@@ -178,6 +180,8 @@ int vm_entry_test_guest(struct kvm_vcpu *vcpu)
 	unsigned long sysenter_esp;
 	unsigned long sysenter_eip;
 	unsigned long rflags;
+	unsigned long cpu_exec_ctrl, cpu_secondary_exec_ctrl;
+	unsigned long tpr_threshold;
 
 	int long_mode;
 	int virtual8086;
@@ -219,38 +223,38 @@ int vm_entry_test_guest(struct kvm_vcpu *vcpu)
 
 	cr0 = vmcs_readl(GUEST_CR0);
 
-	if (!(cr0 & CR0_PG_MASK)) {
+	if (!(cr0 & X86_CR0_PG)) {
 		vcpu_printf(vcpu, "%s: cr0 0x%lx, PG is not set\n",
 			   __FUNCTION__, cr0);
 		return 0;
 	}
 
-	if (!(cr0 & CR0_PE_MASK)) {
+	if (!(cr0 & X86_CR0_PE)) {
 		vcpu_printf(vcpu, "%s: cr0 0x%lx, PE is not set\n",
 			   __FUNCTION__, cr0);
 		return 0;
 	}
 
-	if (!(cr0 & CR0_NE_MASK)) {
+	if (!(cr0 & X86_CR0_NE)) {
 		vcpu_printf(vcpu, "%s: cr0 0x%lx, NE is not set\n",
 			   __FUNCTION__, cr0);
 		return 0;
 	}
 
-	if (!(cr0 & CR0_WP_MASK)) {
+	if (!(cr0 & X86_CR0_WP)) {
 		vcpu_printf(vcpu, "%s: cr0 0x%lx, WP is not set\n",
 			   __FUNCTION__, cr0);
 	}
 
 	cr4 = vmcs_readl(GUEST_CR4);
 
-	if (!(cr4 & CR4_VMXE_MASK)) {
+	if (!(cr4 & X86_CR4_VMXE)) {
 		vcpu_printf(vcpu, "%s: cr4 0x%lx, VMXE is not set\n",
 			   __FUNCTION__, cr4);
 		return 0;
 	}
 
-	if (!(cr4 & CR4_PAE_MASK)) {
+	if (!(cr4 & X86_CR4_PAE)) {
 		vcpu_printf(vcpu, "%s: cr4 0x%lx, PAE is not set\n",
 			   __FUNCTION__, cr4);
 	}
@@ -268,7 +272,7 @@ int vm_entry_test_guest(struct kvm_vcpu *vcpu)
 	if (long_mode) {
 	}
 
-	if ( long_mode && !(cr4 & CR4_PAE_MASK)) {
+	if ( long_mode && !(cr4 & X86_CR4_PAE)) {
 		vcpu_printf(vcpu, "%s: long mode and not PAE\n",
 			   __FUNCTION__);
 		return 0;
@@ -276,13 +280,13 @@ int vm_entry_test_guest(struct kvm_vcpu *vcpu)
 
 	cr3 = vmcs_readl(GUEST_CR3);
 
-	if (cr3 & CR3_L_MODE_RESEVED_BITS) {
+	if (cr3 & CR3_L_MODE_RESERVED_BITS) {
 		vcpu_printf(vcpu, "%s: cr3 0x%lx, reserved bits\n",
 			   __FUNCTION__, cr3);
 		return 0;
 	}
 
-	if ( !long_mode && (cr4 & CR4_PAE_MASK)) {
+	if ( !long_mode && (cr4 & X86_CR4_PAE)) {
 		/* check the 4 PDPTEs for reserved bits */
 		unsigned long pdpt_pfn = cr3 >> PAGE_SHIFT;
 		int i;
@@ -785,6 +789,35 @@ int vm_entry_test_guest(struct kvm_vcpu *vcpu)
 
 	}
 
+	cpu_exec_ctrl = vmcs_read32(CPU_BASED_VM_EXEC_CONTROL);
+	cpu_secondary_exec_ctrl = vmcs_read32(SECONDARY_VM_EXEC_CONTROL);
+	tpr_threshold = vmcs_read32(TPR_THRESHOLD);
+
+	if ((cpu_exec_ctrl & CPU_BASED_TPR_SHADOW)) {
+		if (tpr_threshold & ~0xf) {
+			vcpu_printf(vcpu, "%s: if TPR shadow execution control"
+					" is 1 bits 31:4 of TPR threshold must"
+					" be 0", __FUNCTION__);
+			return 0;
+		}
+		if (!(cpu_secondary_exec_ctrl &
+				SECONDARY_EXEC_VIRTUALIZE_APIC_ACCESSES)) {
+			u32 apic_tpr = *((u32 *)(vcpu->arch.apic->regs + 0x80));
+			apic_tpr >>= 4;
+			if (tpr_threshold > apic_tpr) {
+			vcpu_printf(vcpu, "%s: if TPR shadow execution control"
+					" is 1 and virtual apic accesses is 0"
+					" the value of bits 3:0 of the TPR "
+					"threshold VM-execution control field"
+					" should not be greater than the value"
+					" of bits 7:4 in byte 80H on the "
+					"virtual-APIC page", __FUNCTION__);
+				return 0;
+			}
+
+		}
+	}
+
 	// to be continued from Checks on Guest Non-Register State (22.3.1.5)
 	return 1;
 }
@@ -853,15 +886,16 @@ static int check_selector(struct kvm_vcpu *vcpu, const char *name,
 	return 1;
 }
 
-#define MSR_IA32_VMX_CR0_FIXED0 0x486
-#define MSR_IA32_VMX_CR0_FIXED1 0x487
+//#define MSR_IA32_VMX_CR0_FIXED0 0x486
+//#define MSR_IA32_VMX_CR0_FIXED1 0x487
 
-#define MSR_IA32_VMX_CR4_FIXED0 0x488
-#define MSR_IA32_VMX_CR4_FIXED1 0x489
+//#define MSR_IA32_VMX_CR4_FIXED0 0x488
+//#define MSR_IA32_VMX_CR4_FIXED1 0x489
+#define VM_EXIT_HOST_ADD_SPACE_SIZE     0x00000200
 
 int vm_entry_test_host(struct kvm_vcpu *vcpu)
 {
-	int r = 0;
+	int r = 1;
 	unsigned long cr0 = vmcs_readl(HOST_CR0);
 	unsigned long cr4 = vmcs_readl(HOST_CR4);
 	unsigned long cr3 = vmcs_readl(HOST_CR3);
@@ -920,7 +954,7 @@ int vm_entry_test_host(struct kvm_vcpu *vcpu)
 			    __FUNCTION__);
 		r = 0;
 	}
-	if (!(cr4 & CR4_PAE_MASK)) {
+	if (!(cr4 & X86_CR4_PAE)) {
 		vcpu_printf(vcpu, "%s: cr4 (%lx): !pae\n",
 			    __FUNCTION__, cr4);
 		r = 0;
@@ -1007,13 +1041,17 @@ void vmcs_dump(struct kvm_vcpu *vcpu)
 	vcpu_printf(vcpu, "GUEST_IDTR_LIMIT 0x%x\n", vmcs_read32(GUEST_IDTR_LIMIT));
 
 	vcpu_printf(vcpu, "EXCEPTION_BITMAP 0x%x\n", vmcs_read32(EXCEPTION_BITMAP));
+	vcpu_printf(vcpu, "CPU_BASED_VM_EXEC_CONTROL 0x%x\n", vmcs_read32(CPU_BASED_VM_EXEC_CONTROL));
+	vcpu_printf(vcpu, "SECONDARY_VM_EXEC_CONTROL 0x%x\n", vmcs_read32(SECONDARY_VM_EXEC_CONTROL));
+	vcpu_printf(vcpu, "TPR_THREASHOLD 0x%x\n", vmcs_read32(TPR_THRESHOLD));
+	vcpu_printf(vcpu, "TPR 0x%x\n", *((u32 *) (vcpu->arch.apic->regs + 0x80)));
 	vcpu_printf(vcpu, "***********************************************************\n");
 }
 
 void regs_dump(struct kvm_vcpu *vcpu)
 {
 	#define REG_DUMP(reg) \
-		vcpu_printf(vcpu, #reg" = 0x%lx(VCPU)\n", vcpu->regs[VCPU_REGS_##reg])
+		vcpu_printf(vcpu, #reg" = 0x%lx(VCPU)\n", vcpu->arch.regs[VCPU_REGS_##reg])
 	#define VMCS_REG_DUMP(reg) \
 		vcpu_printf(vcpu, #reg" = 0x%lx(VMCS)\n", vmcs_readl(GUEST_##reg))
 
@@ -1045,23 +1083,20 @@ void regs_dump(struct kvm_vcpu *vcpu)
 void sregs_dump(struct kvm_vcpu *vcpu)
 {
 	vcpu_printf(vcpu, "************************ sregs_dump ************************\n");
-	vcpu_printf(vcpu, "cr0 = 0x%lx\n", vcpu->cr0);
-	vcpu_printf(vcpu, "cr2 = 0x%lx\n", vcpu->cr2);
-	vcpu_printf(vcpu, "cr3 = 0x%lx\n", vcpu->cr3);
-	vcpu_printf(vcpu, "cr4 = 0x%lx\n", vcpu->cr4);
-	vcpu_printf(vcpu, "cr8 = 0x%lx\n", vcpu->cr8);
-	vcpu_printf(vcpu, "shadow_efer = 0x%llx\n", vcpu->shadow_efer);
+	vcpu_printf(vcpu, "cr0 = 0x%lx\n", vcpu->arch.cr0);
+	vcpu_printf(vcpu, "cr2 = 0x%lx\n", vcpu->arch.cr2);
+	vcpu_printf(vcpu, "cr3 = 0x%lx\n", vcpu->arch.cr3);
+	vcpu_printf(vcpu, "cr4 = 0x%lx\n", vcpu->arch.cr4);
+	vcpu_printf(vcpu, "cr8 = 0x%lx\n", vcpu->arch.cr8);
+	vcpu_printf(vcpu, "shadow_efer = 0x%llx\n", vcpu->arch.shadow_efer);
 	vcpu_printf(vcpu, "***********************************************************\n");
 }
 
 void show_pending_interrupts(struct kvm_vcpu *vcpu)
 {
-	int i;
 	vcpu_printf(vcpu, "************************ pending interrupts ****************\n");
-	vcpu_printf(vcpu, "sumamry = 0x%lx\n", vcpu->irq_summary);
-	for (i=0 ; i < NR_IRQ_WORDS ; i++)
-		vcpu_printf(vcpu, "%lx ", vcpu->irq_pending[i]);
-	vcpu_printf(vcpu, "\n");
+	if (vcpu->arch.interrupt.pending)
+		vcpu_printf(vcpu, "nr = %d%s\n", vcpu->arch.interrupt.nr,  vcpu->arch.interrupt.soft?"(soft)":"");
 	vcpu_printf(vcpu, "************************************************************\n");
 }
 
@@ -1070,7 +1105,6 @@ void vcpu_dump(struct kvm_vcpu *vcpu)
 	regs_dump(vcpu);
 	sregs_dump(vcpu);
 	vmcs_dump(vcpu);
-	show_msrs(vcpu);
 	show_pending_interrupts(vcpu);
 	/* more ... */
 }
