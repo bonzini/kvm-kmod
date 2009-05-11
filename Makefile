@@ -19,7 +19,7 @@ rpmrelease = devel
 
 LINUX = ./linux-2.6
 
-version = $(shell cd $(LINUX); git describe)
+version = $(KVM_VERSION)
 
 _hack = mv $1 $1.orig && \
 	gawk -v version=$(version) -f $(ARCH_DIR)/hack-module.awk $1.orig \

@@ -76,6 +76,16 @@ case $arch in
         ;;
 esac
 
+kvm_version() {
+    local fname="$(dirname "$0")/KVM_VERSION"
+
+    if test -f "$fname"; then
+        cat "$fname"
+    else
+        echo "kvm-devel"
+    fi
+}
+
 processor=${arch#*-}
 arch=${arch%%-*}
 
@@ -119,6 +129,7 @@ LD=$cross_prefix$ld
 OBJCOPY=$cross_prefix$objcopy
 AR=$cross_prefix$ar
 DEPMOD_VERSION=$depmod_version
+KVM_VERSION=$(kvm_version)
 EOF
 
 cat <<EOF > config.kbuild
