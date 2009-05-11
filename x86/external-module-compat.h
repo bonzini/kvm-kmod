@@ -11,7 +11,7 @@
 #include <asm/msr.h>
 #include <asm/asm.h>
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
 
 #ifdef CONFIG_X86_64
 #define DECLARE_ARGS(val, low, high)	unsigned low, high
@@ -72,6 +72,10 @@ static inline unsigned long long native_read_msr_safe(unsigned int msr,
 		     : "c" (msr), [fault] "i" (-EFAULT));
 	return EAX_EDX_VAL(val, low, high);
 }
+
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26)
 
 static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 {
