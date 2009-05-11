@@ -138,10 +138,12 @@ uint64_t div64_u64(uint64_t dividend, uint64_t divisor)
 #endif
 
 /*
- * smp_call_function_mask() is not defined/exported below 2.6.24
+ * smp_call_function_mask() is not defined/exported below 2.6.24 on all
+ * targets and below 2.6.26 on x86-64
  */
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24) || \
+    (defined CONFIG_X86_64 && LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26))
 
 #include <linux/smp.h>
 

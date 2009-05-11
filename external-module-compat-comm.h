@@ -214,10 +214,12 @@ typedef _Bool bool;
 #endif
 
 /*
- * smp_call_function_mask() is not defined/exported below 2.6.24
+ * smp_call_function_mask() is not defined/exported below 2.6.24 on all
+ * targets and below 2.6.26 on x86-64
  */
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24) || \
+    (defined CONFIG_X86_64 && LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26))
 
 int kvm_smp_call_function_mask(cpumask_t mask, void (*func) (void *info),
 			       void *info, int wait);
