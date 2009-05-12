@@ -22,10 +22,9 @@ def _hack(file, arch):
         ' > "%(file)s" && rm "%(file)s.orig"'
         % { 'file': file, 'arch': arch, 'version': version })
 
-def unifdef(file):
-    cmd('mv "%(file)s" "%(file)s".orig'
-        ' && cat unifdef.h "%(file)s".orig > "%(file)s"'
-        ' && rm "%(file)s".orig' % { 'file': file })
+def unifdef(fname):
+    data = file('unifdef.h').read() + file(fname).read()
+    file(fname, 'w').write(data)
 
 def hack(T, arch, file):
     _hack(T + '/' + file, arch)
