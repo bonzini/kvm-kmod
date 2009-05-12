@@ -35,15 +35,6 @@ BEGIN { split("INIT_WORK desc_struct ldttss_desc64 desc_ptr " \
 
 { sub(/match->dev->msi_enabled/, "kvm_pcidev_msi_enabled(match->dev)") }
 
-/^static void __vmx_load_host_state/ {
-    vmx_load_host_state = 1
-}
-
-/vmcs_readl\(HOST_GS_BASE\)/ &&  vmx_load_host_state {
-    $0 = "\t\twrmsrl(MSR_GS_BASE, gsbase);";
-    vmx_load_host_state = 0
-}
-
 /atomic_inc\(&kvm->mm->mm_count\);/ { $0 = "mmget(&kvm->mm->mm_count);" }
 
 /^\t\.fault = / {
@@ -86,14 +77,6 @@ BEGIN { split("INIT_WORK desc_struct ldttss_desc64 desc_ptr " \
 /\kvm_.*_fops\.owner = module;/ { $0 = "IF_ANON_INODES_DOES_REFCOUNTS(" $0 ")" }
 
 { print }
-
-/unsigned long flags;/ &&  vmx_load_host_state {
-    print "\tunsigned long gsbase;"
-}
-
-/local_irq_save/ &&  vmx_load_host_state {
-    print "\t\tgsbase = vmcs_readl(HOST_GS_BASE);"
-}
 
 /\tkvm_init_debug/ {
     print "\thrtimer_kallsyms_resolve();"
