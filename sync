@@ -14,6 +14,14 @@ if len(sys.argv) >= 2:
 
 linux = 'linux-2.6'
 
+_re_cache = {}
+
+def re_cache(regexp):
+    global _re_cache
+    if regexp not in _re_cache:
+        _re_cache[regexp] = re.compile(regexp)
+    return _re_cache[regexp]
+
 def __hack(data):
     compat_apis = str.split(
         'INIT_WORK desc_struct ldttss_desc64 desc_ptr '
@@ -24,11 +32,11 @@ def __hack(data):
     anon_inodes = anon_inodes_exit = False
     result = []
     def sub(regexp, repl, str):
-        return re.sub(regexp, repl, str)
+        return re_cache(regexp).sub(repl, str)
     for line in data.splitlines():
         orig = line
         def match(regexp):
-            return re.search(regexp, line)
+            return re_cache(regexp).search(line)
         def w(line, result = result):
             result.append(line)
         f = line.split()
