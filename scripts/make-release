@@ -64,8 +64,7 @@ git --git-dir="$linux_git" --work-tree="$tmpdir/$name/linux-2.6" \
 
 cd "$tmpdir/$name"
 
-make -f sync.mak ARCH_DIR=x86 KVM_VERSION="$name"
-make -f sync.mak ARCH_DIR=ia64 KVM_VERSION="$name"
+./sync "$name"
 
 rm -rf "$tmpdir/$name/linux-2.6"
 

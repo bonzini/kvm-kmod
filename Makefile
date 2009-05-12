@@ -35,7 +35,10 @@ all:: prerequisite
 
 include $(MAKEFILE_PRE)
 
-include sync.mak
+.PHONY: sync
+
+sync:
+	./sync $(KVM_VERSION)
 
 install:
 	mkdir -p $(DESTDIR)/$(INSTALLDIR)

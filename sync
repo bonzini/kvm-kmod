@@ -1,0 +1,115 @@
+#!/usr/bin/python
+
+import sys, os, glob, os.path, shutil
+
+glob = glob.glob
+
+def cmd(c):
+    if os.system(c) != 0:
+        raise Exception('command execution failed: ' + c)
+
+version = 'kvm-devel'
+if len(sys.argv) >= 2:
+    version = sys.argv[1]
+
+linux = 'linux-2.6'
+
+def _hack(file, arch):
+    cmd('mv "%(file)s" "%(file)s.orig"'
+        ' && gawk -v version="%(version)s" '
+        '    -f "%(arch)s/hack-module.awk" "%(file)s.orig"'
+        ' | sed "/\#include/! s/\blapic\b/l_apic/g"'
+        ' > "%(file)s" && rm "%(file)s.orig"'
+        % { 'file': file, 'arch': arch, 'version': version })
+
+def unifdef(file):
+    cmd('mv "%(file)s" "%(file)s".orig'
+        ' && cat unifdef.h "%(file)s".orig > "%(file)s"'
+        ' && rm "%(file)s".orig' % { 'file': file })
+
+def hack(T, arch, file):
+    _hack(T + '/' + file, arch)
+
+hack_files = {
+    'x86': str.split('kvm_main.c mmu.c vmx.c svm.c x86.c irq.h lapic.c'
+                     ' i8254.c kvm_trace.c timer.c'),
+    'ia64': str.split('kvm_main.c kvm_fw.c kvm_lib.c kvm-ia64.c'),
+}
+
+def mkdir(dir):
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+
+def cp(src, dst):
+    mkdir(os.path.dirname(dst))
+    file(dst, 'w').write(file(src).read())
+
+def copy_if_changed(src, dst):
+    for dir, subdirs, files in os.walk(src):
+        ndir = dst + '/' + dir[len(src)+1:]
+        mkdir(ndir)
+        for fname in files:
+            old = ndir + '/' + fname
+            new = dir + '/' + fname
+            try:
+                if file(old).read() !=  file(new).read():
+                    raise Exception('different.')
+            except:
+                cp(new, old)
+
+def rmtree(path):
+    if os.path.exists(path):
+        shutil.rmtree(path)
+
+def header_sync(arch):
+    T = 'header'
+    rmtree(T)
+    for file in glob('%(linux)s/include/linux/kvm*.h' % { 'linux': linux }):
+        out = ('%(T)s/include/linux/%(name)s'
+               % { 'T': T, 'name': os.path.basename(file) })
+        cp(file, out)
+        unifdef(out)
+    arch_headers = (
+        [x
+         for dir in ['%(linux)s/arch/%(arch)s/include/asm/./kvm*.h',
+                     '%(linux)s/arch/%(arch)s/include/asm/./vmx*.h',
+                     '%(linux)s/arch/%(arch)s/include/asm/./svm*.h',
+                     '%(linux)s/arch/%(arch)s/include/asm/./virtext*.h']
+         for x in glob(dir % { 'arch': arch, 'linux': linux })
+         ])
+    for file in arch_headers:
+        out = ('%(T)s/include/asm-%(arch)s/%(name)s'
+               % { 'T': T, 'name': os.path.basename(file), 'arch': arch })
+        cp(file, out)
+        unifdef(out)
+    hack(T, 'x86', 'include/linux/kvm.h')
+    hack(T, arch, 'include/asm-%(arch)s/kvm.h' % { 'arch': arch })
+    copy_if_changed(T, '.')
+    rmtree(T)
+
+def source_sync(arch):
+    T = 'source'
+    rmtree(T)
+    sources = [file
+               for pattern in ['%(linux)s/arch/%(arch)s/kvm/*.[cSh]',
+                               '%(linux)s/virt/kvm/*.[cSh]']
+               for file in glob(pattern % { 'linux': linux, 'arch': arch })
+               if not file.endswith('.mod.c')
+               ]
+    for file in sources:
+        out = ('%(T)s/%(name)s'
+               % { 'T': T, 'name': os.path.basename(file) })
+        cp(file, out)
+
+    for i in glob(T + '/*.c'):
+        unifdef(i)
+
+    for i in hack_files[arch]:
+        hack(T, arch, i)
+
+    copy_if_changed(T, arch)
+    rmtree(T)
+
+for arch in ['x86', 'ia64']:
+    header_sync(arch)
+    source_sync(arch)
