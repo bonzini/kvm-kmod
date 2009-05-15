@@ -67,3 +67,6 @@ rpm:	all
 
 clean:
 	$(MAKE) -C $(KERNELDIR) M=`pwd` $@
+
+distclean: clean
+	rm -f config.kbuild config.mak include/asm include-compat/asm
