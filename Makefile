@@ -51,7 +51,7 @@ install:
 
 tmpspec = .tmp.kvm-kmod.spec
 
-rpm-topdir := $$(pwd)/../rpmtop
+rpm-topdir := $$(pwd)/rpmtop
 
 RPMDIR = $(rpm-topdir)/RPMS
 
