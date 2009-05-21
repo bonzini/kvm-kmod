@@ -1,7 +1,8 @@
 obj-m := kvm.o kvm-intel.o
 
 kvm-objs := kvm_main.o ioapic.o coalesced_mmio.o kvm-ia64.o kvm_fw.o \
-	irq_comm.o ../anon_inodes.o ../external-module-compat.o
+	irq_comm.o ../anon_inodes.o ../external-module-compat.o \
+	../request-irq-compat.o
 
 ifeq ($(CONFIG_IOMMU_API),y)
 kvm-objs += iommu.o
