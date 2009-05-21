@@ -767,3 +767,16 @@ static inline struct page *compound_head(struct page *page)
 }
 
 #endif
+
+#include <linux/iommu.h>
+#ifndef IOMMU_CACHE
+
+#define IOMMU_CACHE	(4)
+#define IOMMU_CAP_CACHE_COHERENCY	0x1
+static inline int iommu_domain_has_cap(struct iommu_domain *domain,
+				       unsigned long cap)
+{
+	return 0;
+}
+
+#endif
