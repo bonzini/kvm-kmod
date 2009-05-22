@@ -11,6 +11,10 @@
 #include <asm/msr.h>
 #include <asm/asm.h>
 
+#ifndef CONFIG_HAVE_KVM_EVENTFD
+#define CONFIG_HAVE_KVM_EVENTFD 1
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
 
 #ifdef CONFIG_X86_64
