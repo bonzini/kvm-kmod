@@ -199,6 +199,9 @@ uint64_t div64_u64(uint64_t dividend, uint64_t divisor);
 
 typedef _Bool bool;
 
+#define false 0
+#define true 1
+
 #endif
 
 #endif
