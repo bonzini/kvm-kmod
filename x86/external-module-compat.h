@@ -6,6 +6,13 @@
 #include <linux/compiler.h>
 #include <linux/version.h>
 
+#include <linux/types.h>
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
+
+typedef u64 phys_addr_t;
+
+#endif
+
 #include "../external-module-compat-comm.h"
 
 #include <asm/msr.h>
@@ -519,12 +526,6 @@ struct mtrr_state_type {
 	unsigned char have_fixed;
 	mtrr_type def_type;
 };
-
-#endif
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
-
-typedef u64 phys_addr_t;
 
 #endif
 

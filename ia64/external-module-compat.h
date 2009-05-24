@@ -5,6 +5,13 @@
 #ifndef __ASSEMBLY__
 #include <linux/version.h>
 
+#include <linux/types.h>
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
+
+typedef u64 phys_addr_t;
+
+#endif
+
 #include "../external-module-compat-comm.h"
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26)
@@ -34,12 +41,6 @@ struct fdesc {
 	uint64_t ip;
 	uint64_t gp;
 };
-#endif
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
-
-typedef u64 phys_addr_t;
-
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,30)
