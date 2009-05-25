@@ -46,6 +46,7 @@ int kvm_smp_call_function_single(int cpu, void (*func)(void *info),
 	put_cpu();
 	return r;
 }
+EXPORT_SYMBOL_GPL(kvm_smp_call_function_single);
 
 #define smp_call_function_single kvm_smp_call_function_single
 
@@ -75,6 +76,7 @@ int kvm_smp_call_function_single(int cpu, void (*func)(void *info),
 	put_cpu();
 	return r;
 }
+EXPORT_SYMBOL_GPL(kvm_smp_call_function_single);
 
 #define smp_call_function_single kvm_smp_call_function_single
 
@@ -104,6 +106,7 @@ int kvm_smp_call_function_single(int cpu, void (*func)(void *info),
 
 }
 #endif /* !CONFIG_SMP */
+EXPORT_SYMBOL_GPL(kvm_smp_call_function_single);
 
 #define smp_call_function_single kvm_smp_call_function_single
 
