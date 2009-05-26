@@ -501,6 +501,14 @@ struct kvm_desc_ptr {
 #define MSR_IA32_TSC                    0x00000010
 #endif
 
+#ifndef MSR_K7_HWCR
+#define MSR_K7_HWCR                     0xc0010015
+#endif
+
+#ifndef MSR_K8_SYSCFG
+#define MSR_K8_SYSCFG                   0xc0010010
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25) && defined(__x86_64__)
 
 #undef set_debugreg
