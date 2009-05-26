@@ -124,7 +124,7 @@ def hack(T, arch, file):
 
 hack_files = {
     'x86': str.split('kvm_main.c mmu.c vmx.c svm.c x86.c irq.h lapic.c'
-                     ' i8254.c kvm_trace.c timer.c'),
+                     ' i8254.c kvm_trace.c timer.c eventfd.c'),
     'ia64': str.split('kvm_main.c kvm_fw.c kvm_lib.c kvm-ia64.c'),
 }
 
