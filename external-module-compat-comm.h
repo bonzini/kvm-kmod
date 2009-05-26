@@ -562,6 +562,15 @@ static inline int cancel_work_sync(struct work_struct *work)
 
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,27)
+
+static inline void flush_work(struct work_struct *work)
+{
+	cancel_work_sync(work);
+}
+
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,20)
 
 struct pci_dev;
