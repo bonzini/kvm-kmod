@@ -302,7 +302,11 @@ static inline void pagefault_enable(void)
 
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,18)
+#include <asm/uaccess.h>
+#else
 #include <linux/uaccess.h>
+#endif
 
 /* vm ops ->fault() was introduced in 2.6.23. */
 #include <linux/mm.h>
