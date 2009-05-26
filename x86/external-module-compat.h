@@ -540,3 +540,13 @@ struct mtrr_state_type {
 #ifndef CONFIG_HAVE_KVM_IRQCHIP
 #define CONFIG_HAVE_KVM_IRQCHIP 1
 #endif
+
+#include <asm/mce.h>
+
+#ifndef MCG_CTL_P
+#define MCG_CTL_P        (1ULL<<8)
+#define MCG_STATUS_MCIP  (1ULL<<2)
+#define MCI_STATUS_VAL   (1ULL<<63)
+#define MCI_STATUS_OVER  (1ULL<<62)
+#define MCI_STATUS_UC    (1ULL<<61)
+#endif
