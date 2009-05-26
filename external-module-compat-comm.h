@@ -572,7 +572,11 @@ struct pci_dev *pci_get_bus_and_slot(unsigned int bus, unsigned int devfn);
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,21)
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,17)
+#include <linux/relayfs_fs.h>
+#else
 #include <linux/relay.h>
+#endif
 
 /* relay_open() interface has changed on 2.6.21 */
 
