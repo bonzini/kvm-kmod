@@ -363,11 +363,6 @@ static inline void preempt_notifier_sys_exit(void) {}
 #define X86_FEATURE_NX (1*32+20)
 #endif
 
-#undef true
-#define true 1
-#undef false
-#define false 0
-
 /* EFER_LMA and EFER_LME are missing in pre 2.6.24 i386 kernels */
 #ifndef EFER_LME
 #define _EFER_LME           8  /* Long mode enable */
