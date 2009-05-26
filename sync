@@ -67,8 +67,8 @@ def __hack(data):
         if match(r'^}'): kvm_arch_init = False
         if match(r'MODULE_AUTHOR'):
             w('MODULE_INFO(version, "%s");' % (version,))
-        line = sub(r'match->dev->msi_enabled',
-                      'kvm_pcidev_msi_enabled(match->dev)', line)
+        line = sub(r'(\w+)->dev->msi_enabled',
+                   r'kvm_pcidev_msi_enabled(\1->dev)', line)
         if match(r'atomic_inc\(&kvm->mm->mm_count\);'):
             line = 'mmget(&kvm->mm->mm_count);'
         if match(r'^\t\.fault = '):
