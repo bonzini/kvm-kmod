@@ -38,7 +38,7 @@ include $(MAKEFILE_PRE)
 .PHONY: sync
 
 sync:
-	./sync $(KVM_VERSION)
+	./sync -v $(KVM_VERSION) -l $(LINUX)
 
 install:
 	mkdir -p $(DESTDIR)/$(INSTALLDIR)

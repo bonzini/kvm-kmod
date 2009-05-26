@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sys, os, glob, os.path, shutil, re
+from optparse import OptionParser
 
 glob = glob.glob
 
@@ -8,11 +9,16 @@ def cmd(c):
     if os.system(c) != 0:
         raise Exception('command execution failed: ' + c)
 
-version = 'kvm-devel'
-if len(sys.argv) >= 2:
-    version = sys.argv[1]
-
-linux = 'linux-2.6'
+parser = OptionParser(usage = 'usage: %prog [-v VERSION][-l LINUX]')
+parser.add_option('-v', action = 'store', type = 'string', dest = 'version', \
+                  help = 'kvm-kmod release version', default = 'kvm-devel')
+parser.add_option('-l', action = 'store', type = 'string', dest = 'linux', \
+                  help = 'Linux kernel tree to sync from', \
+                  default = 'linux-2.6')
+parser.set_defaults()
+(options, args) = parser.parse_args()
+version = options.version
+linux = options.linux
 
 _re_cache = {}
 
