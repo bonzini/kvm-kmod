@@ -497,6 +497,10 @@ struct kvm_desc_ptr {
 #define FEATURE_CONTROL_VMXON_ENABLED	(1<<2)
 #endif
 
+#ifndef MSR_IA32_TSC
+#define MSR_IA32_TSC                    0x00000010
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25) && defined(__x86_64__)
 
 #undef set_debugreg
