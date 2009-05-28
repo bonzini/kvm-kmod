@@ -30,7 +30,7 @@ all:: prerequisite
 		$(if $(KERNELSOURCEDIR),-Iinclude2 -I$(KERNELSOURCEDIR)/include) \
 		-Iarch/${ARCH_DIR}/include -I`pwd`/include-compat \
 		-include include/linux/autoconf.h \
-		-include `pwd`/$(ARCH_DIR)/external-module-compat.h $(module_defines)"
+		-include `pwd`/$(ARCH_DIR)/external-module-compat.h $(module_defines)" \
 		"$$@"
 
 include $(MAKEFILE_PRE)
