@@ -800,3 +800,15 @@ static inline int iommu_domain_has_cap(struct iommu_domain *domain,
 }
 
 #endif
+
+#include <linux/file.h>
+
+/* eventfd_fget() will be introduced in 2.6.32 */
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,32)
+
+static inline struct file *eventfd_fget(int fd)
+{
+    return fget(fd);
+}
+
+#endif
