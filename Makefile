@@ -37,8 +37,13 @@ include $(MAKEFILE_PRE)
 
 .PHONY: sync
 
+KVM_VERSION_GIT = $(if $(and $(filter kvm-devel,$(KVM_VERSION)), \
+			 $(wildcard $(LINUX)/.git)), \
+			   $(shell git --git-dir=$(LINUX)/.git describe), \
+			   $(KVM_VERSION))
+
 sync:
-	./sync -v $(KVM_VERSION) -l $(LINUX)
+	./sync -v $(KVM_VERSION_GIT) -l $(LINUX)
 
 install:
 	mkdir -p $(DESTDIR)/$(INSTALLDIR)
