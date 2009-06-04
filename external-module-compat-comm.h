@@ -812,3 +812,16 @@ static inline struct file *eventfd_fget(int fd)
 }
 
 #endif
+
+/* srcu was born in 2.6.19 */
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,19)
+
+#define kvm_init_srcu_struct init_srcu_struct
+#define kvm_cleanup_srcu_struct cleanup_srcu_struct
+#define kvm_srcu_read_lock srcu_read_lock
+#define kvm_srcu_read_unlock srcu_read_unlock
+#define kvm_synchronize_srcu synchronize_srcu
+#define kvm_srcu_batches_completed srcu_batches_completed
+
+#endif
