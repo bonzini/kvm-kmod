@@ -553,3 +553,19 @@ struct mtrr_state_type {
 #define MCI_STATUS_OVER  (1ULL<<62)
 #define MCI_STATUS_UC    (1ULL<<61)
 #endif
+
+/* do_machine_check() exported in 2.6.31 */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,31)
+
+static inline void kvm_do_machine_check(struct pt_regs *regs, long error_code)
+{
+	panic("kvm machine check!\n");
+}
+
+#else
+
+#define kvm_do_machine_check do_machine_check
+
+#endif
+
