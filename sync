@@ -28,7 +28,9 @@ def __hack(data):
         'hrtimer_add_expires_ns hrtimer_get_expires '
         'hrtimer_get_expires_ns hrtimer_start_expires '
         'hrtimer_expires_remaining smp_send_reschedule '
-        'on_each_cpu relay_open request_irq free_irq')
+        'on_each_cpu relay_open request_irq free_irq '
+        'do_machine_check '
+        )
     anon_inodes = anon_inodes_exit = False
     result = []
     def sub(regexp, repl, str):

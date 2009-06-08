@@ -532,3 +532,29 @@ struct mtrr_state_type {
 #ifndef CONFIG_HAVE_KVM_IRQCHIP
 #define CONFIG_HAVE_KVM_IRQCHIP 1
 #endif
+
+#include <asm/mce.h>
+
+#ifndef MCG_CTL_P
+#define MCG_CTL_P        (1ULL<<8)
+#define MCG_STATUS_MCIP  (1ULL<<2)
+#define MCI_STATUS_VAL   (1ULL<<63)
+#define MCI_STATUS_OVER  (1ULL<<62)
+#define MCI_STATUS_UC    (1ULL<<61)
+#endif
+
+/* do_machine_check() exported in 2.6.31 */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,31)
+
+static inline void kvm_do_machine_check(struct pt_regs *regs, long error_code)
+{
+	panic("kvm machine check!\n");
+}
+
+#else
+
+#define kvm_do_machine_check do_machine_check
+
+#endif
+
