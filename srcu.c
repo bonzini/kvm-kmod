@@ -24,6 +24,8 @@
  *
  */
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
+
 #include <linux/module.h>
 #include <linux/mutex.h>
 #include <linux/percpu.h>
@@ -261,3 +263,5 @@ EXPORT_SYMBOL_GPL(kvm_srcu_read_lock);
 EXPORT_SYMBOL_GPL(kvm_srcu_read_unlock);
 EXPORT_SYMBOL_GPL(kvm_synchronize_srcu);
 EXPORT_SYMBOL_GPL(kvm_srcu_batches_completed);
+
+#endif
