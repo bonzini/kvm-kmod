@@ -737,6 +737,21 @@ static inline void cpumask_clear_cpu(int cpu, cpumask_var_t mask)
 
 #endif
 
+/* A zeroing constructor was added late 2.6.30 */
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,30)
+
+static inline bool zalloc_cpumask_var(cpumask_var_t *mask, gfp_t flags)
+{
+	bool ret;
+
+	ret = alloc_cpumask_var(mask, flags);
+	if (ret)
+		cpumask_clear(*mask);
+	return ret;
+}
+
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)
 
 #define IF_ANON_INODES_DOES_REFCOUNTS(x)
