@@ -22,6 +22,10 @@ typedef u64 phys_addr_t;
 #define CONFIG_HAVE_KVM_EVENTFD 1
 #endif
 
+#ifndef CONFIG_KVM_APIC_ARCHITECTURE
+#define CONFIG_KVM_APIC_ARCHITECTURE
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
 
 #ifdef CONFIG_X86_64
