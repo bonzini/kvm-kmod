@@ -442,6 +442,10 @@ struct kvm_desc_ptr {
 #define MSR_IA32_CR_PAT        0x00000277
 #endif
 
+#ifndef MSR_VM_IGNNE
+#define MSR_VM_IGNNE                    0xc0010115
+#endif
+
 /* Define DEBUGCTLMSR bits */
 #ifndef DEBUGCTLMSR_LBR
 
