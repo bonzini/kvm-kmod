@@ -40,6 +40,7 @@ def __hack(data):
         'do_machine_check '
         )
     anon_inodes = anon_inodes_exit = False
+    mce = False
     result = []
     def sub(regexp, repl, str):
         return re_cache(regexp).sub(repl, str)
@@ -104,6 +105,11 @@ def __hack(data):
             line = 'IF_ANON_INODES_DOES_REFCOUNTS(' + line + ')'
         if not match(r'#include'):
             line = sub(r'\blapic\n', 'l_apic', line)
+        if match(r'struct pt_regs regs'):
+            mce = True
+        if mce and match(r'\.flags'):
+            line = sub(r'flags', r'kvm_pt_regs_flags', line)
+            mce = False
         w(line)
         if match(r'\tkvm_init_debug'):
             w('\thrtimer_kallsyms_resolve();')

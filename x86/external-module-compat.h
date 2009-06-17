@@ -577,3 +577,14 @@ static inline void kvm_do_machine_check(struct pt_regs *regs, long error_code)
 
 #endif
 
+/* pt_regs.flags was once pt_regs.eflags */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
+
+#define kvm_pt_regs_flags eflags
+
+#else
+
+#define kvm_pt_regs_flags flags
+
+#endif
