@@ -64,7 +64,13 @@ git --git-dir="$linux_git" --work-tree="$tmpdir/$name/linux-2.6" \
 
 cd "$tmpdir/$name"
 
-./sync "$name"
+if [[ -z "$formal" ]]; then
+    version="kvm-devel"
+else
+    version="$name"
+fi
+
+./sync "$name" -v "$version"
 
 rm -rf "$tmpdir/$name/linux-2.6"
 
