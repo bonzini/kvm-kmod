@@ -171,6 +171,12 @@ def header_sync(arch):
                % { 'T': T, 'name': os.path.basename(file) })
         cp(file, out)
         unifdef(out)
+    for file in glob(('%(linux)s/include/trace/events/kvm*.h'
+                      % { 'linux': linux })):
+        out = ('%(T)s/include/trace/events/%(name)s'
+               % { 'T': T, 'name': os.path.basename(file) })
+        cp(file, out)
+        unifdef(out)
     arch_headers = (
         [x
          for dir in ['%(linux)s/arch/%(arch)s/include/asm/./kvm*.h',
