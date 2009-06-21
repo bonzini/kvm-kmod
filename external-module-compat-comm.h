@@ -840,3 +840,30 @@ static inline struct file *eventfd_fget(int fd)
 #define kvm_srcu_batches_completed srcu_batches_completed
 
 #endif
+
+/* tracepoints changed in 2.6.30 */
+
+#include <linux/tracepoint.h>
+
+#if LINUX_VERSION_CODE == KERNEL_VERSION(2,6,29)
+
+#define TP_PROTO(args...)	args
+#define TP_ARGS(args...)	args
+#define PARAMS(args...) args
+#define __TRACE_EVENT(name, proto, args)				\
+	static inline void _do_trace_##name(struct tracepoint *tp, proto) \
+	{ }								\
+	static inline void trace_##name(proto)				\
+	{ }								\
+	static inline int register_trace_##name(void (*probe)(proto))	\
+	{								\
+		return -ENOSYS;						\
+	}								\
+	static inline int unregister_trace_##name(void (*probe)(proto)) \
+	{								\
+		return -ENOSYS;						\
+	}
+#define TRACE_EVENT(name, proto, args, struct, assign, print)		\
+	__TRACE_EVENT(name, PARAMS(proto), PARAMS(args))
+
+#endif
