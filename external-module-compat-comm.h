@@ -841,16 +841,21 @@ static inline struct file *eventfd_fget(int fd)
 
 #endif
 
-/* tracepoints changed in 2.6.30 */
+/* tracepoints were introduced in 2.6.29, but changed in 2.6.30 */
 
 #include <linux/tracepoint.h>
 
-#if LINUX_VERSION_CODE == KERNEL_VERSION(2,6,29)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,30)
 
-#define TP_PROTO(args...)	args
-#define TP_ARGS(args...)	args
-#define PARAMS(args...) args
-#define __TRACE_EVENT(name, proto, args)				\
+struct tracepoint;
+
+#undef DECLARE_TRACE
+#undef DEFINE_TRACE
+#undef PARAMS
+#undef TP_PROTO
+#undef TP_ARGS
+
+#define DECLARE_TRACE(name, proto, args)				\
 	static inline void _do_trace_##name(struct tracepoint *tp, proto) \
 	{ }								\
 	static inline void trace_##name(proto)				\
@@ -859,11 +864,32 @@ static inline struct file *eventfd_fget(int fd)
 	{								\
 		return -ENOSYS;						\
 	}								\
-	static inline int unregister_trace_##name(void (*probe)(proto)) \
+	static inline int unregister_trace_##name(void (*probe)(proto))	\
 	{								\
 		return -ENOSYS;						\
 	}
-#define TRACE_EVENT(name, proto, args, struct, assign, print)		\
-	__TRACE_EVENT(name, PARAMS(proto), PARAMS(args))
+
+#ifndef CONFIG_TRACEPOINTS
+
+static inline void tracepoint_update_probe_range(struct tracepoint *begin,
+	struct tracepoint *end)
+{ }
+
+#endif
+
+#define DEFINE_TRACE(name)
+#define EXPORT_TRACEPOINT_SYMBOL_GPL(name)
+#define EXPORT_TRACEPOINT_SYMBOL(name)
+
+#define PARAMS(args...) args
+#define TP_PROTO(args...)	args
+#define TP_ARGS(args...)		args
+
+#define TRACE_EVENT(name, proto, args, struct, assign, print)	\
+	DECLARE_TRACE(name, PARAMS(proto), PARAMS(args))
+
+static inline void tracepoint_synchronize_unregister(void)
+{
+}
 
 #endif
