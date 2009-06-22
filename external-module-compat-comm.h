@@ -854,6 +854,8 @@ struct tracepoint;
 #undef PARAMS
 #undef TP_PROTO
 #undef TP_ARGS
+#undef EXPORT_TRACEPOINT_SYMBOL
+#undef EXPORT_TRACEPOINT_SYMBOL_GPL
 
 #define DECLARE_TRACE(name, proto, args)				\
 	static inline void _do_trace_##name(struct tracepoint *tp, proto) \
@@ -869,13 +871,7 @@ struct tracepoint;
 		return -ENOSYS;						\
 	}
 
-#ifndef CONFIG_TRACEPOINTS
-
-static inline void tracepoint_update_probe_range(struct tracepoint *begin,
-	struct tracepoint *end)
-{ }
-
-#endif
+#define tracepoint_update_probe_range(begin, end) do {} while (0)
 
 #define DEFINE_TRACE(name)
 #define EXPORT_TRACEPOINT_SYMBOL_GPL(name)
@@ -888,8 +884,6 @@ static inline void tracepoint_update_probe_range(struct tracepoint *begin,
 #define TRACE_EVENT(name, proto, args, struct, assign, print)	\
 	DECLARE_TRACE(name, PARAMS(proto), PARAMS(args))
 
-static inline void tracepoint_synchronize_unregister(void)
-{
-}
+#define tracepoint_synchronize_unregister() do {} while (0)
 
 #endif
