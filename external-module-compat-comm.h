@@ -887,3 +887,14 @@ struct tracepoint;
 #define tracepoint_synchronize_unregister() do {} while (0)
 
 #endif
+
+#include <linux/ftrace_event.h>
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,31)
+
+struct trace_print_flags {
+	unsigned long		mask;
+	const char		*name;
+};
+
+#endif
