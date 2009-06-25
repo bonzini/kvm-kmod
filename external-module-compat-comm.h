@@ -841,7 +841,7 @@ static inline struct file *eventfd_fget(int fd)
 
 #endif
 
-/* tracepoints were introduced in 2.6.29, but changed in 2.6.30 */
+/* tracepoints were introduced in 2.6.28, but changed in 2.6.30 */
 
 #include <linux/tracepoint.h>
 
@@ -884,6 +884,7 @@ struct tracepoint;
 #define TRACE_EVENT(name, proto, args, struct, assign, print)	\
 	DECLARE_TRACE(name, PARAMS(proto), PARAMS(args))
 
+#undef tracepoint_synchronize_unregister
 #define tracepoint_synchronize_unregister() do {} while (0)
 
 #endif
