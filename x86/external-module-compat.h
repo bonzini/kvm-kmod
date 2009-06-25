@@ -72,6 +72,8 @@ typedef u64 phys_addr_t;
 #define _ASM_ALIGN	__ASM_SEL(.balign 4, .balign 8)
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22) || defined(CONFIG_X86_64)
+
 static inline unsigned long long native_read_msr_safe(unsigned int msr,
 						      int *err)
 {
@@ -87,6 +89,8 @@ static inline unsigned long long native_read_msr_safe(unsigned int msr,
 		     : "c" (msr), [fault] "i" (-EFAULT));
 	return EAX_EDX_VAL(val, low, high);
 }
+
+#endif
 
 #endif
 
