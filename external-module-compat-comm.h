@@ -898,3 +898,9 @@ struct trace_print_flags {
 };
 
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,31)
+
+#define alloc_pages_exact_node alloc_pages_node
+
+#endif
