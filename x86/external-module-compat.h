@@ -140,6 +140,14 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define EFER_FFXSR		(1<<_EFER_FFXSR)
 #endif
 
+#ifndef MSR_STAR
+#define MSR_STAR                0xc0000081
+#endif
+
+#ifndef MSR_K8_INT_PENDING_MSG
+#define MSR_K8_INT_PENDING_MSG  0xc0010055
+#endif
+
 #include <asm/cpufeature.h>
 
 #ifndef X86_FEATURE_SVM
