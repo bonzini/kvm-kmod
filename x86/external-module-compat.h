@@ -592,3 +592,15 @@ static inline void kvm_do_machine_check(struct pt_regs *regs, long error_code)
 #define kvm_pt_regs_flags flags
 
 #endif
+
+/* boot_cpu_data.x86_phys_bits only appeared for i386 in 2.6.30 */
+
+#if !defined(CONFIG_X86_64) && (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,30))
+
+#define kvm_x86_phys_bits 40
+
+#else
+
+#define kvm_x86_phys_bits (boot_cpu_data.x86_phys_bits)
+
+#endif
