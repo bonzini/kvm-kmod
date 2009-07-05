@@ -107,6 +107,8 @@ def __hack(data):
             line = sub(r'\blapic\n', 'l_apic', line)
         if match(r'struct pt_regs regs'):
             mce = True
+        if mce and match(r'\.cs'):
+            line = sub(r'cs', r'kvm_pt_regs_cs', line)
         if mce and match(r'\.flags'):
             line = sub(r'flags', r'kvm_pt_regs_flags', line)
             mce = False

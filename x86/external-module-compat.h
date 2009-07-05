@@ -595,9 +595,16 @@ static inline void kvm_do_machine_check(struct pt_regs *regs, long error_code)
 
 #define kvm_pt_regs_flags eflags
 
+#  ifdef CONFIG_X86_64
+#    define kvm_pt_regs_cs cs
+#  else
+#    define kvm_pt_regs_cs xcs
+#  endif
+
 #else
 
 #define kvm_pt_regs_flags flags
+#define kvm_pt_regs_cs cs
 
 #endif
 
