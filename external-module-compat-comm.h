@@ -905,3 +905,40 @@ struct trace_print_flags {
 #define alloc_pages_exact_node alloc_pages_node
 
 #endif
+
+/* eventfd accessors, new in 2.6.31 */
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,31)
+
+#include <linux/eventfd.h>
+#include <linux/fs.h>
+
+struct eventfd_ctx;
+
+static inline struct eventfd_ctx *eventfd_ctx_get(struct eventfd_ctx *ctx)
+{
+	struct file *filp = (struct file *)ctx;
+
+	get_file(filp);
+	return ctx;
+}
+
+static inline void eventfd_ctx_put(struct eventfd_ctx *ctx)
+{
+	struct file *filp = (struct file *)ctx;
+
+	fput(filp);
+}
+
+static inline struct eventfd_ctx *eventfd_ctx_fdget(int fd)
+{
+	struct file *filp = eventfd_fget(fd);
+
+	return (struct eventfd_ctx *)filp;
+}
+
+static inline struct eventfd_ctx *eventfd_ctx_fileget(struct file *file)
+{
+	return (struct eventfd_ctx *)file;
+}
+
+#endif
