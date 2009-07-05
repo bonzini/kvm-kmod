@@ -57,10 +57,17 @@ files=("arch/*/kvm/*" "virt/kvm" "include/linux/kvm*"
        "include/trace/events/kvm*"
        )
 
-git --git-dir="$kvm_git" --work-tree="$tmpdir/$name" checkout "$commit" .
+index="$tmpdir/index"
+
+rm -f "$index"
+GIT_INDEX_FILE="$index" git --git-dir="$kvm_git" read-tree "$commit"
+GIT_INDEX_FILE="$index" git --git-dir="$kvm_git" --work-tree="$tmpdir/$name" checkout "$commit" .
 lcommit=($(git --git-dir="$kvm_git" ls-tree "$commit" linux-2.6))
 lcommit="${lcommit[2]}"
-git --git-dir="$linux_git" --work-tree="$tmpdir/$name/linux-2.6" \
+rm -f "$index"
+GIT_INDEX_FILE="$index" git --git-dir="$linux_git" read-tree "$lcommit"
+GIT_INDEX_FILE="$index" git --git-dir="$linux_git" \
+    --work-tree="$tmpdir/$name/linux-2.6" \
     checkout "$lcommit" "${files[@]}"
 
 cd "$tmpdir/$name"
