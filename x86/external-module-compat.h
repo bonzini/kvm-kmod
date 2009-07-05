@@ -202,6 +202,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_SSE5	(6*32+11) /* SSE-5 */
 #endif
 
+#ifndef X86_FEATURE_X2APIC
+#define X86_FEATURE_X2APIC    (4*32+21) /* x2APIC */
+#endif
+
 #include <linux/smp.h>
 
 #ifndef X86_CR0_PE
@@ -619,3 +623,26 @@ static inline void kvm_do_machine_check(struct pt_regs *regs, long error_code)
 #define kvm_x86_phys_bits (boot_cpu_data.x86_phys_bits)
 
 #endif
+
+#include <asm/apicdef.h>
+
+#ifndef APIC_BASE_MSR
+#define APIC_BASE_MSR    0x800
+#endif
+
+#ifndef APIC_SPIV_DIRECTED_EOI
+#define APIC_SPIV_DIRECTED_EOI          (1 << 12)
+#endif
+
+#ifndef APIC_LVR_DIRECTED_EOI
+#define APIC_LVR_DIRECTED_EOI   (1 << 24)
+#endif
+
+#ifndef APIC_SELF_IPI
+#define APIC_SELF_IPI    0x3F0
+#endif
+
+#ifndef X2APIC_ENABLE
+#define X2APIC_ENABLE    (1UL << 10)
+#endif
+
