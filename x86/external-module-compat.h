@@ -206,6 +206,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_X2APIC    (4*32+21) /* x2APIC */
 #endif
 
+#ifndef MSR_AMD64_PATCH_LOADER
+#define MSR_AMD64_PATCH_LOADER         0xc0010020
+#endif
+
 #include <linux/smp.h>
 
 #ifndef X86_CR0_PE
