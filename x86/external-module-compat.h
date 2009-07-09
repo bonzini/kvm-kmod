@@ -477,6 +477,14 @@ struct kvm_desc_ptr {
 
 #endif
 
+#ifndef MSR_FAM10H_MMIO_CONF_BASE
+#define MSR_FAM10H_MMIO_CONF_BASE      0xc0010058
+#endif
+
+#ifndef MSR_AMD64_NB_CFG
+#define MSR_AMD64_NB_CFG               0xc001001f
+#endif
+
 #include <asm/asm.h>
 
 #ifndef __ASM_SIZE
