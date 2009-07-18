@@ -845,7 +845,7 @@ static inline struct file *eventfd_fget(int fd)
 
 #include <linux/tracepoint.h>
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,30)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,31)
 
 struct tracepoint;
 
