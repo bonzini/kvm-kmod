@@ -28,7 +28,7 @@ all:: prerequisite
 	$(MAKE) -C $(KERNELDIR) M=`pwd` \
 		LINUXINCLUDE="-I`pwd`/include -Iinclude \
 		$(if $(KERNELSOURCEDIR),\
-			-Iinclude2 -I$(KERNELSOURCEDIR)/include -I$(KERNELSOURCEDIR)/arch/${ARCH_DIR}/include, \
+			-Iinclude2 -I$(KERNELSOURCEDIR)/include -I$(KERNELSOURCEDIR)/arch/${ARCH_DIR}/include -I$(KERNELSOURCEDIR), \
 			-Iarch/${ARCH_DIR}/include) -I`pwd`/include-compat \
 		-include include/linux/autoconf.h \
 		-include `pwd`/$(ARCH_DIR)/external-module-compat.h $(module_defines)" \
