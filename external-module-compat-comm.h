@@ -941,4 +941,13 @@ static inline struct eventfd_ctx *eventfd_ctx_fileget(struct file *file)
 	return (struct eventfd_ctx *)file;
 }
 
+static inline int kvm_eventfd_signal(struct eventfd_ctx *ctx, int n)
+{
+	return -ENOSYS;
+}
+
+#else
+
+#define kvm_eventfd_signal eventfd_signal
+
 #endif
