@@ -422,6 +422,16 @@ struct kvm_desc_ptr {
 	unsigned long address;
 } __attribute__((packed));
 
+static inline unsigned long kvm_get_desc_base(const struct kvm_desc_struct *desc)
+{
+	return desc->base0 | ((desc->base1) << 16) | ((desc->base2) << 24);
+}
+
+static inline unsigned long kvm_get_desc_limit(const struct kvm_desc_struct *desc)
+{
+	return desc->limit0 | (desc->limit << 16);
+}
+
 #include <asm/msr.h>
 #ifndef MSR_FS_BASE
 #define MSR_FS_BASE 0xc0000100

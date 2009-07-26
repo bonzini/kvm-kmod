@@ -37,7 +37,7 @@ def __hack(data):
         'on_each_cpu relay_open request_irq free_irq '
         'init_srcu_struct cleanup_srcu_struct srcu_read_lock '
         'srcu_read_unlock synchronize_srcu srcu_batches_completed '
-        'do_machine_check eventfd_signal'
+        'do_machine_check eventfd_signal get_desc_base get_desc_limit '
         )
     anon_inodes = anon_inodes_exit = False
     mce = False
