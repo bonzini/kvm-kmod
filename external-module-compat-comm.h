@@ -951,3 +951,23 @@ static inline int kvm_eventfd_signal(struct eventfd_ctx *ctx, int n)
 #define kvm_eventfd_signal eventfd_signal
 
 #endif
+
+#include <linux/hugetlb.h>
+
+/* vma_kernel_pagesize, 2.6.29 */
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,31)
+
+static inline
+unsigned long vma_kernel_pagesize(struct vm_area_struct *vma)
+{
+	struct hstate *hstate;
+
+	if (!is_vm_hugetlb_page(vma))
+		return PAGE_SIZE;
+
+	hstate = hstate_vma(vma);
+
+	return 1UL << (hstate->order + PAGE_SHIFT);
+}
+
+#endif
