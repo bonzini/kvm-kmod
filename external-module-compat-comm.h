@@ -958,7 +958,7 @@ static inline int kvm_eventfd_signal(struct eventfd_ctx *ctx, int n)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,31)
 
 static inline
-unsigned long vma_kernel_pagesize(struct vm_area_struct *vma)
+unsigned long kvm_vma_kernel_pagesize(struct vm_area_struct *vma)
 {
 	struct hstate *hstate;
 
@@ -969,5 +969,9 @@ unsigned long vma_kernel_pagesize(struct vm_area_struct *vma)
 
 	return 1UL << (hstate->order + PAGE_SHIFT);
 }
+
+#else
+
+#define kvm_vma_kernel_pagesize vma_kernel_pagesize
 
 #endif
