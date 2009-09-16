@@ -975,3 +975,17 @@ unsigned long kvm_vma_kernel_pagesize(struct vm_area_struct *vma)
 #define kvm_vma_kernel_pagesize vma_kernel_pagesize
 
 #endif
+
+#ifndef printk_once
+/*
+ * Print a one-time message (analogous to WARN_ONCE() et al):
+ */
+#define printk_once(x...) ({			\
+	static int __print_once = 1;		\
+						\
+	if (__print_once) {			\
+		__print_once = 0;		\
+		printk(x);			\
+	}					\
+})
+#endif
