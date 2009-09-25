@@ -29,7 +29,7 @@ all:: prerequisite
 		LINUXINCLUDE="-I`pwd`/include -Iinclude \
 		$(if $(KERNELSOURCEDIR),\
 			-Iinclude2 -I$(KERNELSOURCEDIR)/include -I$(KERNELSOURCEDIR)/arch/${ARCH_DIR}/include, \
-			-Iarch/${ARCH_DIR}/include) -I`pwd`/include-compat \
+			-Iarch/${ARCH_DIR}/include) -I`pwd`/include-compat -I`pwd`/${ARCH_DIR} \
 		-include include/linux/autoconf.h \
 		-include `pwd`/$(ARCH_DIR)/external-module-compat.h $(module_defines)" \
 		"$$@"
