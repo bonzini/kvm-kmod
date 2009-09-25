@@ -40,7 +40,7 @@ if [[ -z "$name" ]]; then
     name="$commit"
 fi
 
-tarball="$releasedir/$name.tar.gz"
+tarball="$releasedir/$name.tar.bz2"
 
 cd "$(dirname "$0")"/..
 LINUX="$(readlink -f "linux-2.6")"
@@ -86,7 +86,7 @@ if [[ -n "$formal" ]]; then
     echo "$name" > "$tmpdir/$name/KVM_VERSION"
 fi
 
-tar czf "$tarball" -C "$tmpdir" "$name"
+tar cjf "$tarball" -C "$tmpdir" "$name"
 
 rm -rf "$tmpdir"
 
