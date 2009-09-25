@@ -91,7 +91,10 @@ arch=${arch%%-*}
 
 # see if we have split build and source directories
 if [ -d "$kerneldir/include2" ]; then
-    kernelsourcedir=${kerneldir%/*}/source
+    kernelsourcedir=$kerneldir/source
+    if [ ! -L "$kernelsourcedir" ]; then
+        kernelsourcedir=${kerneldir%/build*}/source
+    fi
 fi
 
 if [ -n "$no_uname" -a "$want_module" ]; then
