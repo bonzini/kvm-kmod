@@ -14,7 +14,6 @@ Modules.symvers
 Module.markers
 .tmp_versions
 include-compat/asm
-include-compat/asm-x86/asm-x86
 include
 x86/modules.order
 x86/i825[49].[ch]
@@ -24,17 +23,14 @@ x86/vmx.[ch]
 x86/svm.[ch]
 x86/mmu.[ch]
 x86/paging_tmpl.h
-x86/x86_emulate.[ch]
 x86/ioapic.[ch]
 x86/iodev.h
 x86/irq.[ch]
-x86/kvm_trace.c
 x86/lapic.[ch]
 x86/tss.h
 x86/x86.[ch]
 x86/coalesced_mmio.[ch]
 x86/kvm_cache_regs.h
-x86/vtd.c
 x86/irq_comm.c
 x86/timer.c
 x86/kvm_timer.h
@@ -43,6 +39,10 @@ x86/svm-trace.h
 x86/trace-arch.h
 x86/trace.h
 x86/vmx-trace.h
+x86/assigned-dev.c
+x86/emulate.c
+x86/eventfd.c
+x86/mmutrace.h
 ia64/asm-offsets.c
 ia64/coalesced_mmio.[ch]
 ia64/ioapic.[ch]
@@ -55,7 +55,6 @@ ia64/kvm_fw.c
 ia64/kvm_lib.c
 ia64/kvm_main.c
 ia64/kvm_minstate.h
-ia64/kvm_trace.c
 ia64/lapic.h
 ia64/memcpy.S
 ia64/memset.S
@@ -69,4 +68,6 @@ ia64/vmm.c
 ia64/vmm_ivt.S
 ia64/vti.h
 ia64/vtlb.c
+ia64/assigned-dev.c
+ia64/eventfd.c
 .stgit-*
