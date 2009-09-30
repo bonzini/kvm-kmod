@@ -95,6 +95,8 @@ def __hack(data):
             line = ''
         if match(r'#include <linux\/types.h>'):
             line = '#include <asm/types.h>'
+        if match(r'\t\.change_pte.*kvm_mmu_notifier_change_pte,'):
+            line = '#ifdef MMU_NOTIFIER_HAS_CHANGE_PTE\n' + line + '\n#endif'
         line = sub(r'\bhrtimer_init\b', 'hrtimer_init_p', line)
         line = sub(r'\bhrtimer_start\b', 'hrtimer_start_p', line)
         line = sub(r'\bhrtimer_cancel\b', 'hrtimer_cancel_p', line)
