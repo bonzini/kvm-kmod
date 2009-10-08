@@ -119,6 +119,8 @@ def __hack(data):
             line = sub(r'flags', r'kvm_pt_regs_flags', line)
             mce = False
         line = sub(r'boot_cpu_data.x86_phys_bits', 'kvm_x86_phys_bits', line)
+        if match(r'^static const struct vm_operations_struct kvm_'):
+            line = sub(r' const ', ' ', line)
         w(line)
         if match(r'\tkvm_init_debug'):
             w('\thrtimer_kallsyms_resolve();')
