@@ -993,3 +993,10 @@ unsigned long kvm_vma_kernel_pagesize(struct vm_area_struct *vma)
 	}					\
 })
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,33) && !defined(CONFIG_CPU_FREQ)
+static inline unsigned int cpufreq_get(unsigned int cpu)
+{
+	return 0;
+}
+#endif
