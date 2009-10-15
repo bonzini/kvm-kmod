@@ -1000,3 +1000,7 @@ static inline unsigned int cpufreq_get(unsigned int cpu)
 	return 0;
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
+int schedule_hrtimeout(ktime_t *expires, const enum hrtimer_mode mode);
+#endif
