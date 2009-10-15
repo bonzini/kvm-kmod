@@ -54,6 +54,7 @@ install:
 		if [ -f "$$i" ]; then mv "$$i" "$$i.orig"; fi; \
 	done
 	/sbin/depmod -a $(DEPMOD_VERSION) -b $(DESTDIR)
+	install -m 644 -D scripts/65-kvm.rules $(DESTDIR)/etc/udev/rules.d/65-kvm.rules
 
 tmpspec = .tmp.kvm-kmod.spec
 
