@@ -49,11 +49,11 @@ sync:
 install:
 	mkdir -p $(DESTDIR)/$(INSTALLDIR)
 	cp $(ARCH_DIR)/*.ko $(DESTDIR)/$(INSTALLDIR)
-	for i in $(ORIGMODDIR)/drivers/kvm/*.ko \
-		 $(ORIGMODDIR)/arch/$(ARCH_DIR)/kvm/*.ko; do \
+	for i in $(DESTDIR)/$(ORIGMODDIR)/drivers/kvm/*.ko \
+		 $(DESTDIR)/$(ORIGMODDIR)/arch/$(ARCH_DIR)/kvm/*.ko; do \
 		if [ -f "$$i" ]; then mv "$$i" "$$i.orig"; fi; \
 	done
-	/sbin/depmod -a $(DEPMOD_VERSION)
+	/sbin/depmod -a $(DEPMOD_VERSION) -b $(DESTDIR)
 
 tmpspec = .tmp.kvm-kmod.spec
 
