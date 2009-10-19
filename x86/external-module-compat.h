@@ -571,6 +571,12 @@ static inline unsigned long kvm_get_desc_limit(const struct kvm_desc_struct *des
 
 #endif
 
+#if !defined(CONFIG_X86_64) && LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
+#define kvm_compat_debugreg(x) debugreg[x]
+#else
+#define kvm_compat_debugreg(x) debugreg##x
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)
 
 struct mtrr_var_range {

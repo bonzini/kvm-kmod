@@ -13,17 +13,11 @@ static LIST_HEAD(pn_list);
 			       current->pid, raw_smp_processor_id());	\
 	} while (0)
 
-#if !defined(CONFIG_X86_64) && (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25))
-#define debugreg(x) debugreg[x]
-#else
-#define debugreg(x) debugreg##x
-#endif
-
 static void preempt_enable_sched_out_notifiers(void)
 {
 	asm volatile ("mov %0, %%db0" : : "r"(schedule));
 	asm volatile ("mov %0, %%db7" : : "r"(0x701ul));
-	current->thread.debugreg(7) = 0ul;
+	current->thread.kvm_compat_debugreg(7) = 0ul;
 #ifdef TIF_DEBUG
 	clear_tsk_thread_flag(current, TIF_DEBUG);
 #endif
@@ -33,8 +27,8 @@ static void preempt_enable_sched_in_notifiers(void * addr)
 {
 	asm volatile ("mov %0, %%db0" : : "r"(addr));
 	asm volatile ("mov %0, %%db7" : : "r"(0x701ul));
-	current->thread.debugreg(0) = (unsigned long) addr;
-	current->thread.debugreg(7) = 0x701ul;
+	current->thread.kvm_compat_debugreg(0) = (unsigned long) addr;
+	current->thread.kvm_compat_debugreg(7) = 0x701ul;
 #ifdef TIF_DEBUG
 	set_tsk_thread_flag(current, TIF_DEBUG);
 #endif
@@ -48,7 +42,7 @@ static void __preempt_disable_notifiers(void)
 static void preempt_disable_notifiers(void)
 {
 	__preempt_disable_notifiers();
-	current->thread.debugreg(7) = 0ul;
+	current->thread.kvm_compat_debugreg(7) = 0ul;
 #ifdef TIF_DEBUG
 	clear_tsk_thread_flag(current, TIF_DEBUG);
 #endif
@@ -235,7 +229,7 @@ static void do_disable(void *blah)
 #ifdef TIF_DEBUG
 	if (!test_tsk_thread_flag(current, TIF_DEBUG))
 #else
-	if (!current->thread.debugreg(7))
+	if (!current->thread.kvm_compat_debugreg(7))
 #endif
 		__preempt_disable_notifiers();
 }
