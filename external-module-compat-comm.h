@@ -1003,3 +1003,13 @@ int schedule_hrtimeout(ktime_t *expires, const enum hrtimer_mode mode);
 struct mmu_notifier {};
 #endif
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,27)
+static inline void hlist_del_init_rcu(struct hlist_node *n)
+{
+	if (!hlist_unhashed(n)) {
+		__hlist_del(n);
+		n->pprev = NULL;
+	}
+}
+#endif
