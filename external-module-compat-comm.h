@@ -957,7 +957,7 @@ static inline int kvm_eventfd_signal(struct eventfd_ctx *ctx, int n)
 /* vma_kernel_pagesize, exported since 2.6.32 */
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,32)
 
-#ifdef CONFIG_HUGETLB_PAGE
+#if defined(CONFIG_HUGETLB_PAGE) && LINUX_VERSION_CODE > KERNEL_VERSION(2,6,26)
 static inline
 unsigned long kvm_vma_kernel_pagesize(struct vm_area_struct *vma)
 {
@@ -970,7 +970,7 @@ unsigned long kvm_vma_kernel_pagesize(struct vm_area_struct *vma)
 
 	return 1UL << (hstate->order + PAGE_SHIFT);
 }
-#else /* !CONFIG_HUGETLB_SIZE */
+#else /* !CONFIG_HUGETLB_SIZE || <= 2.6.26 */
 #define kvm_vma_kernel_pagesize(v) PAGE_SIZE
 #endif
 
