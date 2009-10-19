@@ -1004,3 +1004,9 @@ static inline unsigned int cpufreq_get(unsigned int cpu)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
 int schedule_hrtimeout(ktime_t *expires, const enum hrtimer_mode mode);
 #endif
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,27)
+#ifndef CONFIG_MMU_NOTIFIER
+struct mmu_notifier {};
+#endif
+#endif
