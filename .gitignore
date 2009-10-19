@@ -6,7 +6,6 @@
 .*.cmd
 *.ko
 *.mod.c
-config.kbuild
 config.mak
 modules.order
 Module.symvers

@@ -129,6 +129,3 @@ AR=$cross_prefix$ar
 DEPMOD_VERSION=$depmod_version
 KVM_VERSION=$(kvm_version)
 EOF
-
-cat <<EOF > config.kbuild
-EOF

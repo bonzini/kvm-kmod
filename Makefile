@@ -1,5 +1,4 @@
 include config.mak
-include config.kbuild
 
 ARCH_DIR = $(if $(filter $(ARCH),x86_64 i386),x86,$(ARCH))
 ARCH_CONFIG := $(shell echo $(ARCH_DIR) | tr '[:lower:]' '[:upper:]')
@@ -72,4 +71,4 @@ clean:
 	$(MAKE) -C $(KERNELDIR) M=`pwd` $@
 
 distclean: clean
-	rm -f config.kbuild config.mak include/asm include-compat/asm
+	rm -f config.mak include/asm include-compat/asm
