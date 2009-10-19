@@ -165,6 +165,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_FXSR_OPT  (1*32+25)
 #endif
 
+#ifndef X86_FEATURE_GBPAGES
+#define X86_FEATURE_GBPAGES	(1*32+26) /* GB pages */
+#endif
+
 #ifndef X86_FEATURE_SSSE3
 #define X86_FEATURE_SSSE3	(4*32+ 9) /* Supplemental SSE-3 */
 #endif
