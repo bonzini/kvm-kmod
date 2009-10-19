@@ -19,10 +19,6 @@ rpmrelease = devel
 
 LINUX = ./linux-2.6
 
-ifeq ($(EXT_CONFIG_KVM_TRACE),y)
-module_defines += -DEXT_CONFIG_KVM_TRACE=y
-endif
-
 all:: prerequisite
 #	include header priority 1) $LINUX 2) $KERNELDIR 3) include-compat
 	$(MAKE) -C $(KERNELDIR) M=`pwd` \
@@ -31,7 +27,7 @@ all:: prerequisite
 			-Iinclude2 -I$(KERNELSOURCEDIR)/include -I$(KERNELSOURCEDIR)/arch/${ARCH_DIR}/include, \
 			-Iarch/${ARCH_DIR}/include) -I`pwd`/include-compat -I`pwd`/${ARCH_DIR} \
 		-include include/linux/autoconf.h \
-		-include `pwd`/$(ARCH_DIR)/external-module-compat.h $(module_defines)" \
+		-include `pwd`/$(ARCH_DIR)/external-module-compat.h" \
 		"$$@"
 
 include $(MAKEFILE_PRE)

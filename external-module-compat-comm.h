@@ -18,13 +18,6 @@
 #include <linux/hrtimer.h>
 #include <asm/bitops.h>
 
-/* Override CONFIG_KVM_TRACE */
-#ifdef EXT_CONFIG_KVM_TRACE
-#  define CONFIG_KVM_TRACE 1
-#else
-#  undef CONFIG_KVM_TRACE
-#endif
-
 /*
  * 2.6.16 does not have GFP_NOWAIT
  */
