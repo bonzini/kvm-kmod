@@ -54,7 +54,6 @@ mkdir -p "$tmpdir/$name/linux-2.6"
 files=("arch/*/kvm/*" "virt/kvm" "include/linux/kvm*"
        "arch/*/include/asm/kvm*" "arch/x86/include/asm/virtext.h"
        "arch/x86/include/asm/vmx.h" "arch/x86/include/asm/svm.h"
-       "include/trace/events/kvm*"
        )
 
 index="$tmpdir/index"
