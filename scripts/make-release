@@ -91,5 +91,5 @@ tar cjf "$tarball" -C "$tmpdir" "$name"
 rm -rf "$tmpdir"
 
 if [[ -n "$upload" ]]; then
-    rsync --progress -h "$tarball" avik@frs.sourceforge.net:uploads/
+    rsync --progress -h "$tarball" kiszka@frs.sourceforge.net:uploads/
 fi
