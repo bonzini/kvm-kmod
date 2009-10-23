@@ -24,6 +24,10 @@ typedef u64 phys_addr_t;
 #error "KVM/IA-64 depends on preempt notifiers in kernel."
 #endif
 
+#ifndef CONFIG_KVM_APIC_ARCHITECTURE
+#define CONFIG_KVM_APIC_ARCHITECTURE
+#endif
+
 /* smp_call_function() lost an argument in 2.6.27. */
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,27)
 

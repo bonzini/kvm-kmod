@@ -18,13 +18,6 @@
 #include <linux/hrtimer.h>
 #include <asm/bitops.h>
 
-/* Override CONFIG_KVM_TRACE */
-#ifdef EXT_CONFIG_KVM_TRACE
-#  define CONFIG_KVM_TRACE 1
-#else
-#  undef CONFIG_KVM_TRACE
-#endif
-
 /*
  * 2.6.16 does not have GFP_NOWAIT
  */
@@ -562,6 +555,15 @@ static inline int cancel_work_sync(struct work_struct *work)
 
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,27)
+
+static inline void flush_work(struct work_struct *work)
+{
+	cancel_work_sync(work);
+}
+
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,20)
 
 struct pci_dev;
@@ -805,4 +807,209 @@ static inline int iommu_domain_has_cap(struct iommu_domain *domain,
 	return 0;
 }
 
+#endif
+
+#include <linux/file.h>
+
+/* eventfd_fget() will be introduced in 2.6.32 */
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,32)
+
+static inline struct file *eventfd_fget(int fd)
+{
+    return fget(fd);
+}
+
+#endif
+
+/* srcu was born in 2.6.19 */
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,19)
+
+#define kvm_init_srcu_struct init_srcu_struct
+#define kvm_cleanup_srcu_struct cleanup_srcu_struct
+#define kvm_srcu_read_lock srcu_read_lock
+#define kvm_srcu_read_unlock srcu_read_unlock
+#define kvm_synchronize_srcu synchronize_srcu
+#define kvm_srcu_batches_completed srcu_batches_completed
+
+#endif
+
+/* tracepoints were introduced in 2.6.28, but changed in 2.6.30 */
+
+#include <linux/tracepoint.h>
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,31)
+
+struct tracepoint;
+
+#undef DECLARE_TRACE
+#undef DEFINE_TRACE
+#undef PARAMS
+#undef TP_PROTO
+#undef TP_ARGS
+#undef EXPORT_TRACEPOINT_SYMBOL
+#undef EXPORT_TRACEPOINT_SYMBOL_GPL
+
+#define DECLARE_TRACE(name, proto, args)				\
+	static inline void _do_trace_##name(struct tracepoint *tp, proto) \
+	{ }								\
+	static inline void trace_##name(proto)				\
+	{ }								\
+	static inline int register_trace_##name(void (*probe)(proto))	\
+	{								\
+		return -ENOSYS;						\
+	}								\
+	static inline int unregister_trace_##name(void (*probe)(proto))	\
+	{								\
+		return -ENOSYS;						\
+	}
+
+#define tracepoint_update_probe_range(begin, end) do {} while (0)
+
+#define DEFINE_TRACE(name)
+#define EXPORT_TRACEPOINT_SYMBOL_GPL(name)
+#define EXPORT_TRACEPOINT_SYMBOL(name)
+
+#define PARAMS(args...) args
+#define TP_PROTO(args...)	args
+#define TP_ARGS(args...)		args
+
+#define TRACE_EVENT(name, proto, args, struct, assign, print)	\
+	DECLARE_TRACE(name, PARAMS(proto), PARAMS(args))
+
+#undef tracepoint_synchronize_unregister
+#define tracepoint_synchronize_unregister() do {} while (0)
+
+#endif
+
+#include <linux/ftrace_event.h>
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,31)
+
+struct trace_print_flags {
+	unsigned long		mask;
+	const char		*name;
+};
+
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,31)
+
+#define alloc_pages_exact_node alloc_pages_node
+
+#endif
+
+/* eventfd accessors, new in 2.6.31 */
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,31)
+
+#include <linux/eventfd.h>
+#include <linux/fs.h>
+
+struct eventfd_ctx;
+
+static inline struct eventfd_ctx *eventfd_ctx_get(struct eventfd_ctx *ctx)
+{
+	struct file *filp = (struct file *)ctx;
+
+	get_file(filp);
+	return ctx;
+}
+
+static inline void eventfd_ctx_put(struct eventfd_ctx *ctx)
+{
+	struct file *filp = (struct file *)ctx;
+
+	fput(filp);
+}
+
+static inline struct eventfd_ctx *eventfd_ctx_fdget(int fd)
+{
+	struct file *filp = eventfd_fget(fd);
+
+	return (struct eventfd_ctx *)filp;
+}
+
+static inline struct eventfd_ctx *eventfd_ctx_fileget(struct file *file)
+{
+	return (struct eventfd_ctx *)file;
+}
+
+static inline int kvm_eventfd_signal(struct eventfd_ctx *ctx, int n)
+{
+	return -ENOSYS;
+}
+
+#else
+
+#define kvm_eventfd_signal eventfd_signal
+
+#endif
+
+#include <linux/hugetlb.h>
+
+/* vma_kernel_pagesize, exported since 2.6.32 */
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,32)
+
+#if defined(CONFIG_HUGETLB_PAGE) && LINUX_VERSION_CODE > KERNEL_VERSION(2,6,26)
+static inline
+unsigned long kvm_vma_kernel_pagesize(struct vm_area_struct *vma)
+{
+	struct hstate *hstate;
+
+	if (!is_vm_hugetlb_page(vma))
+		return PAGE_SIZE;
+
+	hstate = hstate_vma(vma);
+
+	return 1UL << (hstate->order + PAGE_SHIFT);
+}
+#else /* !CONFIG_HUGETLB_SIZE || <= 2.6.26 */
+#define kvm_vma_kernel_pagesize(v) PAGE_SIZE
+#endif
+
+#else /* >= 2.6.32 */
+
+#define kvm_vma_kernel_pagesize vma_kernel_pagesize
+
+#endif
+
+#ifndef printk_once
+/*
+ * Print a one-time message (analogous to WARN_ONCE() et al):
+ */
+#define printk_once(x...) ({			\
+	static int __print_once = 1;		\
+						\
+	if (__print_once) {			\
+		__print_once = 0;		\
+		printk(x);			\
+	}					\
+})
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,33) && !defined(CONFIG_CPU_FREQ)
+static inline unsigned int cpufreq_get(unsigned int cpu)
+{
+	return 0;
+}
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
+int schedule_hrtimeout(ktime_t *expires, const enum hrtimer_mode mode);
+#endif
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,27)
+#ifndef CONFIG_MMU_NOTIFIER
+struct mmu_notifier {};
+#endif
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,27)
+static inline void hlist_del_init_rcu(struct hlist_node *n)
+{
+	if (!hlist_unhashed(n)) {
+		__hlist_del(n);
+		n->pprev = NULL;
+	}
+}
 #endif

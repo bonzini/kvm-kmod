@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sys, os, glob, os.path, shutil, re
+from optparse import OptionParser
 
 glob = glob.glob
 
@@ -8,11 +9,16 @@ def cmd(c):
     if os.system(c) != 0:
         raise Exception('command execution failed: ' + c)
 
-version = 'kvm-devel'
-if len(sys.argv) >= 2:
-    version = sys.argv[1]
-
-linux = 'linux-2.6'
+parser = OptionParser(usage = 'usage: %prog [-v VERSION][-l LINUX]')
+parser.add_option('-v', action = 'store', type = 'string', dest = 'version', \
+                  help = 'kvm-kmod release version', default = 'kvm-devel')
+parser.add_option('-l', action = 'store', type = 'string', dest = 'linux', \
+                  help = 'Linux kernel tree to sync from', \
+                  default = 'linux-2.6')
+parser.set_defaults()
+(options, args) = parser.parse_args()
+version = options.version
+linux = options.linux
 
 _re_cache = {}
 
@@ -29,9 +35,13 @@ def __hack(data):
         'hrtimer_get_expires_ns hrtimer_start_expires '
         'hrtimer_expires_remaining smp_send_reschedule '
         'on_each_cpu relay_open request_irq free_irq '
-        'do_machine_check '
+        'init_srcu_struct cleanup_srcu_struct srcu_read_lock '
+        'srcu_read_unlock synchronize_srcu srcu_batches_completed '
+        'do_machine_check eventfd_signal get_desc_base get_desc_limit '
+        'vma_kernel_pagesize '
         )
     anon_inodes = anon_inodes_exit = False
+    mce = False
     result = []
     def sub(regexp, repl, str):
         return re_cache(regexp).sub(repl, str)
@@ -63,8 +73,8 @@ def __hack(data):
         if match(r'^}'): kvm_arch_init = False
         if match(r'MODULE_AUTHOR'):
             w('MODULE_INFO(version, "%s");' % (version,))
-        line = sub(r'match->dev->msi_enabled',
-                      'kvm_pcidev_msi_enabled(match->dev)', line)
+        line = sub(r'(\w+)->dev->msi_enabled',
+                   r'kvm_pcidev_msi_enabled(\1->dev)', line)
         if match(r'atomic_inc\(&kvm->mm->mm_count\);'):
             line = 'mmget(&kvm->mm->mm_count);'
         if match(r'^\t\.fault = '):
@@ -85,6 +95,11 @@ def __hack(data):
             line = ''
         if match(r'#include <linux\/types.h>'):
             line = '#include <asm/types.h>'
+        if match(r'\t\.change_pte.*kvm_mmu_notifier_change_pte,'):
+            line = '#ifdef MMU_NOTIFIER_HAS_CHANGE_PTE\n' + line + '\n#endif'
+        if match(r'static void kvm_mmu_notifier_change_pte'):
+            line = sub(r'static ', '', line)
+            line = '#ifdef MMU_NOTIFIER_HAS_CHANGE_PTE\n' + 'static\n' + '#endif\n' + line
         line = sub(r'\bhrtimer_init\b', 'hrtimer_init_p', line)
         line = sub(r'\bhrtimer_start\b', 'hrtimer_start_p', line)
         line = sub(r'\bhrtimer_cancel\b', 'hrtimer_cancel_p', line)
@@ -96,6 +111,30 @@ def __hack(data):
             line = 'IF_ANON_INODES_DOES_REFCOUNTS(' + line + ')'
         if not match(r'#include'):
             line = sub(r'\blapic\n', 'l_apic', line)
+        if match(r'struct pt_regs regs'):
+            mce = True
+        if mce and match(r'\.cs'):
+            line = sub(r'cs', r'kvm_pt_regs_cs', line)
+        if mce and match(r'\.flags'):
+            line = sub(r'flags', r'kvm_pt_regs_flags', line)
+            mce = False
+        line = sub(r'boot_cpu_data.x86_phys_bits', 'kvm_x86_phys_bits', line)
+        if match(r'^static const struct vm_operations_struct kvm_'):
+            line = sub(r' const ', ' ', line)
+        if line == 'static void *nested_svm_map(struct vcpu_svm *svm, u64 gpa, enum km_type idx)':
+            line = sub(r'\)', ', struct page **mapped_page)', line)
+        if line == '\treturn kmap_atomic(page, idx);':
+            line = '\t*mapped_page = page;\n' + line
+        if line == 'static void nested_svm_unmap(void *addr, enum km_type idx)':
+            line = sub(r'\)', ', struct page *mapped_page)', line)
+        if line == '\tpage = kmap_atomic_to_page(addr);':
+            line = '\tpage = mapped_page;'
+        if match(r'= nested_svm_map(.*);'):
+            line = '\t{ struct page *mapped_page;\n' + sub(r'\);', ', &mapped_page);', line)
+        if match('nested_svm_unmap(.*);'):
+            line = sub(r'\);', ', mapped_page); }', line)
+        if match(r'->thread.debugreg[0-7]'):
+            line = sub(r'->thread.debugreg([0-7])', r'->thread.kvm_compat_debugreg(\1)', line)
         w(line)
         if match(r'\tkvm_init_debug'):
             w('\thrtimer_kallsyms_resolve();')
@@ -120,7 +159,7 @@ def hack(T, arch, file):
 
 hack_files = {
     'x86': str.split('kvm_main.c mmu.c vmx.c svm.c x86.c irq.h lapic.c'
-                     ' i8254.c kvm_trace.c timer.c'),
+                     ' i8254.c timer.c'),
     'ia64': str.split('kvm_main.c kvm_fw.c kvm_lib.c kvm-ia64.c'),
 }
 
@@ -154,6 +193,12 @@ def header_sync(arch):
     rmtree(T)
     for file in glob('%(linux)s/include/linux/kvm*.h' % { 'linux': linux }):
         out = ('%(T)s/include/linux/%(name)s'
+               % { 'T': T, 'name': os.path.basename(file) })
+        cp(file, out)
+        unifdef(out)
+    for file in glob(('%(linux)s/include/trace/events/kvm*.h'
+                      % { 'linux': linux })):
+        out = ('%(T)s/include/trace/events/%(name)s'
                % { 'T': T, 'name': os.path.basename(file) })
         cp(file, out)
         unifdef(out)

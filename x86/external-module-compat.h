@@ -18,6 +18,14 @@ typedef u64 phys_addr_t;
 #include <asm/msr.h>
 #include <asm/asm.h>
 
+#ifndef CONFIG_HAVE_KVM_EVENTFD
+#define CONFIG_HAVE_KVM_EVENTFD 1
+#endif
+
+#ifndef CONFIG_KVM_APIC_ARCHITECTURE
+#define CONFIG_KVM_APIC_ARCHITECTURE
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
 
 #ifdef CONFIG_X86_64
@@ -64,6 +72,8 @@ typedef u64 phys_addr_t;
 #define _ASM_ALIGN	__ASM_SEL(.balign 4, .balign 8)
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22) || defined(CONFIG_X86_64)
+
 static inline unsigned long long native_read_msr_safe(unsigned int msr,
 						      int *err)
 {
@@ -79,6 +89,15 @@ static inline unsigned long long native_read_msr_safe(unsigned int msr,
 		     : "c" (msr), [fault] "i" (-EFAULT));
 	return EAX_EDX_VAL(val, low, high);
 }
+
+static inline unsigned long long native_read_tsc(void)
+{
+	unsigned long long val;
+	asm volatile("rdtsc" : "=A" (val));
+	return val;
+}
+
+#endif
 
 #endif
 
@@ -128,6 +147,14 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define EFER_FFXSR		(1<<_EFER_FFXSR)
 #endif
 
+#ifndef MSR_STAR
+#define MSR_STAR                0xc0000081
+#endif
+
+#ifndef MSR_K8_INT_PENDING_MSG
+#define MSR_K8_INT_PENDING_MSG  0xc0010055
+#endif
+
 #include <asm/cpufeature.h>
 
 #ifndef X86_FEATURE_SVM
@@ -136,6 +163,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 
 #ifndef X86_FEATURE_FXSR_OPT
 #define X86_FEATURE_FXSR_OPT  (1*32+25)
+#endif
+
+#ifndef X86_FEATURE_GBPAGES
+#define X86_FEATURE_GBPAGES	(1*32+26) /* GB pages */
 #endif
 
 #ifndef X86_FEATURE_SSSE3
@@ -180,6 +211,14 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 
 #ifndef X86_FEATURE_SSE5
 #define X86_FEATURE_SSE5	(6*32+11) /* SSE-5 */
+#endif
+
+#ifndef X86_FEATURE_X2APIC
+#define X86_FEATURE_X2APIC    (4*32+21) /* x2APIC */
+#endif
+
+#ifndef MSR_AMD64_PATCH_LOADER
+#define MSR_AMD64_PATCH_LOADER         0xc0010020
 #endif
 
 #include <linux/smp.h>
@@ -359,11 +398,6 @@ static inline void preempt_notifier_sys_exit(void) {}
 #define X86_FEATURE_NX (1*32+20)
 #endif
 
-#undef true
-#define true 1
-#undef false
-#define false 0
-
 /* EFER_LMA and EFER_LME are missing in pre 2.6.24 i386 kernels */
 #ifndef EFER_LME
 #define _EFER_LME           8  /* Long mode enable */
@@ -398,6 +432,16 @@ struct kvm_desc_ptr {
 	unsigned short size;
 	unsigned long address;
 } __attribute__((packed));
+
+static inline unsigned long kvm_get_desc_base(const struct kvm_desc_struct *desc)
+{
+	return desc->base0 | ((desc->base1) << 16) | ((desc->base2) << 24);
+}
+
+static inline unsigned long kvm_get_desc_limit(const struct kvm_desc_struct *desc)
+{
+	return desc->limit0 | (desc->limit << 16);
+}
 
 #include <asm/msr.h>
 #ifndef MSR_FS_BASE
@@ -439,6 +483,10 @@ struct kvm_desc_ptr {
 #define MSR_IA32_CR_PAT        0x00000277
 #endif
 
+#ifndef MSR_VM_IGNNE
+#define MSR_VM_IGNNE                    0xc0010115
+#endif
+
 /* Define DEBUGCTLMSR bits */
 #ifndef DEBUGCTLMSR_LBR
 
@@ -448,6 +496,14 @@ struct kvm_desc_ptr {
 #define DEBUGCTLMSR_LBR		(1UL << _DEBUGCTLMSR_LBR)
 #define DEBUGCTLMSR_BTF		(1UL << _DEBUGCTLMSR_BTF)
 
+#endif
+
+#ifndef MSR_FAM10H_MMIO_CONF_BASE
+#define MSR_FAM10H_MMIO_CONF_BASE      0xc0010058
+#endif
+
+#ifndef MSR_AMD64_NB_CFG
+#define MSR_AMD64_NB_CFG               0xc001001f
 #endif
 
 #include <asm/asm.h>
@@ -493,6 +549,18 @@ struct kvm_desc_ptr {
 #define FEATURE_CONTROL_VMXON_ENABLED	(1<<2)
 #endif
 
+#ifndef MSR_IA32_TSC
+#define MSR_IA32_TSC                    0x00000010
+#endif
+
+#ifndef MSR_K7_HWCR
+#define MSR_K7_HWCR                     0xc0010015
+#endif
+
+#ifndef MSR_K8_SYSCFG
+#define MSR_K8_SYSCFG                   0xc0010010
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25) && defined(__x86_64__)
 
 #undef set_debugreg
@@ -501,6 +569,12 @@ struct kvm_desc_ptr {
 		: /* no output */ \
 		:"r" ((unsigned long)value))
 
+#endif
+
+#if !defined(CONFIG_X86_64) && LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
+#define kvm_compat_debugreg(x) debugreg[x]
+#else
+#define kvm_compat_debugreg(x) debugreg##x
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)
@@ -556,5 +630,58 @@ static inline void kvm_do_machine_check(struct pt_regs *regs, long error_code)
 
 #define kvm_do_machine_check do_machine_check
 
+#endif
+
+/* pt_regs.flags was once pt_regs.eflags */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
+
+#define kvm_pt_regs_flags eflags
+
+#  ifdef CONFIG_X86_64
+#    define kvm_pt_regs_cs cs
+#  else
+#    define kvm_pt_regs_cs xcs
+#  endif
+
+#else
+
+#define kvm_pt_regs_flags flags
+#define kvm_pt_regs_cs cs
+
+#endif
+
+/* boot_cpu_data.x86_phys_bits only appeared for i386 in 2.6.30 */
+
+#if !defined(CONFIG_X86_64) && (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,30))
+
+#define kvm_x86_phys_bits 40
+
+#else
+
+#define kvm_x86_phys_bits (boot_cpu_data.x86_phys_bits)
+
+#endif
+
+#include <asm/apicdef.h>
+
+#ifndef APIC_BASE_MSR
+#define APIC_BASE_MSR    0x800
+#endif
+
+#ifndef APIC_SPIV_DIRECTED_EOI
+#define APIC_SPIV_DIRECTED_EOI          (1 << 12)
+#endif
+
+#ifndef APIC_LVR_DIRECTED_EOI
+#define APIC_LVR_DIRECTED_EOI   (1 << 24)
+#endif
+
+#ifndef APIC_SELF_IPI
+#define APIC_SELF_IPI    0x3F0
+#endif
+
+#ifndef X2APIC_ENABLE
+#define X2APIC_ENABLE    (1UL << 10)
 #endif
 

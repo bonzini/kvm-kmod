@@ -7,7 +7,6 @@ ld=ld
 objcopy=objcopy
 ar=ar
 want_module=1
-kvm_trace=
 cross_prefix=
 arch=`uname -m`
 # don't use uname if kerneldir is set
@@ -25,7 +24,6 @@ usage() {
 	Options include:
 	    --arch=ARCH            architecture to compile for ($arch)
 	    --cross-prefix=PREFIX  prefix for cross compile
-	    --with-kvm-trace       Enable kvm_trace
 	    --kerneldir=DIR        kernel build directory ($kerneldir)
             --help                 this helpful text
 EOF
@@ -48,9 +46,6 @@ while [[ "$1" = -* ]]; do
 	    ;;
 	--with-patched-kernel)
 	    want_module=
-	    ;;
-	--with-kvm-trace)
-	    kvm_trace=y
 	    ;;
 	--arch)
 	    arch="$arg"
@@ -91,7 +86,10 @@ arch=${arch%%-*}
 
 # see if we have split build and source directories
 if [ -d "$kerneldir/include2" ]; then
-    kernelsourcedir=${kerneldir%/*}/source
+    kernelsourcedir=$kerneldir/source
+    if [ ! -L "$kernelsourcedir" ]; then
+        kernelsourcedir=${kerneldir%/build*}/source
+    fi
 fi
 
 if [ -n "$no_uname" -a "$want_module" ]; then
@@ -130,8 +128,4 @@ OBJCOPY=$cross_prefix$objcopy
 AR=$cross_prefix$ar
 DEPMOD_VERSION=$depmod_version
 KVM_VERSION=$(kvm_version)
-EOF
-
-cat <<EOF > config.kbuild
-EXT_CONFIG_KVM_TRACE=$kvm_trace
 EOF

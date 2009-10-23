@@ -46,6 +46,7 @@ int kvm_smp_call_function_single(int cpu, void (*func)(void *info),
 	put_cpu();
 	return r;
 }
+EXPORT_SYMBOL_GPL(kvm_smp_call_function_single);
 
 #define smp_call_function_single kvm_smp_call_function_single
 
@@ -75,6 +76,7 @@ int kvm_smp_call_function_single(int cpu, void (*func)(void *info),
 	put_cpu();
 	return r;
 }
+EXPORT_SYMBOL_GPL(kvm_smp_call_function_single);
 
 #define smp_call_function_single kvm_smp_call_function_single
 
@@ -104,6 +106,7 @@ int kvm_smp_call_function_single(int cpu, void (*func)(void *info),
 
 }
 #endif /* !CONFIG_SMP */
+EXPORT_SYMBOL_GPL(kvm_smp_call_function_single);
 
 #define smp_call_function_single kvm_smp_call_function_single
 
@@ -403,6 +406,65 @@ unsigned kvm_get_tsc_khz(void)
 			tsc_khz_p = &tsc_khz_dummy;
 	}
 	return *tsc_khz_p;
+}
+
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
+
+static enum hrtimer_restart kvm_hrtimer_wakeup(struct hrtimer *timer)
+{
+	struct hrtimer_sleeper *t =
+		container_of(timer, struct hrtimer_sleeper, timer);
+	struct task_struct *task = t->task;
+
+	t->task = NULL;
+	if (task)
+		wake_up_process(task);
+
+	return HRTIMER_NORESTART;
+}
+
+int schedule_hrtimeout(ktime_t *expires, const enum hrtimer_mode mode)
+{
+	struct hrtimer_sleeper t;
+
+	/*
+	 * Optimize when a zero timeout value is given. It does not
+	 * matter whether this is an absolute or a relative time.
+	 */
+	if (expires && !expires->tv64) {
+		__set_current_state(TASK_RUNNING);
+		return 0;
+	}
+
+	/*
+	 * A NULL parameter means "inifinte"
+	 */
+	if (!expires) {
+		schedule();
+		__set_current_state(TASK_RUNNING);
+		return -EINTR;
+	}
+
+	hrtimer_init(&t.timer, CLOCK_MONOTONIC, mode);
+	t.timer.expires = *expires;
+
+	t.timer.function = kvm_hrtimer_wakeup;
+	t.task = current;
+
+	hrtimer_start(&t.timer, t.timer.expires, mode);
+	if (!hrtimer_active(&t.timer))
+		t.task = NULL;
+
+	if (likely(t.task))
+		schedule();
+
+	hrtimer_cancel(&t.timer);
+
+	__set_current_state(TASK_RUNNING);
+
+	return !t.task ? 0 : -EINTR;
 }
 
 #endif

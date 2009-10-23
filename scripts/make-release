@@ -40,7 +40,7 @@ if [[ -z "$name" ]]; then
     name="$commit"
 fi
 
-tarball="$releasedir/$name.tar.gz"
+tarball="$releasedir/$name.tar.bz2"
 
 cd "$(dirname "$0")"/..
 LINUX="$(readlink -f "linux-2.6")"
@@ -56,15 +56,28 @@ files=("arch/*/kvm/*" "virt/kvm" "include/linux/kvm*"
        "arch/x86/include/asm/vmx.h" "arch/x86/include/asm/svm.h"
        )
 
-git --git-dir="$kvm_git" --work-tree="$tmpdir/$name" checkout "$commit" .
+index="$tmpdir/index"
+
+rm -f "$index"
+GIT_INDEX_FILE="$index" git --git-dir="$kvm_git" read-tree "$commit"
+GIT_INDEX_FILE="$index" git --git-dir="$kvm_git" --work-tree="$tmpdir/$name" checkout "$commit" .
 lcommit=($(git --git-dir="$kvm_git" ls-tree "$commit" linux-2.6))
 lcommit="${lcommit[2]}"
-git --git-dir="$linux_git" --work-tree="$tmpdir/$name/linux-2.6" \
+rm -f "$index"
+GIT_INDEX_FILE="$index" git --git-dir="$linux_git" read-tree "$lcommit"
+GIT_INDEX_FILE="$index" git --git-dir="$linux_git" \
+    --work-tree="$tmpdir/$name/linux-2.6" \
     checkout "$lcommit" "${files[@]}"
 
 cd "$tmpdir/$name"
 
-./sync "$name"
+if [[ -z "$formal" ]]; then
+    version="kvm-devel"
+else
+    version="$name"
+fi
+
+./sync "$name" -v "$version"
 
 rm -rf "$tmpdir/$name/linux-2.6"
 
@@ -72,10 +85,10 @@ if [[ -n "$formal" ]]; then
     echo "$name" > "$tmpdir/$name/KVM_VERSION"
 fi
 
-tar czf "$tarball" -C "$tmpdir" "$name"
+tar cjf "$tarball" -C "$tmpdir" "$name"
 
 rm -rf "$tmpdir"
 
 if [[ -n "$upload" ]]; then
-    rsync --progress -h "$tarball" avik@frs.sourceforge.net:uploads/
+    rsync --progress -h "$tarball" kiszka@frs.sourceforge.net:uploads/
 fi
