@@ -91,5 +91,5 @@ tar cjf "$tarball" -C "$tmpdir" "$name"
 rm -rf "$tmpdir"
 
 if [[ -n "$upload" ]]; then
-    rsync --progress -h "$tarball" kiszka@frs.sourceforge.net:uploads/
+    scp "$tarball" kiszka,kvm@frs.sourceforge.net:/home/frs/project/k/kv/kvm/kvm-kmod/${name/kvm-kmod-/}/
 fi
