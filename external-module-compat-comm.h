@@ -1013,3 +1013,43 @@ static inline void hlist_del_init_rcu(struct hlist_node *n)
 	}
 }
 #endif
+
+#ifndef CONFIG_USER_RETURN_NOTIFIER
+
+#include <linux/percpu.h>
+
+struct kvm_user_return_notifier {
+	void (*on_user_return)(struct kvm_user_return_notifier *urn);
+};
+
+DECLARE_PER_CPU(struct kvm_user_return_notifier *, kvm_urn);
+
+static inline void
+kvm_user_return_notifier_register(struct kvm_user_return_notifier *urn)
+{
+	__get_cpu_var(kvm_urn) = urn;
+}
+
+static inline void
+kvm_user_return_notifier_unregister(struct kvm_user_return_notifier *urn)
+{
+	__get_cpu_var(kvm_urn) = NULL;
+}
+
+static inline void kvm_fire_urn(void)
+{
+	struct kvm_user_return_notifier *urn = __get_cpu_var(kvm_urn);
+
+	if (urn)
+		urn->on_user_return(urn);
+}
+
+#else /* CONFIG_USER_RETURN_NOTIFIER */
+
+#define kvm_user_return_notifier		user_return_notifier
+#define kvm_user_return_notifier_register	user_return_notifier_register
+#define kvm_user_return_notifier_unregister	user_return_notifier_unregister
+
+static inline void kvm_fire_urn(void) {}
+
+#endif /* CONFIG_USER_RETURN_NOTIFIER */

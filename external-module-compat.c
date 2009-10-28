@@ -468,3 +468,9 @@ int schedule_hrtimeout(ktime_t *expires, const enum hrtimer_mode mode)
 }
 
 #endif
+
+#ifndef CONFIG_USER_RETURN_NOTIFIER
+
+DEFINE_PER_CPU(struct kvm_user_return_notifier *, kvm_urn) = NULL;
+
+#endif /* CONFIG_USER_RETURN_NOTIFIER */
