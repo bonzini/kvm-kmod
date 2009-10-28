@@ -90,16 +90,20 @@ static inline unsigned long long native_read_msr_safe(unsigned int msr,
 	return EAX_EDX_VAL(val, low, high);
 }
 
-static inline unsigned long long native_read_tsc(void)
+#endif
+
+static inline unsigned long long kvm_native_read_tsc(void)
 {
 	unsigned long long val;
 	asm volatile("rdtsc" : "=A" (val));
 	return val;
 }
 
-#endif
+#else /* >= 2.6.25 */
 
-#endif
+#define kvm_native_read_tsc	native_read_tsc
+
+#endif /* >= 2.6.25 */
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26)
 
