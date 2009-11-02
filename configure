@@ -1,5 +1,8 @@
 #!/bin/bash
 
+min_kernel_version=24
+max_kernel_version=32
+force_build=
 kernelsourcedir=
 kerneldir=/lib/modules/$(uname -r)/build
 cc=gcc
@@ -25,6 +28,7 @@ usage() {
 	    --arch=ARCH            architecture to compile for ($arch)
 	    --cross-prefix=PREFIX  prefix for cross compile
 	    --kerneldir=DIR        kernel build directory ($kerneldir)
+            --force                continue even if kernel is not supported
             --help                 this helpful text
 EOF
     exit 1
@@ -44,6 +48,9 @@ while [[ "$1" = -* ]]; do
 	    kerneldir="$arg"
             no_uname=1
 	    ;;
+        --force)
+            force_build=1
+            ;;
 	--with-patched-kernel)
 	    want_module=
 	    ;;
@@ -92,22 +99,41 @@ if [ -d "$kerneldir/include2" ]; then
     fi
 fi
 
-if [ -n "$no_uname" -a "$want_module" ]; then
-    if [ -e "$kerneldir/.kernelrelease" ]; then
-        depmod_version=`cat "$kerneldir/.kernelrelease"`
+kernel_version=
+if [ -e "$kerneldir/.kernelrelease" ]; then
+	kernel_version=`cat "$kerneldir/.kernelrelease"`
+elif [ -e "$kerneldir/include/config/kernel.release" ]; then
+	kernel_version=`cat "$kerneldir/include/config/kernel.release"`
+elif [ -e "$kerneldir/.config" ]; then
+	kernel_version=$(awk '/Linux kernel version:/ { print $NF }' \
+		"$kerneldir/.config")
+fi
+if [ ! -n "$kernel_version" ]; then
+	echo
+	echo "Error: kernel version not found."
+	echo "Please make sure your kernel is configured."
+	echo
+	exit 1
+fi
 
-    elif [ -e "$kerneldir/include/config/kernel.release" ]; then
-            depmod_version=`cat "$kerneldir/include/config/kernel.release"`
-    elif [ -e "$kerneldir/.config" ]; then
-	depmod_version=$(awk '/Linux kernel version:/ { print $NF }' \
-			 "$kerneldir/.config")
-    else
-        echo
-        echo "Error: kernelversion not found"
-        echo "Please make sure your kernel is configured"
-        echo
-        exit 1
-    fi
+kernel_version=`echo $kernel_version | sed 's/[0-9]*\.[0-9]*\.\([0-9]*\)*.*/\1/'`
+if [ ! -n "$force_build" ]; then
+	if [ $kernel_version -lt $min_kernel_version ]; then
+		echo
+		echo "Error: kernel is too old for this kvm-kmod release."
+		echo
+		exit 1
+	elif [ $kernel_version -gt $max_kernel_version ]; then
+		echo
+		echo "Error: kernel is more recent than KVM modules delivered with this release."
+		echo "You probably want to use the KVM support that is already part of your kernel."
+		echo
+		exit 1
+	fi
+fi
+
+if [ -n "$no_uname" -a "$want_module" ]; then
+	depmod_version=$kernel_version
 fi
 
 rm -f include/asm include-compat/asm
