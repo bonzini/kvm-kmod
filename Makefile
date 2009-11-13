@@ -7,7 +7,7 @@ NONARCH_CONFIG = $(filter-out $(ARCH_CONFIG),X86 IA64)
 
 KVERREL = $(patsubst /lib/modules/%/build,%,$(KERNELDIR))
 
-DESTDIR=
+DESTDIR = /
 
 MAKEFILE_PRE = $(ARCH_DIR)/Makefile.pre
 
