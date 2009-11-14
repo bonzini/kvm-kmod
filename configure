@@ -28,8 +28,8 @@ usage() {
 	    --arch=ARCH            architecture to compile for ($arch)
 	    --cross-prefix=PREFIX  prefix for cross compile
 	    --kerneldir=DIR        kernel build directory ($kerneldir)
-            --force                continue even if kernel is not supported
-            --help                 this helpful text
+	    --force                continue even if kernel is not supported
+	    --help                 this helpful text
 EOF
     exit 1
 }
