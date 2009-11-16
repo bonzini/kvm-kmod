@@ -94,9 +94,10 @@ static inline unsigned long long native_read_msr_safe(unsigned int msr,
 
 static inline unsigned long long kvm_native_read_tsc(void)
 {
-	unsigned long long val;
-	asm volatile("rdtsc" : "=A" (val));
-	return val;
+	DECLARE_ARGS(val, low, high);
+
+	asm volatile("rdtsc" : EAX_EDX_RET(val, low, high));
+	return EAX_EDX_VAL(val, low, high);
 }
 
 #else /* >= 2.6.25 */
