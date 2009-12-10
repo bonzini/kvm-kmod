@@ -14,6 +14,8 @@ MAKEFILE_PRE = $(ARCH_DIR)/Makefile.pre
 INSTALLDIR = $(patsubst %/build,%/extra,$(KERNELDIR))
 ORIGMODDIR = $(patsubst %/build,%/kernel,$(KERNELDIR))
 
+HEADERDIR = /usr/local/include/kvm-kmod
+
 rpmrelease = devel
 
 LINUX = ./linux-2.6
@@ -31,15 +33,27 @@ all:: prerequisite
 
 include $(MAKEFILE_PRE)
 
-.PHONY: sync
+.PHONY: sync sync-kmod sync-hdr
 
 KVM_VERSION_GIT = $(if $(and $(filter kvm-devel,$(KVM_VERSION)), \
 			 $(wildcard $(LINUX)/.git)), \
 			   $(shell git --git-dir=$(LINUX)/.git describe), \
 			   $(KVM_VERSION))
 
-sync:
+sync-kmod:
 	./sync -v $(KVM_VERSION_GIT) -l $(LINUX)
+
+sync-hdr:
+	for a in ia64 x86; do \
+		$(MAKE) -C $(LINUX) INSTALL_HDR_PATH=`pwd`/.tmp-hdrs SRCARCH="$$a" headers_install; \
+		mkdir -p usr/include/asm-"$$a"; \
+		cp .tmp-hdrs/include/asm/kvm.h usr/include/asm-"$$a"; \
+	done
+	mkdir -p usr/include/linux
+	cp .tmp-hdrs/include/linux/kvm.h usr/include/linux
+	rm -rf .tmp-hdrs
+
+sync: sync-kmod sync-hdr
 
 install:
 	mkdir -p $(DESTDIR)/$(INSTALLDIR)
@@ -50,6 +64,8 @@ install:
 	done
 	/sbin/depmod -a $(DEPMOD_VERSION) -b $(DESTDIR)
 	install -m 644 -D scripts/65-kvm.rules $(DESTDIR)/etc/udev/rules.d/65-kvm.rules
+	install -m 644 -D usr/include/asm-$(ARCH_DIR)/kvm.h $(DESTDIR)/$(HEADERDIR)/asm/kvm.h
+	install -m 644 -D usr/include/linux/kvm.h $(DESTDIR)/$(HEADERDIR)/linux/kvm.h
 
 tmpspec = .tmp.kvm-kmod.spec
 
