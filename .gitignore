@@ -12,6 +12,7 @@ Module.symvers
 Modules.symvers
 Module.markers
 .tmp_versions
+.tmp.kvm-kmod.*
 include-compat/asm
 include
 x86/modules.order
