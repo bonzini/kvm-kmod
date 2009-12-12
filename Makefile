@@ -5,15 +5,12 @@ ARCH_CONFIG := $(shell echo $(ARCH_DIR) | tr '[:lower:]' '[:upper:]')
 # NONARCH_CONFIG used for unifdef, and only cover X86 and IA64 now
 NONARCH_CONFIG = $(filter-out $(ARCH_CONFIG),X86 IA64)
 
-KVERREL = $(patsubst /lib/modules/%/build,%,$(KERNELDIR))
-
 DESTDIR = /
 
 MAKEFILE_PRE = $(ARCH_DIR)/Makefile.pre
 
-INSTALLDIR = $(patsubst %/build,%/extra,$(KERNELDIR))
-ORIGMODDIR = $(patsubst %/build,%/kernel,$(KERNELDIR))
-
+INSTALLDIR = /lib/modules/$(KERNELVERSION)/extra
+ORIGMODDIR = /lib/modules/$(KERNELVERSION)/kernel
 HEADERDIR = /usr/local/include/kvm-kmod
 
 rpmrelease = devel
@@ -62,7 +59,7 @@ install:
 		 $(DESTDIR)/$(ORIGMODDIR)/arch/$(ARCH_DIR)/kvm/*.ko; do \
 		if [ -f "$$i" ]; then mv "$$i" "$$i.orig"; fi; \
 	done
-	/sbin/depmod -a $(DEPMOD_VERSION) -b $(DESTDIR)
+	/sbin/depmod -a $(KERNELVERSION) -b $(DESTDIR)
 	install -m 644 -D scripts/65-kvm.rules $(DESTDIR)/etc/udev/rules.d/65-kvm.rules
 	install -m 644 -D usr/include/asm-$(ARCH_DIR)/kvm.h $(DESTDIR)/$(HEADERDIR)/asm/kvm.h
 	install -m 644 -D usr/include/linux/kvm.h $(DESTDIR)/$(HEADERDIR)/linux/kvm.h
@@ -75,9 +72,9 @@ RPMDIR = $(rpm-topdir)/RPMS
 
 rpm:	all
 	mkdir -p $(rpm-topdir)/BUILD $(RPMDIR)/$$(uname -i)
-	sed 's/^Release:.*/Release: $(rpmrelease)/; s/^%define kverrel.*/%define kverrel $(KVERREL)/' \
+	sed 's/^Release:.*/Release: $(rpmrelease)/; s/^%define kverrel.*/%define kverrel $(KERNELVERSION)/' \
 	     kvm-kmod.spec > $(tmpspec)
-	rpmbuild --define="kverrel $(KVERREL)" \
+	rpmbuild --define="kverrel $(KERNELVERSION)" \
 		 --define="objdir $$(pwd)/$(ARCH_DIR)" \
 		 --define="_rpmdir $(RPMDIR)" \
 		 --define="_topdir $(rpm-topdir)" \
