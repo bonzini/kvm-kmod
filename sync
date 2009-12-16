@@ -53,15 +53,18 @@ def __hack(data):
         def w(line, result = result):
             result.append(line)
         f = line.split()
-        if match(r'^int kvm_init\('): anon_inodes = 1
-        if match(r'return 0;') and anon_inodes:
+        if match(r'^int kvm_init\('): anon_inodes = True
+        if match(r'r = kvm_arch_init\(opaque\);') and anon_inodes:
             w('\tr = kvm_init_anon_inodes();')
-            w('\tif (r) {')
-            w('\t\t__free_page(bad_page);')
-            w('\t\tgoto out;')
-            w('\t}')
+            w('\tif (r)')
+            w('\t\treturn r;\n')
             w('\tpreempt_notifier_sys_init();')
+            w('\thrtimer_kallsyms_resolve();\n')
+        if match(r'return 0;') and anon_inodes:
             w('\tprintk("loaded kvm module (%s)\\n");\n' % (version,))
+        if match(r'return r;') and anon_inodes:
+            w('\tkvm_exit_anon_inodes();')
+            w('\tpreempt_notifier_sys_exit();')
             anon_inodes = False
         if match(r'^void kvm_exit'): anon_inodes_exit = True
         if match(r'\}') and anon_inodes_exit:
@@ -137,8 +140,6 @@ def __hack(data):
         if match(r'->thread.debugreg[0-7]'):
             line = sub(r'->thread.debugreg([0-7])', r'->thread.kvm_compat_debugreg(\1)', line)
         w(line)
-        if match(r'\tkvm_init_debug'):
-            w('\thrtimer_kallsyms_resolve();')
         if match(r'apic->timer.dev.function ='):
             w('\thrtimer_data_pointer(&apic->timer.dev);')
         if match(r'pt->timer.function ='):
