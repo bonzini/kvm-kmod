@@ -26,6 +26,10 @@ typedef u64 phys_addr_t;
 #define CONFIG_KVM_APIC_ARCHITECTURE
 #endif
 
+#ifndef CONFIG_KVM_MMIO
+#define CONFIG_KVM_MMIO
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
 
 #ifdef CONFIG_X86_64
