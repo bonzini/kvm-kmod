@@ -134,6 +134,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define MSR_KERNEL_GS_BASE              0xc0000102
 #endif
 
+#ifndef MSR_TSC_AUX
+#define MSR_TSC_AUX                     0xc0000103
+#endif
+
 #ifndef MSR_VM_CR
 #define MSR_VM_CR                       0xc0010114
 #endif
