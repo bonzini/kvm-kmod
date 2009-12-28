@@ -137,8 +137,6 @@ def __hack(data):
             line = '\t{ struct page *mapped_page;\n' + sub(r'\);', ', &mapped_page);', line)
         if match('nested_svm_unmap(.*);'):
             line = sub(r'\);', ', mapped_page); }', line)
-        if match(r'->thread.debugreg[0-7]'):
-            line = sub(r'->thread.debugreg([0-7])', r'->thread.kvm_compat_debugreg(\1)', line)
         w(line)
         if match(r'apic->timer.dev.function ='):
             w('\thrtimer_data_pointer(&apic->timer.dev);')

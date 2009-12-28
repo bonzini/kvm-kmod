@@ -690,3 +690,21 @@ static inline void kvm_do_machine_check(struct pt_regs *regs, long error_code)
 #define X2APIC_ENABLE    (1UL << 10)
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,33)
+
+static inline int hw_breakpoint_active(void)
+{
+	return test_thread_flag(TIF_DEBUG);
+}
+
+static inline void hw_breakpoint_restore(void)
+{
+	set_debugreg(current->thread.kvm_compat_debugreg(0), 0);
+	set_debugreg(current->thread.kvm_compat_debugreg(1), 1);
+	set_debugreg(current->thread.kvm_compat_debugreg(2), 2);
+	set_debugreg(current->thread.kvm_compat_debugreg(3), 3);
+	set_debugreg(current->thread.kvm_compat_debugreg(6), 6);
+	set_debugreg(current->thread.kvm_compat_debugreg(7), 7);
+}
+
+#endif
