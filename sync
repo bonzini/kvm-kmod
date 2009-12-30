@@ -44,6 +44,7 @@ def __hack(data):
     anon_inodes = anon_inodes_exit = False
     mce = False
     result = []
+    pr_fmt = ''
     def sub(regexp, repl, str):
         return re_cache(regexp).sub(repl, str)
     for line in data.splitlines():
@@ -53,6 +54,10 @@ def __hack(data):
         def w(line, result = result):
             result.append(line)
         f = line.split()
+        if match(r'^#define pr_fmt'):
+            pr_fmt = sub(r'#define pr_fmt\([^)]*\) ("[^"]*").*', r'\1', line) + ' '
+            line = ''
+        line = sub(r'pr_debug\(([^),]*)', r'pr_debug(' + pr_fmt + r'\1', line)
         if match(r'^int kvm_init\('): anon_inodes = True
         if match(r'r = kvm_arch_init\(opaque\);') and anon_inodes:
             w('\tr = kvm_init_anon_inodes();')
