@@ -23,11 +23,14 @@ all:: prerequisite
 #	include header priority 1) $LINUX 2) $KERNELDIR 3) include-compat
 	$(MAKE) -C $(KERNELDIR) M=`pwd` \
 		LINUXINCLUDE="-I`pwd`/include -Iinclude \
-		$(if $(KERNELSOURCEDIR),\
+			$(if $(KERNELSOURCEDIR),\
 			-Iinclude2 -I$(KERNELSOURCEDIR)/include -I$(KERNELSOURCEDIR)/arch/${ARCH_DIR}/include, \
-			-Iarch/${ARCH_DIR}/include) -I`pwd`/include-compat -I`pwd`/${ARCH_DIR} \
-		-include include/linux/autoconf.h \
-		-include `pwd`/$(ARCH_DIR)/external-module-compat.h" \
+				-Iarch/${ARCH_DIR}/include) \
+			-I`pwd`/include-compat -I`pwd`/${ARCH_DIR} \
+			-include $(if $(wildcard $(KERNELDIR)/include/generated), \
+				include/generated/autoconf.h, \
+				include/linux/autoconf.h) \
+			-include `pwd`/$(ARCH_DIR)/external-module-compat.h" \
 		"$$@"
 
 include $(MAKEFILE_PRE)
