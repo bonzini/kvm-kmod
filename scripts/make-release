@@ -77,6 +77,7 @@ fi
 
 ./configure
 make sync KVM_VERSION="$version"
+make distclean
 
 rm -rf "$tmpdir/$name/linux-2.6"
 
