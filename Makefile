@@ -1,3 +1,4 @@
+$(if $(wildcard config.mak),,$(error Please run configure first))
 include config.mak
 
 ARCH_DIR = $(if $(filter $(ARCH),x86_64 i386),x86,$(ARCH))
