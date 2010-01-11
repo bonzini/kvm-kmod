@@ -46,10 +46,10 @@ sync-hdr:
 	for a in ia64 x86; do \
 		$(MAKE) -C $(LINUX) INSTALL_HDR_PATH=`pwd`/.tmp-hdrs SRCARCH="$$a" headers_install; \
 		mkdir -p usr/include/asm-"$$a"; \
-		cp .tmp-hdrs/include/asm/kvm.h usr/include/asm-"$$a"; \
+		cp .tmp-hdrs/include/asm/{kvm,kvm_para}.h usr/include/asm-"$$a"; \
 	done
 	mkdir -p usr/include/linux
-	cp .tmp-hdrs/include/linux/kvm.h usr/include/linux
+	cp .tmp-hdrs/include/linux/{kvm,kvm_para}.h usr/include/linux
 	rm -rf .tmp-hdrs
 
 sync: sync-kmod sync-hdr
