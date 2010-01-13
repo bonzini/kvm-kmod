@@ -1053,3 +1053,20 @@ static inline void kvm_fire_urn(void)
 static inline void kvm_fire_urn(void) {}
 
 #endif /* CONFIG_USER_RETURN_NOTIFIER */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,33)
+
+#ifdef CONFIG_SMP
+void kvm_synchronize_srcu_expedited(struct srcu_struct *sp);
+#else
+static inline void kvm_synchronize_srcu_expedited(struct srcu_struct *sp) { }
+#endif
+
+#else
+
+#define kvm_synchronize_srcu_expedited synchronize_srcu_expedited
+
+#endif
+
+int kvm_init_srcu(void);
+void kvm_exit_srcu(void);

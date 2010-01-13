@@ -40,8 +40,9 @@ def __hack(data):
         'do_machine_check eventfd_signal get_desc_base get_desc_limit '
         'vma_kernel_pagesize native_read_tsc user_return_notifier '
         'user_return_notifier_register user_return_notifier_unregister '
+        'synchronize_srcu_expedited '
         )
-    anon_inodes = anon_inodes_exit = False
+    kvm_init = kvm_exit = False
     mce = False
     result = []
     pr_fmt = ''
@@ -58,24 +59,30 @@ def __hack(data):
             pr_fmt = sub(r'#define pr_fmt\([^)]*\) ("[^"]*").*', r'\1', line) + ' '
             line = ''
         line = sub(r'pr_debug\(([^),]*)', r'pr_debug(' + pr_fmt + r'\1', line)
-        if match(r'^int kvm_init\('): anon_inodes = True
-        if match(r'r = kvm_arch_init\(opaque\);') and anon_inodes:
+        if match(r'^int kvm_init\('): kvm_init = True
+        if match(r'r = kvm_arch_init\(opaque\);') and kvm_init:
             w('\tr = kvm_init_anon_inodes();')
             w('\tif (r)')
             w('\t\treturn r;\n')
+            w('\tr = kvm_init_srcu();')
+            w('\tif (r)')
+            w('\t\tgoto cleanup_anon_inodes;\n')
             w('\tpreempt_notifier_sys_init();')
             w('\thrtimer_kallsyms_resolve();\n')
-        if match(r'return 0;') and anon_inodes:
+        if match(r'return 0;') and kvm_init:
             w('\tprintk("loaded kvm module (%s)\\n");\n' % (version,))
-        if match(r'return r;') and anon_inodes:
-            w('\tkvm_exit_anon_inodes();')
+        if match(r'return r;') and kvm_init:
             w('\tpreempt_notifier_sys_exit();')
-            anon_inodes = False
-        if match(r'^void kvm_exit'): anon_inodes_exit = True
-        if match(r'\}') and anon_inodes_exit:
+            w('\tkvm_exit_srcu();')
+            w('cleanup_anon_inodes:')
             w('\tkvm_exit_anon_inodes();')
+            kvm_init = False
+        if match(r'^void kvm_exit'): kvm_exit = True
+        if match(r'\}') and kvm_exit:
             w('\tpreempt_notifier_sys_exit();')
-            anon_inodes_exit = False
+            w('\tkvm_exit_srcu();')
+            w('\tkvm_exit_anon_inodes();')
+            kvm_exit = False
         if match(r'^int kvm_arch_init'): kvm_arch_init = True
         if match(r'\btsc_khz\b') and kvm_arch_init:
             line = sub(r'\btsc_khz\b', 'kvm_tsc_khz', line)
