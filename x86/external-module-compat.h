@@ -340,6 +340,11 @@ static inline unsigned long long __kvm_cmpxchg64(volatile void *ptr,
 #endif
 
 #ifndef CONFIG_PREEMPT_NOTIFIERS
+
+#ifdef CONFIG_HAVE_HW_BREAKPOINT
+#error Preemption notifier emulation does not work for this kernel.
+#endif
+
 /*
  * Include sched|preempt.h before defining CONFIG_PREEMPT_NOTIFIERS to avoid
  * a miscompile.
