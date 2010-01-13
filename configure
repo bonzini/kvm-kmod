@@ -87,7 +87,7 @@ processor=${arch#*-}
 arch=${arch%%-*}
 
 # see if we have split build and source directories
-if [ -d "$kerneldir/include2" ]; then
+if [ -d "$kerneldir/include2" -o -L "$kerneldir/source" ]; then
     kernelsourcedir=$kerneldir/source
     if [ ! -L "$kernelsourcedir" ]; then
         kernelsourcedir=${kerneldir%/build*}/source
