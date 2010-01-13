@@ -66,7 +66,15 @@ KVM_KMOD_VERSION = $(strip $(if $(wildcard KVM_VERSION), \
 				$(shell git describe), \
 				kvm-devel)))
 
-install:
+install-hdr:
+	mkdir -p $(DESTDIR)/$(HEADERDIR)/asm/
+	install -m 644 usr/include/asm-$(ARCH_DIR)/{kvm,kvm_para}.h $(DESTDIR)/$(HEADERDIR)/asm/
+	mkdir -p $(DESTDIR)/$(HEADERDIR)/linux/
+	install -m 644 usr/include/linux/{kvm,kvm_para}.h $(DESTDIR)/$(HEADERDIR)/linux/
+	sed 's|PREFIX|$(PREFIX)|; s/VERSION/$(KVM_KMOD_VERSION)/' kvm-kmod.pc > $(tmppc)
+	install -m 644 -D $(tmppc) $(DESTDIR)/$(PKGCONFIGDIR)/kvm-kmod.pc
+
+install: install-hdr
 	mkdir -p $(DESTDIR)/$(INSTALLDIR)
 	cp $(ARCH_DIR)/*.ko $(DESTDIR)/$(INSTALLDIR)
 	for i in $(DESTDIR)/$(ORIGMODDIR)/drivers/kvm/*.ko \
@@ -75,12 +83,6 @@ install:
 	done
 	/sbin/depmod -a $(KERNELVERSION) -b $(DESTDIR)
 	install -m 644 -D scripts/65-kvm.rules $(DESTDIR)/etc/udev/rules.d/65-kvm.rules
-	mkdir -p $(DESTDIR)/$(HEADERDIR)/asm/
-	install -m 644 usr/include/asm-$(ARCH_DIR)/{kvm,kvm_para}.h $(DESTDIR)/$(HEADERDIR)/asm/
-	mkdir -p $(DESTDIR)/$(HEADERDIR)/linux/
-	install -m 644 usr/include/linux/{kvm,kvm_para}.h $(DESTDIR)/$(HEADERDIR)/linux/
-	sed 's|PREFIX|$(PREFIX)|; s/VERSION/$(KVM_KMOD_VERSION)/' kvm-kmod.pc > $(tmppc)
-	install -m 644 -D $(tmppc) $(DESTDIR)/$(PKGCONFIGDIR)/kvm-kmod.pc
 
 tmpspec = .tmp.kvm-kmod.spec
 
