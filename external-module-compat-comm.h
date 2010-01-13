@@ -1070,3 +1070,15 @@ static inline void kvm_synchronize_srcu_expedited(struct srcu_struct *sp) { }
 
 int kvm_init_srcu(void);
 void kvm_exit_srcu(void);
+
+#ifndef WARN_ONCE
+#define WARN_ONCE(condition, format...)	({			\
+	static bool __warned;					\
+	int __ret_warn_once = !!(condition);			\
+								\
+	if (unlikely(__ret_warn_once))				\
+		if (WARN_ON(!__warned)) 			\
+			__warned = true;			\
+	unlikely(__ret_warn_once);				\
+})
+#endif
