@@ -1082,3 +1082,8 @@ void kvm_exit_srcu(void);
 	unlikely(__ret_warn_once);				\
 })
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
+#define get_online_cpus lock_cpu_hotplug
+#define put_online_cpus unlock_cpu_hotplug
+#endif
