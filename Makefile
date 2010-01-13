@@ -36,8 +36,6 @@ all:: prerequisite
 
 include $(MAKEFILE_PRE)
 
-.PHONY: sync sync-kmod sync-hdr
-
 KVM_VERSION_GIT = $(if $(and $(filter kvm-devel,$(KVM_VERSION)), \
 			 $(wildcard $(LINUX)/.git)), \
 			   $(shell git --git-dir=$(LINUX)/.git describe), \
@@ -105,3 +103,5 @@ clean:
 
 distclean: clean
 	rm -f config.mak include/asm include-compat/asm $(tmppc) $(tmpspec)
+
+.PHONY: all sync sync-kmod sync-hdr install install-hdr rpm clean distclean
