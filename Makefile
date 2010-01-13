@@ -75,8 +75,10 @@ install:
 	done
 	/sbin/depmod -a $(KERNELVERSION) -b $(DESTDIR)
 	install -m 644 -D scripts/65-kvm.rules $(DESTDIR)/etc/udev/rules.d/65-kvm.rules
-	install -m 644 -D usr/include/asm-$(ARCH_DIR)/{kvm,kvm_para}.h $(DESTDIR)/$(HEADERDIR)/asm/
-	install -m 644 -D usr/include/linux/{kvm,kvm_para}.h $(DESTDIR)/$(HEADERDIR)/linux/
+	mkdir -p $(DESTDIR)/$(HEADERDIR)/asm/
+	install -m 644 usr/include/asm-$(ARCH_DIR)/{kvm,kvm_para}.h $(DESTDIR)/$(HEADERDIR)/asm/
+	mkdir -p $(DESTDIR)/$(HEADERDIR)/linux/
+	install -m 644 usr/include/linux/{kvm,kvm_para}.h $(DESTDIR)/$(HEADERDIR)/linux/
 	sed 's|PREFIX|$(PREFIX)|; s/VERSION/$(KVM_KMOD_VERSION)/' kvm-kmod.pc > $(tmppc)
 	install -m 644 -D $(tmppc) $(DESTDIR)/$(PKGCONFIGDIR)/kvm-kmod.pc
 
