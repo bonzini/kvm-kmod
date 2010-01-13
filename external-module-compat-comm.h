@@ -1087,3 +1087,7 @@ void kvm_exit_srcu(void);
 #define get_online_cpus lock_cpu_hotplug
 #define put_online_cpus unlock_cpu_hotplug
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)
+#define cpumask_any(m)	first_cpu(*(m))
+#endif
