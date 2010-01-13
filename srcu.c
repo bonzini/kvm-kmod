@@ -399,13 +399,66 @@ void kvm_synchronize_srcu_expedited(struct srcu_struct *sp)
 }
 EXPORT_SYMBOL_GPL(kvm_synchronize_srcu_expedited);
 
+static struct sched_param sync_thread_param = {
+	.sched_priority = MAX_RT_PRIO-1
+};
+
+#ifdef CONFIG_HOTPLUG_CPU
+#include <linux/cpumask.h>
+
+static int cpu_callback(struct notifier_block *nfb, unsigned long action,
+			void *hcpu)
+{
+	int hotcpu = (unsigned long)hcpu;
+	struct task_struct *p;
+
+	switch (action) {
+	case CPU_UP_PREPARE:
+	case CPU_UP_PREPARE_FROZEN:
+		p = kthread_create(kvm_rcu_sync_thread, hcpu,
+				   "kvmsrcusync/%d", hotcpu);
+		if (IS_ERR(p)) {
+			printk(KERN_ERR "kvm: kvmsrcsync for %d failed\n",
+			       hotcpu);
+			return NOTIFY_BAD;
+		}
+		kthread_bind(p, hotcpu);
+		sched_setscheduler(p, SCHED_FIFO, &sync_thread_param);
+		per_cpu(sync_thread, hotcpu) = p;
+		break;
+	case CPU_ONLINE:
+	case CPU_ONLINE_FROZEN:
+		wake_up_process(per_cpu(sync_thread, hotcpu));
+		break;
+	case CPU_UP_CANCELED:
+	case CPU_UP_CANCELED_FROZEN:
+		if (!per_cpu(sync_thread, hotcpu))
+			break;
+		/* Unbind so it can run.  Fall thru. */
+		kthread_bind(per_cpu(sync_thread, hotcpu),
+			     cpumask_any(cpu_online_mask));
+	case CPU_DEAD:
+	case CPU_DEAD_FROZEN:
+		p = per_cpu(sync_thread, hotcpu);
+		per_cpu(sync_thread, hotcpu) = NULL;
+		kthread_stop(p);
+		break;
+	}
+	return NOTIFY_OK;
+}
+
+static struct notifier_block cpu_nfb = {
+	.notifier_call = cpu_callback
+};
+#endif /* CONFIG_HOTPLUG_CPU */
+
 int kvm_init_srcu(void)
 {
-	struct sched_param param = { .sched_priority = MAX_RT_PRIO-1 };
 	struct task_struct *p;
 	int cpu;
 	int err;
 
+	get_online_cpus();
 	for_each_online_cpu(cpu) {
 		p = kthread_create(kvm_rcu_sync_thread, (void *)(long)cpu,
 				   "kvmsrcusync/%d", cpu);
@@ -413,13 +466,19 @@ int kvm_init_srcu(void)
 			goto error_out;
 
 		kthread_bind(p, cpu);
-		sched_setscheduler(p, SCHED_FIFO, &param);
+		sched_setscheduler(p, SCHED_FIFO, &sync_thread_param);
 		per_cpu(sync_thread, cpu) = p;
 		wake_up_process(p);
 	}
+#ifdef CONFIG_HOTPLUG_CPU
+	register_cpu_notifier(&cpu_nfb);
+#endif /* CONFIG_HOTPLUG_CPU */
+	put_online_cpus();
+
 	return 0;
 
 error_out:
+	put_online_cpus();
 	printk(KERN_ERR "kvm: kvmsrcsync for %d failed\n", cpu);
 	err = PTR_ERR(p);
 	kvm_exit_srcu();
@@ -430,6 +489,7 @@ void kvm_exit_srcu(void)
 {
 	int cpu;
 
+	unregister_cpu_notifier(&cpu_nfb);
 	for_each_online_cpu(cpu)
 		if (per_cpu(sync_thread, cpu))
 			kthread_stop(per_cpu(sync_thread, cpu));
