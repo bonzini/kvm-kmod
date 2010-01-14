@@ -728,6 +728,8 @@ static inline void cpumask_clear_cpu(int cpu, cpumask_var_t mask)
 
 #define cpu_online_mask (&cpu_online_map)
 
+#define cpumask_any(m) first_cpu(*(m))
+
 #endif
 
 /* A zeroing constructor was added late 2.6.30 */
@@ -1086,8 +1088,4 @@ void kvm_exit_srcu(void);
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
 #define get_online_cpus lock_cpu_hotplug
 #define put_online_cpus unlock_cpu_hotplug
-#endif
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)
-#define cpumask_any(m)	first_cpu(*(m))
 #endif
