@@ -11,8 +11,7 @@ DESTDIR = /
 
 MAKEFILE_PRE = $(ARCH_DIR)/Makefile.pre
 
-export INSTALL_MOD_DIR=extras
-ORIGMODDIR = /lib/modules/$(KERNELVERSION)/kernel
+export INSTALL_MOD_DIR=updates
 HEADERDIR = $(PREFIX)/include/kvm-kmod
 PKGCONFIGDIR = $(PREFIX)/lib/pkgconfig
 
@@ -73,10 +72,6 @@ install-hdr:
 	install -m 644 -D $(tmppc) $(DESTDIR)/$(PKGCONFIGDIR)/kvm-kmod.pc
 
 modules_install:
-	for i in $(DESTDIR)/$(ORIGMODDIR)/drivers/kvm/*.ko \
-		 $(DESTDIR)/$(ORIGMODDIR)/arch/$(ARCH_DIR)/kvm/*.ko; do \
-		if [ -f "$$i" ]; then mv "$$i" "$$i.orig"; fi; \
-	done
 	$(MAKE) -C $(KERNELDIR) M=`pwd` INSTALL_MOD_PATH=$(DESTDIR)/$(INSTALL_MOD_PATH) $@
 
 install: install-hdr modules_install
