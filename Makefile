@@ -11,7 +11,7 @@ DESTDIR = /
 
 MAKEFILE_PRE = $(ARCH_DIR)/Makefile.pre
 
-INSTALLDIR = /lib/modules/$(KERNELVERSION)/extra
+export INSTALL_MOD_DIR=extras
 ORIGMODDIR = /lib/modules/$(KERNELVERSION)/kernel
 HEADERDIR = $(PREFIX)/include/kvm-kmod
 PKGCONFIGDIR = $(PREFIX)/lib/pkgconfig
@@ -72,14 +72,14 @@ install-hdr:
 	sed 's|PREFIX|$(PREFIX)|; s/VERSION/$(KVM_KMOD_VERSION)/' kvm-kmod.pc > $(tmppc)
 	install -m 644 -D $(tmppc) $(DESTDIR)/$(PKGCONFIGDIR)/kvm-kmod.pc
 
-install: install-hdr
-	mkdir -p $(DESTDIR)/$(INSTALLDIR)
-	cp $(ARCH_DIR)/*.ko $(DESTDIR)/$(INSTALLDIR)
+modules_install:
 	for i in $(DESTDIR)/$(ORIGMODDIR)/drivers/kvm/*.ko \
 		 $(DESTDIR)/$(ORIGMODDIR)/arch/$(ARCH_DIR)/kvm/*.ko; do \
 		if [ -f "$$i" ]; then mv "$$i" "$$i.orig"; fi; \
 	done
-	/sbin/depmod -a $(KERNELVERSION) -b $(DESTDIR)
+	$(MAKE) -C $(KERNELDIR) M=`pwd` INSTALL_MOD_PATH=$(DESTDIR)/$(INSTALL_MOD_PATH) $@
+
+install: install-hdr modules_install
 	install -m 644 -D scripts/65-kvm.rules $(DESTDIR)/etc/udev/rules.d/65-kvm.rules
 
 tmpspec = .tmp.kvm-kmod.spec
