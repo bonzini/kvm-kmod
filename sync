@@ -92,7 +92,7 @@ def __hack(data):
         line = sub(r'(\w+)->dev->msi_enabled',
                    r'kvm_pcidev_msi_enabled(\1->dev)', line)
         if match(r'atomic_inc\(&kvm->mm->mm_count\);'):
-            line = 'mmget(&kvm->mm->mm_count);'
+            line = '\tmmget(&kvm->mm->mm_count);'
         if match(r'^\t\.fault = '):
             fcn = sub(r',', '', f[2])
             line = '\t.VMA_OPS_FAULT(fault) = VMA_OPS_FAULT_FUNC(' + fcn + '),'
