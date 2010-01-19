@@ -44,6 +44,7 @@ def __hack(data):
         )
     kvm_init = kvm_exit = False
     mce = False
+    eventfd_file = eventfd_ioctl = False
     result = []
     pr_fmt = ''
     def sub(regexp, repl, str):
@@ -149,6 +150,14 @@ def __hack(data):
             line = '\t{ struct page *mapped_page;\n' + sub(r'\);', ', &mapped_page);', line)
         if match('nested_svm_unmap(.*);'):
             line = sub(r'\);', ', mapped_page); }', line)
+        if line == 'struct _irqfd {':
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)')
+            eventfd_file = True
+        if line in ['\tcase KVM_IRQFD: {', '\tcase KVM_IOEVENTFD: {']:
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)')
+            eventfd_ioctl = True
+        if line == '\tcase KVM_CAP_IRQFD:':
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)')
         w(line)
         if match(r'apic->timer.dev.function ='):
             w('\thrtimer_data_pointer(&apic->timer.dev);')
@@ -156,6 +165,16 @@ def __hack(data):
             w('\thrtimer_data_pointer(&pt->timer);')
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
+        if line == '\t}' and eventfd_ioctl:
+            w('#endif')
+            eventfd_ioctl = False
+        if line == '\tcase KVM_CAP_IOEVENTFD:':
+            w('#endif')
+    if eventfd_file:
+        result.append('#else\n'
+                      'void kvm_eventfd_init(struct kvm *kvm) { }\n'
+                      'void kvm_irqfd_release(struct kvm *kvm) { }\n'
+                      '#endif')
     data = str.join('', [line + '\n' for line in result])
     return data
 
