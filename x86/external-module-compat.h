@@ -758,3 +758,9 @@ static inline void kvm_do_machine_check(struct pt_regs *regs, long error_code)
 #define savesegment(seg, value)				\
 	asm("mov %%" #seg ",%0":"=r" (value) : : "memory")
 #endif
+
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(2,6,24) && defined(CONFIG_X86_64)
+#define kvm_check_tsc_unstable()	1
+#else
+#define kvm_check_tsc_unstable		check_tsc_unstable
+#endif
