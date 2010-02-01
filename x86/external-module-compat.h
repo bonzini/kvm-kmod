@@ -721,3 +721,9 @@ static inline void hw_breakpoint_restore(void)
 }
 
 #endif
+
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(2,6,24) && defined(CONFIG_X86_64)
+#define kvm_check_tsc_unstable()	1
+#else
+#define kvm_check_tsc_unstable		check_tsc_unstable
+#endif
