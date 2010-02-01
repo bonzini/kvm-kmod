@@ -1033,3 +1033,24 @@ void kvm_exit_srcu(void);
 #define get_online_cpus lock_cpu_hotplug
 #define put_online_cpus unlock_cpu_hotplug
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,33)
+static inline void kvm_getboottime(struct timespec *ts)
+{
+	struct timespec sys, now = current_kernel_time();
+	ktime_get_ts(&sys);
+	*ts = ns_to_timespec(timespec_to_ns(&now) - timespec_to_ns(&sys));
+}
+#define kvm_monotonic_to_bootbased(ts)
+#else
+#define kvm_getboottime			getboottime
+#define kvm_monotonic_to_bootbased	monotonic_to_bootbased
+#endif
+
+static inline void kvm_clock_warn_suspend_bug(void)
+{
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,33) && defined(CONFIG_SUSPEND)
+	printk("kvm: paravirtual wallclock will not work reliably "
+	       "accross host suspend/resume\n");
+#endif
+}
