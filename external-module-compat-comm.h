@@ -1054,3 +1054,14 @@ static inline void kvm_clock_warn_suspend_bug(void)
 	       "accross host suspend/resume\n");
 #endif
 }
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,33) && defined(CONFIG_PCI)
+#include <linux/pci.h>
+static inline struct pci_dev *
+pci_get_domain_bus_and_slot(int domain, unsigned int bus, unsigned int devfn)
+{
+	if (domain != 0)
+		return NULL;
+	return pci_get_bus_and_slot(bus, devfn);
+}
+#endif
