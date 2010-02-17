@@ -23,6 +23,8 @@
 #include "lapic.h"
 #include "debug.h"
 
+#include "x86.h"
+
 #ifdef KVM_DEBUG
 
 static unsigned long vmcs_readl(unsigned long field)
@@ -64,7 +66,7 @@ void show_code(struct kvm_vcpu *vcpu)
 	if (!is_long_mode(vcpu))
 		rip += vmcs_readl(GUEST_CS_BASE);
 
-	gpa = vcpu->arch.mmu.gva_to_gpa(vcpu, rip);
+	gpa = vcpu->arch.mmu.gva_to_gpa(vcpu, rip, 0, NULL);
 	if (gpa == UNMAPPED_GVA)
 		return;
 	kvm_read_guest(vcpu->kvm, gpa, code, sizeof code);
@@ -99,7 +101,8 @@ void show_irq(struct kvm_vcpu *vcpu,  int irq)
 		return;
 	}
 
-	gpa = vcpu->arch.mmu.gva_to_gpa(vcpu, idt_base + irq * sizeof(gate));
+	gpa = vcpu->arch.mmu.gva_to_gpa(vcpu, idt_base + irq * sizeof(gate),
+								0, NULL);
 	if (gpa == UNMAPPED_GVA)
 		return;
 
@@ -127,7 +130,7 @@ void show_page(struct kvm_vcpu *vcpu,
 		return;
 
 	addr &= PAGE_MASK;
-	gpa = vcpu->arch.mmu.gva_to_gpa(vcpu, addr);
+	gpa = vcpu->arch.mmu.gva_to_gpa(vcpu, addr, 0, NULL);
 	if (gpa == UNMAPPED_GVA)
 		return;
 	if (kvm_read_guest(vcpu->kvm, gpa, buf, PAGE_SIZE)) {
@@ -150,7 +153,7 @@ void show_u64(struct kvm_vcpu *vcpu, gva_t addr)
 	u64 buf;
 	gpa_t gpa;
 
-	gpa = vcpu->arch.mmu.gva_to_gpa(vcpu, addr);
+	gpa = vcpu->arch.mmu.gva_to_gpa(vcpu, addr, 0, NULL);
 	if (gpa == UNMAPPED_GVA)
 		return;
 	if (kvm_read_guest(vcpu->kvm, gpa, &buf, sizeof(u64)) == sizeof(u64)) {
@@ -1064,6 +1067,7 @@ void regs_dump(struct kvm_vcpu *vcpu)
 	REG_DUMP(RBP);
 	REG_DUMP(RSI);
 	REG_DUMP(RDI);
+#ifdef CONFIG_X86_64
 	REG_DUMP(R8);
 	REG_DUMP(R9);
 	REG_DUMP(R10);
@@ -1072,6 +1076,7 @@ void regs_dump(struct kvm_vcpu *vcpu)
 	REG_DUMP(R13);
 	REG_DUMP(R14);
 	REG_DUMP(R15);
+#endif
 
 	VMCS_REG_DUMP(RSP);
 	VMCS_REG_DUMP(RIP);
@@ -1088,7 +1093,7 @@ void sregs_dump(struct kvm_vcpu *vcpu)
 	vcpu_printf(vcpu, "cr3 = 0x%lx\n", vcpu->arch.cr3);
 	vcpu_printf(vcpu, "cr4 = 0x%lx\n", vcpu->arch.cr4);
 	vcpu_printf(vcpu, "cr8 = 0x%lx\n", vcpu->arch.cr8);
-	vcpu_printf(vcpu, "shadow_efer = 0x%llx\n", vcpu->arch.shadow_efer);
+	vcpu_printf(vcpu, "efer = 0x%llx\n", vcpu->arch.efer);
 	vcpu_printf(vcpu, "***********************************************************\n");
 }
 
