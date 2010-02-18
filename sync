@@ -251,6 +251,7 @@ def header_sync(arch):
         unifdef(out)
     hack_file(T, 'include/linux/kvm.h')
     hack_file(T, 'include/asm-%(arch)s/kvm.h' % { 'arch': arch })
+    hack_file(T, 'include/asm-%(arch)s/kvm_host.h' % { 'arch': arch })
     copy_if_changed(T, '.')
     rmtree(T)
 
