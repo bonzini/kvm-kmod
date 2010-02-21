@@ -140,18 +140,6 @@ def hack_content(data):
         line = sub(r'boot_cpu_data.x86_phys_bits', 'kvm_x86_phys_bits', line)
         if match(r'^static const struct vm_operations_struct kvm_'):
             line = sub(r' const ', ' ', line)
-        if line == 'static void *nested_svm_map(struct vcpu_svm *svm, u64 gpa, enum km_type idx)':
-            line = sub(r'\)', ', struct page **mapped_page)', line)
-        if line == '\treturn kmap_atomic(page, idx);':
-            line = '\t*mapped_page = page;\n' + line
-        if line == 'static void nested_svm_unmap(void *addr, enum km_type idx)':
-            line = sub(r'\)', ', struct page *mapped_page)', line)
-        if line == '\tpage = kmap_atomic_to_page(addr);':
-            line = '\tpage = mapped_page;'
-        if match(r'= nested_svm_map(.*);'):
-            line = '\t{ struct page *mapped_page;\n' + sub(r'\);', ', &mapped_page);', line)
-        if match('nested_svm_unmap(.*);'):
-            line = sub(r'\);', ', mapped_page); }', line)
         if line == 'struct _irqfd {':
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)')
             eventfd_file = True
