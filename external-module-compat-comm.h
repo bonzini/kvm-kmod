@@ -1000,7 +1000,8 @@ static inline void kvm_fire_urn(void) {}
 
 #endif /* CONFIG_USER_RETURN_NOTIFIER */
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,33)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,32) || \
+    (LINUX_VERSION_CODE == KERNEL_VERSION(2,6,32) && KERNEL_EXTRAVERSION < 9)
 static inline void kvm_getboottime(struct timespec *ts)
 {
 	struct timespec sys, now = current_kernel_time();
@@ -1015,7 +1016,9 @@ static inline void kvm_getboottime(struct timespec *ts)
 
 static inline void kvm_clock_warn_suspend_bug(void)
 {
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,33) && defined(CONFIG_SUSPEND)
+#if defined(CONFIG_SUSPEND) && \
+    (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,32) || \
+     (LINUX_VERSION_CODE == KERNEL_VERSION(2,6,32) && KERNEL_EXTRAVERSION < 9))
 	printk("kvm: paravirtual wallclock will not work reliably "
 	       "accross host suspend/resume\n");
 #endif
