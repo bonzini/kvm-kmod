@@ -18,6 +18,8 @@
 #include <linux/hrtimer.h>
 #include <asm/bitops.h>
 
+#include "kvm-kmod-config.h"
+
 /*
  * 2.6.16 does not have GFP_NOWAIT
  */
