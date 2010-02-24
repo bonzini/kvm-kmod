@@ -127,6 +127,11 @@ if [ ! -n "$force_build" ]; then
 	fi
 fi
 
+kernel_extraversion=`echo $kernel_version | sed 's/[0-9]*\.[0-9]*\.[0-9]*\.\([0-9]*\)*.*/\1/'`
+if [ ! -n $kernel_extraversion -o $kernel_extraversion = $kernel_version ]; then
+	kernel_extraversion=0
+fi
+
 . "$kerneldir/.config"
 if [ "$CONFIG_PREEMPT_NOTIFIERS" = "" ]; then
 	if [ $kernel_subversion -ge 33 ]; then
@@ -164,4 +169,8 @@ LD=$cross_prefix$ld
 OBJCOPY=$cross_prefix$objcopy
 AR=$cross_prefix$ar
 KVM_VERSION=$(kvm_version)
+EOF
+
+cat <<EOF > kvm-kmod-config.h
+#define KERNEL_EXTRAVERSION $kernel_extraversion
 EOF

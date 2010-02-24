@@ -7,6 +7,7 @@
 *.ko
 *.mod.c
 config.mak
+kvm-kmod-config.h
 modules.order
 Module.symvers
 Modules.symvers
