@@ -44,10 +44,10 @@ sync-hdr:
 	for a in ia64 x86; do \
 		$(MAKE) -C $(LINUX) INSTALL_HDR_PATH=`pwd`/.tmp-hdrs SRCARCH="$$a" headers_install; \
 		mkdir -p usr/include/asm-"$$a"; \
-		cp .tmp-hdrs/include/asm/{kvm,kvm_para}.h usr/include/asm-"$$a"; \
+		cp .tmp-hdrs/include/asm/kvm.h .tmp-hdrs/include/asm/kvm_para.h usr/include/asm-"$$a"; \
 	done
 	mkdir -p usr/include/linux
-	cp .tmp-hdrs/include/linux/{kvm,kvm_para}.h usr/include/linux
+	cp .tmp-hdrs/include/linux/kvm.h .tmp-hdrs/include/linux/kvm_para.h usr/include/linux
 	rm -rf .tmp-hdrs
 
 sync: sync-kmod sync-hdr
@@ -62,9 +62,9 @@ KVM_KMOD_VERSION = $(strip $(if $(wildcard KVM_VERSION), \
 
 install-hdr:
 	mkdir -p $(DESTDIR)/$(HEADERDIR)/asm/
-	install -m 644 usr/include/asm-$(ARCH_DIR)/{kvm,kvm_para}.h $(DESTDIR)/$(HEADERDIR)/asm/
+	install -m 644 usr/include/asm-$(ARCH_DIR)/*.h $(DESTDIR)/$(HEADERDIR)/asm/
 	mkdir -p $(DESTDIR)/$(HEADERDIR)/linux/
-	install -m 644 usr/include/linux/{kvm,kvm_para}.h $(DESTDIR)/$(HEADERDIR)/linux/
+	install -m 644 usr/include/linux/*.h $(DESTDIR)/$(HEADERDIR)/linux/
 	sed 's|PREFIX|$(PREFIX)|; s/VERSION/$(KVM_KMOD_VERSION)/' kvm-kmod.pc > $(tmppc)
 	install -m 644 -D $(tmppc) $(DESTDIR)/$(PKGCONFIGDIR)/kvm-kmod.pc
 
