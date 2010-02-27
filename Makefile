@@ -47,13 +47,13 @@ sync-hdr:
 	for a in ia64 x86; do \
 		$(MAKE) -C $(LINUX) INSTALL_HDR_PATH=`pwd`/.tmp-hdrs SRCARCH="$$a" headers_install; \
 		mkdir -p usr/include/asm-"$$a"; \
-		cp .tmp-hdrs/include/asm/{kvm,kvm_para}.h usr/include/asm-"$$a"; \
+		cp .tmp-hdrs/include/asm/kvm.h .tmp-hdrs/include/asm/kvm_para.h usr/include/asm-"$$a"; \
 		if test $$a == x86; then \
 			cp .tmp-hdrs/include/asm/hyperv.h usr/include/asm-x86; \
 		fi \
 	done
 	mkdir -p usr/include/linux
-	cp .tmp-hdrs/include/linux/{kvm,kvm_para}.h usr/include/linux
+	cp .tmp-hdrs/include/linux/kvm.h .tmp-hdrs/include/linux/kvm_para.h usr/include/linux
 	rm -rf .tmp-hdrs
 
 sync: sync-kmod sync-hdr
