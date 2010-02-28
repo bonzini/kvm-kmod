@@ -489,7 +489,9 @@ void kvm_exit_srcu(void)
 {
 	int cpu;
 
+#ifdef CONFIG_HOTPLUG_CPU
 	unregister_cpu_notifier(&cpu_nfb);
+#endif /* CONFIG_HOTPLUG_CPU */
 	for_each_online_cpu(cpu)
 		if (per_cpu(sync_thread, cpu))
 			kthread_stop(per_cpu(sync_thread, cpu));
