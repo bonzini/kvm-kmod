@@ -466,6 +466,11 @@ static inline void kvm_native_store_gdt(struct kvm_desc_ptr *dtr)
 	asm volatile("sgdt %0":"=m" (*dtr));
 }
 
+static inline void kvm_native_store_idt(struct kvm_desc_ptr *dtr)
+{
+	asm volatile("sidt %0":"=m" (*dtr));
+}
+
 #include <asm/msr.h>
 #ifndef MSR_FS_BASE
 #define MSR_FS_BASE 0xc0000100
