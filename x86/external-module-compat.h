@@ -451,14 +451,31 @@ struct kvm_desc_ptr {
 	unsigned long address;
 } __attribute__((packed));
 
-static inline unsigned long kvm_get_desc_base(const struct kvm_desc_struct *desc)
+static inline unsigned long
+kvm_get_desc_base(const struct kvm_desc_struct *desc)
 {
 	return desc->base0 | ((desc->base1) << 16) | ((desc->base2) << 24);
 }
 
-static inline unsigned long kvm_get_desc_limit(const struct kvm_desc_struct *desc)
+static inline void
+kvm_set_desc_base(struct kvm_desc_struct *desc, unsigned long base)
+{
+	desc->base0 = base & 0xffff;
+	desc->base1 = (base >> 16) & 0xff;
+	desc->base2 = (base >> 24) & 0xff;
+}
+
+static inline unsigned long
+kvm_get_desc_limit(const struct kvm_desc_struct *desc)
 {
 	return desc->limit0 | (desc->limit << 16);
+}
+
+static inline void
+kvm_set_desc_limit(struct kvm_desc_struct *desc, unsigned long limit)
+{
+	desc->limit0 = limit & 0xffff;
+	desc->limit = (limit >> 16) & 0xf;
 }
 
 static inline void kvm_native_store_gdt(struct kvm_desc_ptr *dtr)

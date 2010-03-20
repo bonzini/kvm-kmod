@@ -42,6 +42,7 @@ def hack_content(data):
         'user_return_notifier_register user_return_notifier_unregister '
         'synchronize_srcu_expedited getboottime monotonic_to_bootbased '
         'check_tsc_unstable native_store_gdt native_store_idt '
+        'set_desc_base set_desc_limit '
         )
     kvm_init = kvm_exit = False
     mce = False
@@ -180,7 +181,7 @@ def unifdef(fname):
 
 hack_files = {
     'x86': str.split('kvm_main.c mmu.c vmx.c svm.c x86.c irq.h lapic.c'
-                     ' i8254.c timer.c eventfd.c'),
+                     ' i8254.c timer.c eventfd.c emulate.c'),
     'ia64': str.split('kvm_main.c kvm_fw.c kvm_lib.c kvm-ia64.c'),
 }
 
@@ -240,6 +241,8 @@ def header_sync(arch):
     hack_file(T, 'include/linux/kvm.h')
     hack_file(T, 'include/asm-%(arch)s/kvm.h' % { 'arch': arch })
     hack_file(T, 'include/asm-%(arch)s/kvm_host.h' % { 'arch': arch })
+    if arch == 'x86':
+        hack_file(T, 'include/asm-x86/kvm_emulate.h')
     copy_if_changed(T, '.')
     rmtree(T)
 
