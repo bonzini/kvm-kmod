@@ -149,6 +149,8 @@ def hack_content(data):
             eventfd_ioctl = True
         if line == '\tcase KVM_CAP_IRQFD:':
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)')
+        if match(r'#include <asm/desc_defs.h>'):
+            line = ''
         w(line)
         if match(r'apic->timer.dev.function ='):
             w('\thrtimer_data_pointer(&apic->timer.dev);')
