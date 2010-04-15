@@ -94,6 +94,6 @@ clean:
 	$(MAKE) -C $(KERNELDIR) M=`pwd` $@
 
 distclean: clean
-	rm -f config.mak include/asm include-compat/asm $(tmppc) $(tmpspec)
+	rm -f config.mak kvm-kmod-config.h include/asm include-compat/asm $(tmppc) $(tmpspec)
 
 .PHONY: all sync sync-kmod sync-hdr install install-hdr rpm clean distclean
