@@ -754,3 +754,8 @@ static inline void hw_breakpoint_restore(void)
 #else
 #define kvm_check_tsc_unstable		check_tsc_unstable
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,30)
+#define percpu_read(t)		__get_cpu_var(t)
+#define percpu_write(t, v)	__get_cpu_var(t) = v
+#endif
