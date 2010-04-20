@@ -1091,3 +1091,23 @@ pci_get_domain_bus_and_slot(int domain, unsigned int bus, unsigned int devfn)
 #endif
 
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35)
+struct perf_guest_info_callbacks {
+	int (*is_in_guest) (void);
+	int (*is_user_mode) (void);
+	unsigned long (*get_guest_ip) (void);
+};
+
+static inline int
+perf_register_guest_info_callbacks(struct perf_guest_info_callbacks *cbs)
+{
+	return 0;
+}
+
+static inline int
+perf_unregister_guest_info_callbacks(struct perf_guest_info_callbacks *cbs)
+{
+	return 0;
+}
+#endif
