@@ -1111,3 +1111,13 @@ perf_unregister_guest_info_callbacks(struct perf_guest_info_callbacks *cbs)
 	return 0;
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,34)
+#define rcu_dereference_check(p, sp)	rcu_dereference(p)
+#define srcu_dereference(p, sp)		rcu_dereference(p)
+#define srcu_read_lock_held(sp)		(1)
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,32)
+#define lockdep_is_held(m)		(1)
+#endif
