@@ -141,6 +141,8 @@ def __hack(data):
             line = sub(r'\);', ', mapped_page); }', line)
         if match(r'->thread.debugreg[0-7]'):
             line = sub(r'->thread.debugreg([0-7])', r'->thread.kvm_compat_debugreg(\1)', line)
+        if match(r'static int load_segment_descriptor_to_kvm_desct'):
+            line = sub(r'static int', r'static int __attribute__((unused))', line)
         w(line)
         if match(r'apic->timer.dev.function ='):
             w('\thrtimer_data_pointer(&apic->timer.dev);')
