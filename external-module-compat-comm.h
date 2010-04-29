@@ -828,11 +828,14 @@ static inline int iommu_domain_has_cap(struct iommu_domain *domain,
 
 #endif
 
-/* tracepoints were introduced in 2.6.28, but changed in 2.6.30 */
+/*
+ * Tracepoints were introduced in 2.6.28, but changed several times in
+ * incompatible ways.
+ */
 
 #include <linux/tracepoint.h>
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,31)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,33)
 
 struct tracepoint;
 
@@ -873,6 +876,10 @@ struct tracepoint;
 
 #undef tracepoint_synchronize_unregister
 #define tracepoint_synchronize_unregister() do {} while (0)
+
+#define DECLARE_EVENT_CLASS(name, proto, args, tstruct, assign, print)
+#define DEFINE_EVENT(template, name, proto, args)		\
+	DECLARE_TRACE(name, PARAMS(proto), PARAMS(args))
 
 #endif
 
