@@ -424,6 +424,11 @@ static inline void preempt_notifier_sys_exit(void) {}
 #define EFER_LMA            (1<<_EFER_LMA)
 #endif
 
+#ifndef EFER_LMSLE
+#define _EFER_LMSLE		13 /* Long Mode Segment Limit Enable */
+#define EFER_LMSLE		(1<<_EFER_LMSLE)
+#endif
+
 struct kvm_desc_struct {
 	union {
 		struct { unsigned int a, b; };
