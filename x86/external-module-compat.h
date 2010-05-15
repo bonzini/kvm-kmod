@@ -773,3 +773,18 @@ static inline void hw_breakpoint_restore(void)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35)
 #define tboot_enabled()		0
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35)
+struct kvm_pvclock_vcpu_time_info {
+	u32   version;
+	u32   pad0;
+	u64   tsc_timestamp;
+	u64   system_time;
+	u32   tsc_to_system_mul;
+	s8    tsc_shift;
+	u8    flags;
+	u8    pad[2];
+} __attribute__((__packed__)); /* 32 bytes */
+#else
+#define kvm_pvclock_vcpu_time_info	pvclock_vcpu_time_info
+#endif
