@@ -701,3 +701,11 @@ static inline void kvm_do_machine_check(struct pt_regs *regs, long error_code)
 #else
 #define kvm_tboot_enabled	tboot_enabled
 #endif
+
+#ifndef MSR_AMD64_DC_CFG
+#define MSR_AMD64_DC_CFG		0xc0011022
+#endif
+
+#ifndef MSR_IA32_MCx_STATUS
+#define MSR_IA32_MCx_STATUS(x)		(MSR_IA32_MC0_STATUS + 4*(x))
+#endif
