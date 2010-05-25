@@ -796,3 +796,85 @@ struct kvm_pvclock_vcpu_time_info {
 #ifndef MSR_IA32_MCx_STATUS
 #define MSR_IA32_MCx_STATUS(x)		(MSR_IA32_MC0_STATUS + 4*(x))
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
+#include <asm/i387.h>
+
+struct kvm_i387_fxsave_struct {
+	u16	cwd;
+	u16	swd;
+	u16	twd;
+	u16	fop;
+	u64	rip;
+	u64	rdp;
+	u32	mxcsr;
+	u32	mxcsr_mask;
+	u32	st_space[32];	/* 8*16 bytes for each FP-reg = 128 bytes */
+#ifdef CONFIG_X86_64
+	u32	xmm_space[64];	/* 16*16 bytes for each XMM-reg = 256 bytes */
+#else
+	u32	xmm_space[32];	/* 8*16 bytes for each XMM-reg = 128 bytes */
+#endif
+};
+
+union kvm_thread_xstate {
+	struct kvm_i387_fxsave_struct fxsave;
+};
+
+struct fpu {
+	union kvm_thread_xstate state_buffer;
+	union kvm_thread_xstate *state;
+};
+
+static inline int fpu_alloc(struct fpu *fpu)
+{
+	fpu->state = &fpu->state_buffer;
+	return 0;
+}
+
+static inline void fpu_free(struct fpu *fpu)
+{
+}
+
+static inline void kvm_fx_save(struct kvm_i387_fxsave_struct *image)
+{
+	asm("fxsave (%0)":: "r" (image));
+}
+
+static inline void kvm_fx_restore(struct kvm_i387_fxsave_struct *image)
+{
+	asm("fxrstor (%0)":: "r" (image));
+}
+
+static inline void kvm_fx_finit(void)
+{
+	asm("finit");
+}
+
+static inline void fpu_finit(struct fpu *fpu)
+{
+	unsigned after_mxcsr_mask;
+
+	preempt_disable();
+	kvm_fx_finit();
+	kvm_fx_save(&fpu->state->fxsave);
+	preempt_enable();
+
+	after_mxcsr_mask = offsetof(struct kvm_i387_fxsave_struct, st_space);
+	fpu->state->fxsave.mxcsr = 0x1f80;
+	memset((void *)&fpu->state->fxsave + after_mxcsr_mask,
+	       0, sizeof(struct kvm_i387_fxsave_struct) - after_mxcsr_mask);
+}
+
+static inline int fpu_restore_checking(struct fpu *fpu)
+{
+	kvm_fx_restore(&fpu->state->fxsave);
+	return 0;
+}
+
+static inline void fpu_save_init(struct fpu *fpu)
+{
+	kvm_fx_save(&fpu->state->fxsave);
+}
+
+#endif
