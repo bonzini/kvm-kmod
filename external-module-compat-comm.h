@@ -1150,3 +1150,7 @@ static inline int iommu_unmap(struct iommu_domain *domain, unsigned long iova,
 	return gfp_order;
 }
 #endif
+
+#ifndef lower_32_bits
+#define lower_32_bits(n) ((u32)(n))
+#endif
