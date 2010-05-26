@@ -96,6 +96,23 @@ static inline unsigned long long native_read_msr_safe(unsigned int msr,
 
 #endif
 
+static inline int kvm_native_write_msr_safe(unsigned int msr,
+					    unsigned low, unsigned high)
+{
+	int err;
+	asm volatile("2: wrmsr ; xor %[err],%[err]\n"
+		     "1:\n\t"
+		     ".section .fixup,\"ax\"\n\t"
+		     "3:  mov %[fault],%[err] ; jmp 1b\n\t"
+		     ".previous\n\t"
+		     _ASM_EXTABLE(2b, 3b)
+		     : [err] "=a" (err)
+		     : "c" (msr), "0" (low), "d" (high),
+		       [fault] "i" (-EIO)
+		     : "memory");
+	return err;
+}
+
 static inline unsigned long long kvm_native_read_tsc(void)
 {
 	DECLARE_ARGS(val, low, high);
@@ -106,7 +123,8 @@ static inline unsigned long long kvm_native_read_tsc(void)
 
 #else /* >= 2.6.25 */
 
-#define kvm_native_read_tsc	native_read_tsc
+#define kvm_native_write_msr_safe	native_write_msr_safe
+#define kvm_native_read_tsc		native_read_tsc
 
 #endif /* >= 2.6.25 */
 
