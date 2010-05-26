@@ -771,7 +771,9 @@ static inline void hw_breakpoint_restore(void)
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35)
-#define tboot_enabled()		0
+#define kvm_tboot_enabled()	0
+#else
+#define kvm_tboot_enabled	tboot_enabled
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35)
