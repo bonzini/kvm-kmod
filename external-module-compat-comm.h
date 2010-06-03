@@ -1154,3 +1154,10 @@ static inline int iommu_unmap(struct iommu_domain *domain, unsigned long iova,
 #ifndef lower_32_bits
 #define lower_32_bits(n) ((u32)(n))
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
+static inline int is_hwpoison_address(unsigned long addr)
+{
+	return 0;
+}
+#endif
