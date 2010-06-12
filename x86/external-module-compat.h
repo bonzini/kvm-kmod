@@ -849,7 +849,7 @@ struct kvm_i387_fxsave_struct {
 #else
 	u32	xmm_space[32];	/* 8*16 bytes for each XMM-reg = 128 bytes */
 #endif
-};
+} __aligned(16);
 
 union kvm_thread_xstate {
 	struct kvm_i387_fxsave_struct fxsave;
