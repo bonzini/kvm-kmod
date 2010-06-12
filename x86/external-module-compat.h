@@ -310,6 +310,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_CR4_VMXE 0x00002000
 #endif
 
+#ifndef X86_CR4_OSXSAVE
+#define X86_CR4_OSXSAVE 0x00040000
+#endif
+
 #undef X86_CR8_TPR
 #define X86_CR8_TPR 0x0f
 
@@ -426,12 +430,22 @@ static inline void preempt_notifier_sys_exit(void) {}
 #define CONFIG_HAS_IOMEM 1
 #endif
 
-/* X86_FEATURE_NX is missing in some x86_64 kernels */
-
 #include <asm/cpufeature.h>
 
 #ifndef X86_FEATURE_NX
-#define X86_FEATURE_NX (1*32+20)
+#define X86_FEATURE_NX		(1*32+20)
+#endif
+
+#ifndef X86_FEATURE_XSAVE
+#define X86_FEATURE_XSAVE	(4*32+26)
+#endif
+
+#ifndef X86_FEATURE_OSXSAVE
+#define X86_FEATURE_OSXSAVE	(4*32+27)
+#endif
+
+#ifndef cpu_has_xsave
+#define cpu_has_xsave boot_cpu_has(X86_FEATURE_XSAVE)
 #endif
 
 /* EFER_LMA and EFER_LME are missing in pre 2.6.24 i386 kernels */
@@ -897,4 +911,13 @@ static inline void fpu_save_init(struct fpu *fpu)
 	kvm_fx_save(&fpu->state->fxsave);
 }
 
+#endif
+
+#ifndef XSTATE_FP
+#define XSTATE_FP       0x1
+#define XSTATE_SSE      0x2
+#endif
+
+#ifndef XSTATE_YMM
+#define XSTATE_YMM      0x4
 #endif
