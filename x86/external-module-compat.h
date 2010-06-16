@@ -851,8 +851,27 @@ struct kvm_i387_fxsave_struct {
 #endif
 } __aligned(16);
 
+struct kvm_ymmh_struct {
+	/* 16 * 16 bytes for each YMMH-reg = 256 bytes */
+	u32 ymmh_space[64];
+};
+
+struct kvm_xsave_hdr_struct {
+	u64 xstate_bv;
+	u64 reserved1[2];
+	u64 reserved2[5];
+} __attribute__((packed));
+
+struct kvm_xsave_struct {
+	struct kvm_i387_fxsave_struct i387;
+	struct kvm_xsave_hdr_struct xsave_hdr;
+	struct kvm_ymmh_struct ymmh;
+	/* new processor state extensions will go here */
+} __attribute__ ((packed, aligned (64)));
+
 union kvm_thread_xstate {
 	struct kvm_i387_fxsave_struct fxsave;
+	struct kvm_xsave_struct xsave;
 };
 
 struct fpu {
@@ -916,8 +935,13 @@ static inline void fpu_save_init(struct fpu *fpu)
 #ifndef XSTATE_FP
 #define XSTATE_FP       0x1
 #define XSTATE_SSE      0x2
+#define XSTATE_FPSSE    (XSTATE_FP | XSTATE_SSE)
 #endif
 
 #ifndef XSTATE_YMM
 #define XSTATE_YMM      0x4
+#endif
+
+#ifndef XSAVE_HDR_OFFSET
+#define XSAVE_HDR_OFFSET    512
 #endif
