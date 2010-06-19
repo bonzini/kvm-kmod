@@ -1128,3 +1128,7 @@ perf_unregister_guest_info_callbacks(struct perf_guest_info_callbacks *cbs)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,32)
 #define lockdep_is_held(m)		(1)
 #endif
+
+#ifndef lower_32_bits
+#define lower_32_bits(n) ((u32)(n))
+#endif
