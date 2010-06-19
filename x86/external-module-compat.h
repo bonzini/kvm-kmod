@@ -834,6 +834,7 @@ struct kvm_pvclock_vcpu_time_info {
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
 #include <asm/i387.h>
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35)
 struct kvm_i387_fxsave_struct {
 	u16	cwd;
 	u16	swd;
@@ -874,18 +875,26 @@ union kvm_thread_xstate {
 	struct kvm_xsave_struct xsave;
 };
 
-struct fpu {
+#else /* >= 2.6.35 */
+
+#define kvm_i387_fxsave_struct	i387_fxsave_struct
+#define kvm_xsave_struct	xsave_struct
+#define kvm_thread_xstate	thread_xstate
+
+#endif /* >= 2.6.35 */
+
+struct kvm_compat_fpu {
 	union kvm_thread_xstate state_buffer;
 	union kvm_thread_xstate *state;
 };
 
-static inline int fpu_alloc(struct fpu *fpu)
+static inline int kvm_fpu_alloc(struct kvm_compat_fpu *fpu)
 {
 	fpu->state = &fpu->state_buffer;
 	return 0;
 }
 
-static inline void fpu_free(struct fpu *fpu)
+static inline void kvm_fpu_free(struct kvm_compat_fpu *fpu)
 {
 }
 
@@ -904,7 +913,7 @@ static inline void kvm_fx_finit(void)
 	asm("finit");
 }
 
-static inline void fpu_finit(struct fpu *fpu)
+static inline void kvm_fpu_finit(struct kvm_compat_fpu *fpu)
 {
 	unsigned after_mxcsr_mask;
 
@@ -919,18 +928,27 @@ static inline void fpu_finit(struct fpu *fpu)
 	       0, sizeof(struct kvm_i387_fxsave_struct) - after_mxcsr_mask);
 }
 
-static inline int fpu_restore_checking(struct fpu *fpu)
+static inline int kvm_fpu_restore_checking(struct kvm_compat_fpu *fpu)
 {
 	kvm_fx_restore(&fpu->state->fxsave);
 	return 0;
 }
 
-static inline void fpu_save_init(struct fpu *fpu)
+static inline void kvm_fpu_save_init(struct kvm_compat_fpu *fpu)
 {
 	kvm_fx_save(&fpu->state->fxsave);
 }
 
-#endif
+#else /* >= 2.6.36 */
+
+#define kvm_compat_fpu			fpu
+#define kvm_fpu_alloc			fpu_alloc
+#define kvm_fpu_free			fpu_free
+#define kvm_fpu_restore_checking	fpu_restore_checking
+#define kvm_fpu_save_init		fpu_save_init
+#define kvm_fpu_finit			fpu_finit
+
+#endif /* >= 2.6.36 */
 
 #ifndef XSTATE_FP
 #define XSTATE_FP       0x1

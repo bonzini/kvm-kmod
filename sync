@@ -44,6 +44,7 @@ def hack_content(data):
         'check_tsc_unstable native_store_gdt native_store_idt '
         'set_desc_base set_desc_limit pvclock_vcpu_time_info tboot_enabled '
         'i387_fxsave_struct native_write_msr_safe xsave_struct '
+        'fpu_alloc fpu_free fpu_restore_checking fpu_save_init fpu_finit '
         )
     kvm_init = kvm_exit = False
     mce = False
@@ -152,6 +153,8 @@ def hack_content(data):
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)')
         if match(r'#include <asm/desc_defs.h>'):
             line = ''
+        if match(r'struct fpu '):
+            line = sub(r'struct fpu ', 'struct kvm_compat_fpu ', line)
         w(line)
         if match(r'apic->timer.dev.function ='):
             w('\thrtimer_data_pointer(&apic->timer.dev);')
