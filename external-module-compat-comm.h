@@ -1129,7 +1129,7 @@ perf_unregister_guest_info_callbacks(struct perf_guest_info_callbacks *cbs)
 #define lockdep_is_held(m)		(1)
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36) && defined(CONFIG_IOMMU_API)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35) && defined(CONFIG_IOMMU_API)
 #include <linux/iommu.h>
 
 static inline int iommu_map(struct iommu_domain *domain, unsigned long iova,
