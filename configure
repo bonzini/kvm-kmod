@@ -160,8 +160,8 @@ cat <<EOF > config.mak
 ARCH=$arch
 PROCESSOR=$processor
 PREFIX=$prefix
-KERNELDIR=$kerneldir
-KERNELSOURCEDIR=$kernelsourcedir
+KERNELDIR=$(cd $kerneldir; pwd)
+KERNELSOURCEDIR=$(cd $kernelsourcedir; pwd)
 KERNELVERSION=$kernel_version
 CROSS_COMPILE=$cross_prefix
 CC=$cross_prefix$cc
