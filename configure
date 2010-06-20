@@ -86,6 +86,8 @@ kvm_version() {
 processor=${arch#*-}
 arch=${arch%%-*}
 
+kerneldir=$(cd $kerneldir; pwd)
+
 # see if we have split build and source directories
 if [ -d "$kerneldir/include2" -o -L "$kerneldir/source" ]; then
     kernelsourcedir=$kerneldir/source
