@@ -200,6 +200,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_GBPAGES	(1*32+26) /* GB pages */
 #endif
 
+#ifndef X86_FEATURE_PCLMULQDQ
+#define X86_FEATURE_PCLMULQDQ	(4*32+ 1) /* PCLMULQDQ instruction */
+#endif
+
 #ifndef X86_FEATURE_SSSE3
 #define X86_FEATURE_SSSE3	(4*32+ 9) /* Supplemental SSE-3 */
 #endif
@@ -218,6 +222,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 
 #ifndef X86_FEATURE_POPCNT
 #define X86_FEATURE_POPCNT      (4*32+23) /* POPCNT instruction */
+#endif
+
+#ifndef X86_FEATURE_AVX
+#define X86_FEATURE_AVX		(4*32+28) /* Advanced Vector Extensions */
 #endif
 
 #ifndef X86_FEATURE_CR8_LEGACY
