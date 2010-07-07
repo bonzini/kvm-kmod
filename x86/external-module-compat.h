@@ -594,6 +594,11 @@ static inline void kvm_native_store_idt(struct kvm_desc_ptr *dtr)
 #define FEATURE_CONTROL_VMXON_ENABLED	(1<<2)
 #endif
 
+#ifndef FEATURE_CONTROL_VMXON_ENABLED_INSIDE_SMX
+#define FEATURE_CONTROL_VMXON_ENABLED_INSIDE_SMX	(1<<1)
+#define FEATURE_CONTROL_VMXON_ENABLED_OUTSIDE_SMX	(1<<2)
+#endif
+
 #ifndef MSR_IA32_TSC
 #define MSR_IA32_TSC                    0x00000010
 #endif
@@ -753,4 +758,11 @@ static inline void hw_breakpoint_restore(void)
 #define kvm_check_tsc_unstable()	1
 #else
 #define kvm_check_tsc_unstable		check_tsc_unstable
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35) || \
+    (LINUX_VERSION_CODE == KERNEL_VERSION(2,6,34) && KERNEL_EXTRAVERSION < 1)
+#define kvm_tboot_enabled()	0
+#else
+#define kvm_tboot_enabled	tboot_enabled
 #endif
