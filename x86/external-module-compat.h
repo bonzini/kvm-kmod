@@ -554,6 +554,11 @@ static inline unsigned long kvm_get_desc_limit(const struct kvm_desc_struct *des
 #define FEATURE_CONTROL_VMXON_ENABLED	(1<<2)
 #endif
 
+#ifndef FEATURE_CONTROL_VMXON_ENABLED_INSIDE_SMX
+#define FEATURE_CONTROL_VMXON_ENABLED_INSIDE_SMX	(1<<1)
+#define FEATURE_CONTROL_VMXON_ENABLED_OUTSIDE_SMX	(1<<2)
+#endif
+
 #ifndef MSR_IA32_TSC
 #define MSR_IA32_TSC                    0x00000010
 #endif
@@ -690,3 +695,9 @@ static inline void kvm_do_machine_check(struct pt_regs *regs, long error_code)
 #define X2APIC_ENABLE    (1UL << 10)
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,32) || \
+    (LINUX_VERSION_CODE == KERNEL_VERSION(2,6,32) && KERNEL_EXTRAVERSION < 16)
+#define kvm_tboot_enabled()	0
+#else
+#define kvm_tboot_enabled	tboot_enabled
+#endif

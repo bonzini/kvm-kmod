@@ -40,7 +40,7 @@ def __hack(data):
         'do_machine_check eventfd_signal get_desc_base get_desc_limit '
         'vma_kernel_pagesize native_read_tsc user_return_notifier '
         'user_return_notifier_register user_return_notifier_unregister '
-        'getboottime monotonic_to_bootbased '
+        'getboottime monotonic_to_bootbased tboot_enabled '
         )
     anon_inodes = anon_inodes_exit = False
     mce = False
