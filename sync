@@ -155,6 +155,12 @@ def hack_content(data):
             line = ''
         if match(r'struct fpu '):
             line = sub(r'struct fpu ', 'struct kvm_compat_fpu ', line)
+        if line == 'static int mmu_shrink(struct shrinker *shrink, int nr_to_scan, gfp_t gfp_mask)':
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,35)')
+            w('static int mmu_shrink(struct shrinker *shrink, int nr_to_scan, gfp_t gfp_mask)')
+            w('#else')
+            w('static int mmu_shrink(int nr_to_scan, gfp_t gfp_mask)')
+            line = '#endif'
         w(line)
         if match(r'apic->timer.dev.function ='):
             w('\thrtimer_data_pointer(&apic->timer.dev);')
