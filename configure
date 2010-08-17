@@ -89,7 +89,7 @@ arch=${arch%%-*}
 kerneldir=$(cd $kerneldir; pwd)
 
 # see if we have split build and source directories
-if [ -d "$kerneldir/include2" -o -L "$kerneldir/source" ]; then
+if [ ! -d "$kerneldir/Kbuild" ]; then
     kernelsourcedir=$kerneldir/source
     if [ ! -L "$kernelsourcedir" ]; then
         kernelsourcedir=${kerneldir%/build*}/source
