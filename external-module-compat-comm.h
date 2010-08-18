@@ -1079,3 +1079,7 @@ static inline void kvm_clock_warn_suspend_bug(void)
 	       "accross host suspend/resume\n");
 #endif
 }
+
+#ifndef lower_32_bits
+#define lower_32_bits(n) ((u32)(n))
+#endif
