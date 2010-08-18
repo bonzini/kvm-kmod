@@ -988,3 +988,9 @@ static inline void kvm_xstate_size_init(void)
 #ifndef XSAVE_HDR_OFFSET
 #define XSAVE_HDR_OFFSET    512
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
+#define kvm_cpu_has_xsave	0
+#else /* >= 2.6.28 */
+#define kvm_cpu_has_xsave	cpu_has_xsave
+#endif /* >= 2.6.28 */

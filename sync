@@ -45,7 +45,7 @@ def hack_content(data):
         'set_desc_base set_desc_limit pvclock_vcpu_time_info tboot_enabled '
         'i387_fxsave_struct native_write_msr_safe xsave_struct '
         'fpu_alloc fpu_free fpu_restore_checking fpu_save_init fpu_finit '
-        'load_gdt store_gdt xstate_size '
+        'load_gdt store_gdt xstate_size cpu_has_xsave '
         )
     kvm_init = kvm_exit = False
     mce = False
