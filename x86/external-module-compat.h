@@ -954,6 +954,10 @@ static inline void kvm_fpu_save_init(struct kvm_compat_fpu *fpu)
 	kvm_fx_save(&fpu->state->fxsave);
 }
 
+extern unsigned int kvm_xstate_size;
+
+void kvm_xstate_size_init(void);
+
 #else /* >= 2.6.36 */
 
 #define kvm_compat_fpu			fpu
@@ -962,6 +966,12 @@ static inline void kvm_fpu_save_init(struct kvm_compat_fpu *fpu)
 #define kvm_fpu_restore_checking	fpu_restore_checking
 #define kvm_fpu_save_init		fpu_save_init
 #define kvm_fpu_finit			fpu_finit
+
+#define kvm_xstate_size			xstate_size
+
+static inline void kvm_xstate_size_init(void)
+{
+}
 
 #endif /* >= 2.6.36 */
 

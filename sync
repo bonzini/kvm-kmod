@@ -45,7 +45,7 @@ def hack_content(data):
         'set_desc_base set_desc_limit pvclock_vcpu_time_info tboot_enabled '
         'i387_fxsave_struct native_write_msr_safe xsave_struct '
         'fpu_alloc fpu_free fpu_restore_checking fpu_save_init fpu_finit '
-        'load_gdt store_gdt '
+        'load_gdt store_gdt xstate_size '
         )
     kvm_init = kvm_exit = False
     mce = False
@@ -162,6 +162,8 @@ def hack_content(data):
             w('#else')
             w('static int mmu_shrink(int nr_to_scan, gfp_t gfp_mask)')
             line = '#endif'
+        if line == '\tkvm_x86_ops = ops;':
+            w('\tkvm_xstate_size_init();\n')
         w(line)
         if match(r'apic->timer.dev.function ='):
             w('\thrtimer_data_pointer(&apic->timer.dev);')
