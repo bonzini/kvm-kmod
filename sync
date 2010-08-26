@@ -116,10 +116,6 @@ def hack_content(data):
             w('\tpreempt_notifier_sys_exit();')
             w('\tkvm_exit_srcu();')
             w('\tkvm_exit_anon_inodes();')
-        if match(r'^int kvm_arch_init'): kvm_arch_init = True
-        if match(r'\btsc_khz\b') and kvm_arch_init:
-            line = sub(r'\btsc_khz\b', 'kvm_tsc_khz', line)
-        if match(r'^}'): kvm_arch_init = False
         if match(r'MODULE_AUTHOR'):
             w('MODULE_INFO(version, "%s");' % (version,))
         line = sub(r'(\w+)->dev->msi_enabled',

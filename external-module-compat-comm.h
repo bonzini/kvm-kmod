@@ -400,17 +400,6 @@ static inline struct page *__kvm_vm_fault(struct vm_area_struct *vma,
 #endif
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23)
-
-unsigned kvm_get_tsc_khz(void);
-#define kvm_tsc_khz (kvm_get_tsc_khz())
-
-#else
-
-#define kvm_tsc_khz tsc_khz
-
-#endif
-
 #if LINUX_VERSION_CODE <= KERNEL_VERSION(2,6,21)
 
 #include <linux/ktime.h>
