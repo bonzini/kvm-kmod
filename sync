@@ -47,49 +47,75 @@ def hack_content(data):
         'fpu_alloc fpu_free fpu_restore_checking fpu_save_init fpu_finit '
         'load_gdt store_gdt xstate_size cpu_has_xsave '
         )
-    kvm_init = kvm_exit = False
-    mce = False
-    eventfd_file = eventfd_ioctl = False
+    eventfd_file = False
     result = []
     pr_fmt = ''
+    inside_block_state = {}
+
     def sub(regexp, repl, str):
         return re_cache(regexp).sub(repl, str)
+
     for line in data.splitlines():
-        orig = line
         def match(regexp):
             return re_cache(regexp).search(line)
+
+        def get_block_key(start_regexp, end_regexp):
+            key = start_regexp + '\n' + end_regexp
+            if not inside_block_state.has_key(key):
+                inside_block_state[key] = False
+            return key
+
+        def inside_block(start_regexp, end_regexp):
+            key = get_block_key(start_regexp, end_regexp)
+            if inside_block_state[key]:
+                if match(end_regexp):
+                    inside_block_state[key] = False
+            elif match(start_regexp):
+                inside_block_state[key] = True
+                return False
+            return inside_block_state[key]
+
+        def match_block_end(start_regexp, end_regexp):
+            key = get_block_key(start_regexp, end_regexp)
+            if inside_block_state[key]:
+                if match(end_regexp):
+                    inside_block_state[key] = False
+                    return True
+            elif match(start_regexp):
+                inside_block_state[key] = True
+            return False
+
         def w(line, result = result):
             result.append(line)
+
+        orig = line
         f = line.split()
         if match(r'^#define pr_fmt'):
             pr_fmt = sub(r'#define pr_fmt\([^)]*\) ("[^"]*").*', r'\1', line) + ' '
             line = ''
         line = sub(r'pr_debug\(([^),]*)', r'pr_debug(' + pr_fmt + r'\1', line)
-        if match(r'^int kvm_init\('): kvm_init = True
-        if match(r'r = kvm_arch_init\(opaque\);') and kvm_init:
-            w('\tr = kvm_init_anon_inodes();')
-            w('\tif (r)')
-            w('\t\treturn r;\n')
-            w('\tr = kvm_init_srcu();')
-            w('\tif (r)')
-            w('\t\tgoto cleanup_anon_inodes;\n')
-            w('\tpreempt_notifier_sys_init();')
-            w('\thrtimer_kallsyms_resolve();\n')
-        if match(r'return 0;') and kvm_init:
-            w('\tprintk("loaded kvm module (%s)\\n");\n' % (version,))
-            w('\tkvm_clock_warn_suspend_bug();\n')
-        if match(r'return r;') and kvm_init:
-            w('\tpreempt_notifier_sys_exit();')
-            w('\tkvm_exit_srcu();')
-            w('cleanup_anon_inodes:')
-            w('\tkvm_exit_anon_inodes();')
-            kvm_init = False
-        if match(r'^void kvm_exit'): kvm_exit = True
-        if match(r'\}') and kvm_exit:
+        if inside_block(r'^int kvm_init\(', r'^}'):
+            if match(r'r = kvm_arch_init\(opaque\);'):
+                w('\tr = kvm_init_anon_inodes();')
+                w('\tif (r)')
+                w('\t\treturn r;\n')
+                w('\tr = kvm_init_srcu();')
+                w('\tif (r)')
+                w('\t\tgoto cleanup_anon_inodes;\n')
+                w('\tpreempt_notifier_sys_init();')
+                w('\thrtimer_kallsyms_resolve();\n')
+            elif match(r'return 0;'):
+                w('\tprintk("loaded kvm module (%s)\\n");\n' % (version,))
+                w('\tkvm_clock_warn_suspend_bug();\n')
+            elif match(r'return r;'):
+                w('\tpreempt_notifier_sys_exit();')
+                w('\tkvm_exit_srcu();')
+                w('cleanup_anon_inodes:')
+                w('\tkvm_exit_anon_inodes();')
+        if match_block_end(r'^void kvm_exit', r'^}'):
             w('\tpreempt_notifier_sys_exit();')
             w('\tkvm_exit_srcu();')
             w('\tkvm_exit_anon_inodes();')
-            kvm_exit = False
         if match(r'^int kvm_arch_init'): kvm_arch_init = True
         if match(r'\btsc_khz\b') and kvm_arch_init:
             line = sub(r'\btsc_khz\b', 'kvm_tsc_khz', line)
@@ -134,23 +160,18 @@ def hack_content(data):
             line = 'IF_ANON_INODES_DOES_REFCOUNTS(' + line + ')'
         if not match(r'#include'):
             line = sub(r'\blapic\n', 'l_apic', line)
-        if match(r'struct pt_regs regs'):
-            mce = True
-        if mce and match(r'\.cs'):
-            line = sub(r'cs', r'kvm_pt_regs_cs', line)
-        if mce and match(r'\.flags'):
-            line = sub(r'flags', r'kvm_pt_regs_flags', line)
-            mce = False
+        if inside_block(r'struct pt_regs regs = {', r'};'):
+            if match(r'\.cs'):
+                line = sub(r'cs', r'kvm_pt_regs_cs', line)
+            if match(r'\.flags'):
+                line = sub(r'flags', r'kvm_pt_regs_flags', line)
         line = sub(r'boot_cpu_data.x86_phys_bits', 'kvm_x86_phys_bits', line)
         if match(r'^static const struct vm_operations_struct kvm_'):
             line = sub(r' const ', ' ', line)
         if line == 'struct _irqfd {':
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)')
             eventfd_file = True
-        if line in ['\tcase KVM_IRQFD: {', '\tcase KVM_IOEVENTFD: {']:
-            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)')
-            eventfd_ioctl = True
-        if line == '\tcase KVM_CAP_IRQFD:':
+        if match(r'(^\tcase KVM_IRQFD: {|^\tcase KVM_IOEVENTFD: {|^\tcase KVM_CAP_IRQFD:)'):
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)')
         if match(r'#include <asm/desc_defs.h>'):
             line = ''
@@ -171,10 +192,7 @@ def hack_content(data):
             w('\thrtimer_data_pointer(&pt->timer);')
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
-        if line == '\t}' and eventfd_ioctl:
-            w('#endif')
-            eventfd_ioctl = False
-        if line == '\tcase KVM_CAP_IOEVENTFD:':
+        if match_block_end(r'(\tcase KVM_IRQFD: {|\tcase KVM_IOEVENTFD: {)', r'^\t}') or line == '\tcase KVM_CAP_IOEVENTFD:':
             w('#endif')
     if eventfd_file:
         result.append('#else\n'
