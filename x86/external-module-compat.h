@@ -140,18 +140,6 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
-
-#ifndef _EFER_SCE
-#define _EFER_SCE		0  /* SYSCALL/SYSRET */
-#endif
-
-#ifndef EFER_SCE
-#define EFER_SCE		(1<<_EFER_SCE)
-#endif
-
-#endif
-
 #ifndef MSR_KERNEL_GS_BASE
 #define MSR_KERNEL_GS_BASE              0xc0000102
 #endif
@@ -546,13 +534,6 @@ static inline void kvm_native_store_idt(struct kvm_desc_ptr *dtr)
 #endif
 #ifndef MSR_GS_BASE
 #define MSR_GS_BASE 0xc0000101
-#endif
-
-/* undefine lapic */
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,18)
-
-#undef lapic
-
 #endif
 
 #include <asm/hw_irq.h>

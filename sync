@@ -30,13 +30,12 @@ def re_cache(regexp):
 
 def hack_content(data):
     compat_apis = str.split(
-        'INIT_WORK desc_struct ldttss_desc64 desc_ptr '
+        'desc_struct ldttss_desc64 desc_ptr '
         'hrtimer_add_expires_ns hrtimer_get_expires '
         'hrtimer_get_expires_ns hrtimer_start_expires '
         'hrtimer_expires_remaining smp_send_reschedule '
-        'on_each_cpu relay_open request_irq free_irq '
-        'init_srcu_struct cleanup_srcu_struct srcu_read_lock '
-        'srcu_read_unlock synchronize_srcu srcu_batches_completed '
+        'on_each_cpu relay_open '
+        'synchronize_srcu srcu_batches_completed '
         'do_machine_check get_desc_base get_desc_limit '
         'vma_kernel_pagesize native_read_tsc user_return_notifier '
         'user_return_notifier_register user_return_notifier_unregister '
@@ -102,8 +101,7 @@ def hack_content(data):
                 w('\tr = kvm_init_srcu();')
                 w('\tif (r)')
                 w('\t\tgoto cleanup_anon_inodes;\n')
-                w('\tpreempt_notifier_sys_init();')
-                w('\thrtimer_kallsyms_resolve();\n')
+                w('\tpreempt_notifier_sys_init();\n')
             elif match(r'return 0;'):
                 w('\tprintk("loaded kvm module (%s)\\n");\n' % (version,))
                 w('\tkvm_clock_warn_suspend_bug();\n')
@@ -118,13 +116,8 @@ def hack_content(data):
             w('\tkvm_exit_anon_inodes();')
         if match(r'MODULE_AUTHOR'):
             w('MODULE_INFO(version, "%s");' % (version,))
-        line = sub(r'(\w+)->dev->msi_enabled',
-                   r'kvm_pcidev_msi_enabled(\1->dev)', line)
         if match(r'atomic_inc\(&kvm->mm->mm_count\);'):
             line = '\tmmget(&kvm->mm->mm_count);'
-        if match(r'^\t\.fault = '):
-            fcn = sub(r',', '', f[2])
-            line = '\t.VMA_OPS_FAULT(fault) = VMA_OPS_FAULT_FUNC(' + fcn + '),'
         if match(r'^static int (.*_stat_get|lost_records_get)'):
             line = line[0:11] + '__' + line[11:]
         if match(r'DEFINE_SIMPLE_ATTRIBUTE.*(_stat_get|lost_records_get)'):
@@ -145,9 +138,6 @@ def hack_content(data):
         if match(r'static void kvm_mmu_notifier_change_pte'):
             line = sub(r'static ', '', line)
             line = '#ifdef MMU_NOTIFIER_HAS_CHANGE_PTE\n' + 'static\n' + '#endif\n' + line
-        line = sub(r'\bhrtimer_init\b', 'hrtimer_init_p', line)
-        line = sub(r'\bhrtimer_start\b', 'hrtimer_start_p', line)
-        line = sub(r'\bhrtimer_cancel\b', 'hrtimer_cancel_p', line)
         if match(r'case KVM_CAP_SYNC_MMU'):
             line = '#ifdef CONFIG_MMU_NOTIFIER\n' + line + '\n#endif'
         for ident in compat_apis:
@@ -182,10 +172,6 @@ def hack_content(data):
         if line == '\tkvm_x86_ops = ops;':
             w('\tkvm_xstate_size_init();\n')
         w(line)
-        if match(r'apic->timer.dev.function ='):
-            w('\thrtimer_data_pointer(&apic->timer.dev);')
-        if match(r'pt->timer.function ='):
-            w('\thrtimer_data_pointer(&pt->timer);')
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
         if match_block_end(r'(\tcase KVM_IRQFD: {|\tcase KVM_IOEVENTFD: {)', r'^\t}') or line == '\tcase KVM_CAP_IOEVENTFD:':

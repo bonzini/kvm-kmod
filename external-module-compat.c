@@ -3,84 +3,7 @@
  * smp_call_function_single() is not exported below 2.6.20.
  */
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,20)
-
-#undef smp_call_function_single
-
-#include <linux/spinlock.h>
-#include <linux/smp.h>
-
-struct scfs_thunk_info {
-	int cpu;
-	void (*func)(void *info);
-	void *info;
-};
-
-static void scfs_thunk(void *_thunk)
-{
-	struct scfs_thunk_info *thunk = _thunk;
-
-	if (raw_smp_processor_id() == thunk->cpu)
-		thunk->func(thunk->info);
-}
-
-int kvm_smp_call_function_single(int cpu, void (*func)(void *info),
-				 void *info, int wait)
-{
-	int r, this_cpu;
-	struct scfs_thunk_info thunk;
-
-	this_cpu = get_cpu();
-	WARN_ON(irqs_disabled());
-	if (cpu == this_cpu) {
-		r = 0;
-		local_irq_disable();
-		func(info);
-		local_irq_enable();
-	} else {
-		thunk.cpu = cpu;
-		thunk.func = func;
-		thunk.info = info;
-		r = smp_call_function(scfs_thunk, &thunk, 0, 1);
-	}
-	put_cpu();
-	return r;
-}
-EXPORT_SYMBOL_GPL(kvm_smp_call_function_single);
-
-#define smp_call_function_single kvm_smp_call_function_single
-
-#elif LINUX_VERSION_CODE < KERNEL_VERSION(2,6,23)
-/*
- * pre 2.6.23 doesn't handle smp_call_function_single on current cpu
- */
-
-#undef smp_call_function_single
-
-#include <linux/smp.h>
-
-int kvm_smp_call_function_single(int cpu, void (*func)(void *info),
-				 void *info, int wait)
-{
-	int this_cpu, r;
-
-	this_cpu = get_cpu();
-	WARN_ON(irqs_disabled());
-	if (cpu == this_cpu) {
-		r = 0;
-		local_irq_disable();
-		func(info);
-		local_irq_enable();
-	} else
-		r = smp_call_function_single(cpu, func, info, 0, wait);
-	put_cpu();
-	return r;
-}
-EXPORT_SYMBOL_GPL(kvm_smp_call_function_single);
-
-#define smp_call_function_single kvm_smp_call_function_single
-
-#elif LINUX_VERSION_CODE < KERNEL_VERSION(2,6,27)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,27)
 
 /* The 'nonatomic' argument was removed in 2.6.27. */
 
@@ -237,18 +160,10 @@ struct kvm_kick {
 	struct work_struct work;
 };
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,20)
-static void kvm_do_smp_call_function(void *data)
-{
-	int me;
-	struct kvm_kick *kvm_kick = data;
-#else
 static void kvm_do_smp_call_function(struct work_struct *work)
 {
-	int me;
+	int me = get_cpu();
 	struct kvm_kick *kvm_kick = container_of(work, struct kvm_kick, work);
-#endif
-	me = get_cpu();
 
 	if (kvm_kick->cpu != me)
 		smp_call_function_single(kvm_kick->cpu, vcpu_kick_intr,
@@ -261,11 +176,7 @@ void kvm_queue_smp_call_function(int cpu)
 {
 	struct kvm_kick *kvm_kick = kmalloc(sizeof(struct kvm_kick), GFP_ATOMIC);
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,20)
-	INIT_WORK(&kvm_kick->work, kvm_do_smp_call_function, kvm_kick);
-#else
 	INIT_WORK(&kvm_kick->work, kvm_do_smp_call_function);
-#endif
 
 	schedule_work(&kvm_kick->work);
 }
@@ -280,113 +191,12 @@ void kvm_smp_send_reschedule(int cpu)
 }
 #endif
 
-/* manually export hrtimer_init/start/cancel */
-void (*hrtimer_init_p)(struct hrtimer *timer, clockid_t which_clock,
-		       enum hrtimer_mode mode);
-int (*hrtimer_start_p)(struct hrtimer *timer, ktime_t tim,
-		       const enum hrtimer_mode mode);
-int (*hrtimer_cancel_p)(struct hrtimer *timer);
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
-
-static void kvm_set_normalized_timespec(struct timespec *ts, time_t sec,
-					long nsec)
-{
-        while (nsec >= NSEC_PER_SEC) {
-                nsec -= NSEC_PER_SEC;
-                ++sec;
-        }
-        while (nsec < 0) {
-                nsec += NSEC_PER_SEC;
-                --sec;
-        }
-        ts->tv_sec = sec;
-        ts->tv_nsec = nsec;
-}
-
-struct timespec kvm_ns_to_timespec(const s64 nsec)
-{
-        struct timespec ts;
-
-        if (!nsec)
-                return (struct timespec) {0, 0};
-
-        ts.tv_sec = div_long_long_rem_signed(nsec, NSEC_PER_SEC, &ts.tv_nsec);
-        if (unlikely(nsec < 0))
-                kvm_set_normalized_timespec(&ts, ts.tv_sec, ts.tv_nsec);
-
-        return ts;
-}
-
-#endif
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,20)
-
-#include <linux/pci.h>
-
-struct pci_dev *pci_get_bus_and_slot(unsigned int bus, unsigned int devfn)
-{
-	struct pci_dev *dev = NULL;
-
-	while ((dev = pci_get_device(PCI_ANY_ID, PCI_ANY_ID, dev)) != NULL) {
-		if (pci_domain_nr(dev->bus) == 0 &&
-		    (dev->bus->number == bus && dev->devfn == devfn))
-			return dev;
-	}
-	return NULL;
-}
-
-#endif
-
 #include <linux/intel-iommu.h>
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
 
 int intel_iommu_found()
 {
-	return 0;
-}
-
-#endif
-
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,21)
-
-/* relay_open() interface has changed on 2.6.21 */
-
-struct rchan *kvm_relay_open(const char *base_filename,
-			 struct dentry *parent,
-			 size_t subbuf_size,
-			 size_t n_subbufs,
-			 struct rchan_callbacks *cb,
-			 void *private_data)
-{
-	struct rchan *chan = relay_open(base_filename, parent,
-					subbuf_size, n_subbufs,
-					cb);
-	if (chan)
-		chan->private_data = private_data;
-	return chan;
-}
-
-#endif
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,18)
-
-#include <linux/pci.h>
-
-int kvm_pcidev_msi_enabled(struct pci_dev *dev)
-{
-	int pos;
-	u16 control;
-
-	if (!(pos = pci_find_capability(dev, PCI_CAP_ID_MSI)))
-		return 0;
-
-	pci_read_config_word(dev, pos + PCI_MSI_FLAGS, &control);
-	if (control & PCI_MSI_FLAGS_ENABLE)
-		return 1;
-
 	return 0;
 }
 
