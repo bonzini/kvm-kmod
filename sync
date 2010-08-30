@@ -171,6 +171,18 @@ def hack_content(data):
             line = '#endif'
         if line == '\tkvm_x86_ops = ops;':
             w('\tkvm_xstate_size_init();\n')
+        if match_block_end(r'case CPU_STARTING:', r'hardware_enable'):
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,28)')
+            w('\t\thardware_enable(NULL);')
+            w('#else')
+            w('\t\tsmp_call_function_single(cpu, hardware_enable, NULL, 1);')
+            line = '#endif'
+        if match(r'case CPU_STARTING:'):
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,28)')
+            w('\tcase CPU_STARTING:')
+            w('#else')
+            w('\tcase CPU_ONLINE:')
+            line = '#endif'
         w(line)
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
