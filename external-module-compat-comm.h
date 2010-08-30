@@ -250,9 +250,17 @@ static inline void flush_work(struct work_struct *work)
 
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,27)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,37)
 
 #include <linux/mm.h>
+
+static inline int kvm___get_user_pages_fast(unsigned long start, int nr_pages,
+					    int write, struct page **pages)
+{
+	return 0;
+}
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,27)
 
 static inline int get_user_pages_fast(unsigned long start, int nr_pages,
 				      int write, struct page **pages)
@@ -267,7 +275,13 @@ static inline int get_user_pages_fast(unsigned long start, int nr_pages,
 	return npages;
 }
 
-#endif
+#endif /* < 2.6.27 */
+
+#else /* >= 2.6.37 */
+
+#define kvm___get_user_pages_fast	__get_user_pages_fast
+
+#endif /* >= 2.6.37 */
 
 /* spin_needbreak() was called something else in 2.6.24 */
 #if LINUX_VERSION_CODE <= KERNEL_VERSION(2,6,24)
