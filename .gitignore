@@ -23,6 +23,7 @@ x86/kvm_svm.h
 x86/vmx.[ch]
 x86/svm.[ch]
 x86/mmu.[ch]
+x86/mmu_audit.c
 x86/paging_tmpl.h
 x86/ioapic.[ch]
 x86/iodev.h
