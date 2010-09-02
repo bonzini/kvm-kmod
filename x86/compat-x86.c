@@ -15,3 +15,12 @@ void kvm_xstate_size_init(void)
 }
 
 #endif /* < 2.6.36 */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
+
+const int kvm_amd_erratum_383[] =
+	AMD_OSVW_ERRATUM(3, AMD_MODEL_RANGE(0x10, 0, 0, 0xff, 0xf));
+
+EXPORT_SYMBOL_GPL(kvm_amd_erratum_383);
+
+#endif /* < 2.6.36 */
