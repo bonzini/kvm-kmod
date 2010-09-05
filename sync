@@ -189,6 +189,10 @@ def hack_content(data):
             w('\tkvm_fire_urn();')
         if match_block_end(r'(\tcase KVM_IRQFD: {|\tcase KVM_IOEVENTFD: {)', r'^\t}') or line == '\tcase KVM_CAP_IOEVENTFD:':
             w('#endif')
+        if line == '\t\tprintk(KERN_ERR "kvm: disabled by bios\\n");':
+            w('#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35)')
+            w('\t\tprintk(KERN_ERR "kvm: if TXT is enabled in the BIOS, disable it\\n");')
+            w('#endif')
     if eventfd_file:
         result.append('#else\n'
                       'void kvm_eventfd_init(struct kvm *kvm) { }\n'
