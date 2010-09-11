@@ -1091,3 +1091,7 @@ static inline u64 pvclock_scale_delta(u64 delta, u32 mul_frac, int shift)
 #else
 #define kvm_set_64bit		set_64bit
 #endif
+
+#ifndef MSR_EBC_FREQUENCY_ID
+#define MSR_EBC_FREQUENCY_ID	0x0000002c
+#endif
