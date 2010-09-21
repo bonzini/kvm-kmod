@@ -1086,7 +1086,8 @@ static inline u64 pvclock_scale_delta(u64 delta, u32 mul_frac, int shift)
 }
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36) && defined(CONFIG_X86_64)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,34) && \
+    LINUX_VERSION_CODE != KERNEL_VERSION(2,6,32) && defined(CONFIG_X86_64)
 #define kvm_set_64bit(ptr, val)	set_64bit((unsigned long *)ptr, val)
 #else
 #define kvm_set_64bit		set_64bit
