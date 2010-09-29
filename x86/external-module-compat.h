@@ -821,3 +821,10 @@ struct kvm_pvclock_vcpu_time_info {
 #ifndef MSR_IA32_MCx_STATUS
 #define MSR_IA32_MCx_STATUS(x)		(MSR_IA32_MC0_STATUS + 4*(x))
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,34) && \
+    LINUX_VERSION_CODE != KERNEL_VERSION(2,6,32)
+#define kvm_set_64bit		set_64bit
+#else
+#define kvm_set_64bit(ptr, val)	set_64bit((u64 *)ptr, val)
+#endif
