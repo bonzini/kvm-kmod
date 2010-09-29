@@ -827,7 +827,6 @@ struct kvm_pvclock_vcpu_time_info {
 #define MSR_IA32_MCx_STATUS(x)		(MSR_IA32_MC0_STATUS + 4*(x))
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
 #include <asm/i387.h>
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35)
@@ -878,6 +877,8 @@ union kvm_thread_xstate {
 #define kvm_thread_xstate	thread_xstate
 
 #endif /* >= 2.6.35 */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
 
 struct kvm_compat_fpu {
 	union kvm_thread_xstate state_buffer;
