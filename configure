@@ -1,7 +1,7 @@
 #!/bin/bash
 
 min_kernel_version=24
-max_kernel_version=35
+max_kernel_version=36
 force_build=
 kernelsourcedir=
 kerneldir=/lib/modules/$(uname -r)/build
