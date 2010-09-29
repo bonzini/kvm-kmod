@@ -501,6 +501,13 @@ kvm_set_desc_limit(struct kvm_desc_struct *desc, unsigned long limit)
 	desc->limit = (limit >> 16) & 0xf;
 }
 
+static inline void kvm_load_gdt(const struct kvm_desc_ptr *dtr)
+{
+	asm volatile("lgdt %0"::"m" (*dtr));
+}
+
+#define kvm_store_gdt	kvm_native_store_gdt
+
 static inline void kvm_native_store_gdt(struct kvm_desc_ptr *dtr)
 {
 	asm volatile("sgdt %0":"=m" (*dtr));
