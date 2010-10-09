@@ -648,6 +648,10 @@ struct mtrr_state_type {
 #define MCI_STATUS_UC    (1ULL<<61)
 #endif
 
+#ifndef MCG_SER_P
+#define MCG_SER_P	 	(1ULL<<24)   /* MCA recovery/new status bits */
+#endif
+
 /* do_machine_check() exported in 2.6.31 */
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,31)
