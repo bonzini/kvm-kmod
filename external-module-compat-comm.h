@@ -778,3 +778,33 @@ static inline int is_hwpoison_address(unsigned long addr)
 	return 0;
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,32)
+#include <asm/siginfo.h>
+
+typedef struct {
+	int si_signo;
+	int si_errno;
+	int si_code;
+
+	union {
+		int _pad[SI_PAD_SIZE];
+
+		struct _sigfault {
+			void __user *_addr; /* faulting insn/memory ref. */
+#ifdef __ARCH_SI_TRAPNO
+			int _trapno;	/* TRAP # which caused the signal */
+#endif
+			short _addr_lsb; /* LSB of the reported address */
+		} _sigfault;
+	} _sifields;
+} kvm_siginfo_t;
+
+#define si_addr_lsb	_sifields._sigfault._addr_lsb
+#define BUS_MCEERR_AR	(__SI_FAULT|4)
+
+#else
+
+#define kvm_siginfo_t	siginfo_t
+
+#endif

@@ -45,7 +45,7 @@ def hack_content(data):
         'i387_fxsave_struct native_write_msr_safe xsave_struct '
         'fpu_alloc fpu_free fpu_restore_checking fpu_save_init fpu_finit '
         'load_gdt store_gdt xstate_size cpu_has_xsave __get_user_pages_fast '
-        'amd_erratum_383 cpu_has_amd_erratum set_64bit '
+        'amd_erratum_383 cpu_has_amd_erratum set_64bit siginfo_t '
         )
     eventfd_file = False
     result = []
@@ -184,6 +184,8 @@ def hack_content(data):
             w('#else')
             w('\tcase CPU_ONLINE:')
             line = '#endif'
+        if line == '\tsend_sig_info(SIGBUS, &info, tsk);':
+            line = '\tsend_sig_info(SIGBUS, (siginfo_t *)&info, tsk);'
         w(line)
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
