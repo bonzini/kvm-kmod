@@ -458,7 +458,7 @@ struct kvm_desc_ptr {
 
 static inline unsigned long kvm_get_desc_base(const struct kvm_desc_struct *desc)
 {
-	return desc->base0 | ((desc->base1) << 16) | ((desc->base2) << 24);
+	return (unsigned)(desc->base0 | ((desc->base1) << 16) | ((desc->base2) << 24));
 }
 
 static inline unsigned long kvm_get_desc_limit(const struct kvm_desc_struct *desc)
