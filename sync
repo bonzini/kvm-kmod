@@ -192,7 +192,7 @@ def hack_content(data):
         if match_block_end(r'(\tcase KVM_IRQFD: {|\tcase KVM_IOEVENTFD: {)', r'^\t}') or line == '\tcase KVM_CAP_IOEVENTFD:':
             w('#endif')
         if line == '\t\tprintk(KERN_ERR "kvm: disabled by bios\\n");':
-            w('#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35)')
+            w('#ifndef KVM_TBOOT_ENABLED_WORKS\n')
             w('\t\tprintk(KERN_ERR "kvm: if TXT is enabled in the BIOS, disable it\\n");')
             w('#endif')
     if eventfd_file:

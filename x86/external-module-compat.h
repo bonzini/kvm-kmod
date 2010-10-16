@@ -750,10 +750,17 @@ static inline void hw_breakpoint_restore(void)
 #define percpu_write(t, v)	__get_cpu_var(t) = v
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,32) || \
+    (LINUX_VERSION_CODE == KERNEL_VERSION(2,6,32) && \
+     KERNEL_EXTRAVERSION < 16) || \
+    (LINUX_VERSION_CODE == KERNEL_VERSION(2,6,33) && \
+     KERNEL_EXTRAVERSION < 6) || \
+    (LINUX_VERSION_CODE == KERNEL_VERSION(2,6,34) && \
+     KERNEL_EXTRAVERSION < 1)
 #define kvm_tboot_enabled()	0
 #else
 #define kvm_tboot_enabled	tboot_enabled
+#define KVM_TBOOT_ENABLED_WORKS	1
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35)
