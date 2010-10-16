@@ -43,7 +43,7 @@ def hack_content(data):
         'synchronize_srcu_expedited getboottime monotonic_to_bootbased '
         'check_tsc_unstable native_store_gdt native_store_idt '
         'set_desc_base set_desc_limit pvclock_vcpu_time_info '
-        'native_write_msr_safe load_gdt store_gdt set_64bit '
+        'native_write_msr_safe load_gdt store_gdt set_64bit tboot_enabled '
         )
     kvm_init = kvm_exit = False
     mce = False
