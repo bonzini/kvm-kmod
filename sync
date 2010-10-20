@@ -45,7 +45,8 @@ def hack_content(data):
         'i387_fxsave_struct native_write_msr_safe xsave_struct '
         'fpu_alloc fpu_free fpu_restore_checking fpu_save_init fpu_finit '
         'load_gdt store_gdt xstate_size cpu_has_xsave __get_user_pages_fast '
-        'amd_erratum_383 cpu_has_amd_erratum set_64bit siginfo_t '
+        'amd_erratum_383 cpu_has_amd_erratum set_64bit siginfo_t use_mm '
+        'unuse_mm '
         )
     eventfd_file = False
     result = []
@@ -186,6 +187,14 @@ def hack_content(data):
             line = '#endif'
         if line == '\tsend_sig_info(SIGBUS, &info, tsk);':
             line = '\tsend_sig_info(SIGBUS, (siginfo_t *)&info, tsk);'
+        if line == '\tcase KVM_CAP_ASYNC_PF:':
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,37)')
+            w(line)
+            line = '#endif'
+        if line == '\treturn hva_to_pfn(kvm, addr, atomic, async);':
+            w('#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,37)')
+            w('\tasync = NULL;')
+            w('#endif')
         w(line)
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
@@ -215,7 +224,7 @@ def unifdef(fname):
 
 hack_files = {
     'x86': str.split('kvm_main.c mmu.c vmx.c svm.c x86.c irq.h lapic.c'
-                     ' i8254.c timer.c eventfd.c emulate.c'),
+                     ' i8254.c timer.c eventfd.c emulate.c async_pf.c'),
     'ia64': str.split('kvm_main.c kvm_fw.c kvm_lib.c kvm-ia64.c'),
 }
 

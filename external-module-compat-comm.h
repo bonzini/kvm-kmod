@@ -808,3 +808,42 @@ typedef struct {
 #define kvm_siginfo_t	siginfo_t
 
 #endif
+
+#include <linux/mm.h>
+
+/* Services below are only referenced by code unused in older kernels */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,37)
+static inline int
+get_user_pages_noio(struct task_struct *tsk, struct mm_struct *mm,
+		    unsigned long start, int nr_pages, int write, int force,
+		    struct page **pages, struct vm_area_struct **vmas)
+{
+	BUG();
+	return 0;
+}
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,34)
+static inline void kvm_use_mm(struct mm_struct *mm)
+{
+	BUG();
+}
+
+static inline void kvm_unuse_mm(struct mm_struct *mm)
+{
+	BUG();
+}
+#else
+#define kvm_use_mm	use_mm
+#define kvm_unuse_mm	unuse_mm
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
+static inline u32 hash_32(u32 val, unsigned int bits)
+{
+	BUG();
+	return 0;
+}
+#define order_base_2(n)	({ BUG(); 0; })
+#endif
