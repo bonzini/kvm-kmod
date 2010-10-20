@@ -753,3 +753,8 @@ static inline void kvm_do_machine_check(struct pt_regs *regs, long error_code)
 #ifndef MSR_IA32_MCx_STATUS
 #define MSR_IA32_MCx_STATUS(x)		(MSR_IA32_MC0_STATUS + 4*(x))
 #endif
+
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(2,6,24) && defined(CONFIG_X86_64)
+#define savesegment(seg, value)				\
+	asm("mov %%" #seg ",%0":"=r" (value) : : "memory")
+#endif
