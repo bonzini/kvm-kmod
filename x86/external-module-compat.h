@@ -1104,3 +1104,8 @@ static inline u64 pvclock_scale_delta(u64 delta, u32 mul_frac, int shift)
 #ifndef MSR_EBC_FREQUENCY_ID
 #define MSR_EBC_FREQUENCY_ID	0x0000002c
 #endif
+
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(2,6,24) && defined(CONFIG_X86_64)
+#define savesegment(seg, value)				\
+	asm("mov %%" #seg ",%0":"=r" (value) : : "memory")
+#endif
