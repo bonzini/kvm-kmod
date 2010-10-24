@@ -232,12 +232,28 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_3DNOWPREFETCH (6*32+ 8) /* 3DNow prefetch instructions */
 #endif
 
-#ifndef X86_FEATURE_SSE5
-#define X86_FEATURE_SSE5	(6*32+11) /* SSE-5 */
+#ifndef X86_FEATURE_XOP
+#define X86_FEATURE_XOP		(6*32+11) /* extended AVX instructions */
+#endif
+
+#ifndef X86_FEATURE_FMA4
+#define X86_FEATURE_FMA4	(6*32+16) /* 4 operands MAC instructions */
+#endif
+
+#ifndef X86_FEATURE_TBM
+#define X86_FEATURE_TBM		(6*32+21) /* trailing bit manipulations */
 #endif
 
 #ifndef X86_FEATURE_X2APIC
 #define X86_FEATURE_X2APIC    (4*32+21) /* x2APIC */
+#endif
+
+#ifndef X86_FEATURE_AES
+#define X86_FEATURE_AES		(4*32+25) /* AES instructions */
+#endif
+
+#ifndef X86_FEATURE_F16C
+#define X86_FEATURE_F16C	(4*32+29) /* 16-bit fp conversions */
 #endif
 
 #ifndef MSR_AMD64_PATCH_LOADER
