@@ -847,3 +847,7 @@ static inline u32 hash_32(u32 val, unsigned int bits)
 }
 #define order_base_2(n)	({ BUG(); 0; })
 #endif
+
+#ifndef __rcu
+#define __rcu
+#endif
