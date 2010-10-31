@@ -191,7 +191,7 @@ def hack_content(data):
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,37)')
             w(line)
             line = '#endif'
-        if line == '\treturn hva_to_pfn(kvm, addr, atomic, async);':
+        if match(r'\treturn hva_to_pfn\(kvm, addr, atomic, async'):
             w('#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,37)')
             w('\tasync = NULL;')
             w('#endif')
