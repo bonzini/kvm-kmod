@@ -851,3 +851,14 @@ static inline u32 hash_32(u32 val, unsigned int bits)
 #ifndef __rcu
 #define __rcu
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,37)
+#include <linux/vmalloc.h>
+static inline void *vzalloc(unsigned long size)
+{
+	void *addr = vmalloc(size);
+	if (addr)
+		memset(addr, 0, size);
+	return addr;
+}
+#endif
