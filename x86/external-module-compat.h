@@ -1097,3 +1097,7 @@ static inline u64 pvclock_scale_delta(u64 delta, u32 mul_frac, int shift)
 #define savesegment(seg, value)				\
 	asm("mov %%" #seg ",%0":"=r" (value) : : "memory")
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35)
+#define static_cpu_has(bit) boot_cpu_has(bit)
+#endif
