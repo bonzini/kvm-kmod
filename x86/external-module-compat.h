@@ -264,6 +264,22 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_F16C	(4*32+29) /* 16-bit fp conversions */
 #endif
 
+#ifndef X86_FEATURE_NPT
+#define X86_FEATURE_NPT		(8*32+ 5) /* AMD Nested Page Table support */
+#endif
+
+#ifndef X86_FEATURE_LBRV
+#define X86_FEATURE_LBRV	(8*32+ 6) /* AMD LBR Virtualization support */
+#endif
+
+#ifndef X86_FEATURE_NRIPS
+#define X86_FEATURE_NRIPS	(8*32+ 8) /* "nrip_save" AMD SVM next_rip save */
+#endif
+
+#ifndef X86_FEATURE_PAUSEFILTER
+#define X86_FEATURE_PAUSEFILTER (8*32+13) /* AMD filtered pause intercept */
+#endif
+
 #ifndef MSR_AMD64_PATCH_LOADER
 #define MSR_AMD64_PATCH_LOADER         0xc0010020
 #endif
