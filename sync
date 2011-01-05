@@ -186,6 +186,10 @@ def hack_content(data):
             line = '#endif'
         if line == '\tsend_sig_info(SIGBUS, &info, tsk);':
             line = '\tsend_sig_info(SIGBUS, (siginfo_t *)&info, tsk);'
+        if line == '\t.llseek\t\t= noop_llseek,':
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,35)')
+            w(line)
+            line = '#endif'
         w(line)
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
