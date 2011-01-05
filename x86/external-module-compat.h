@@ -276,6 +276,14 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_NRIPS	(8*32+ 8) /* "nrip_save" AMD SVM next_rip save */
 #endif
 
+#ifndef X86_FEATURE_FLUSHBYASID
+#define X86_FEATURE_FLUSHBYASID (8*32+11) /* AMD flush-by-ASID support */
+#endif
+
+#ifndef X86_FEATURE_DECODEASSISTS
+#define X86_FEATURE_DECODEASSISTS (8*32+12) /* AMD Decode Assists support */
+#endif
+
 #ifndef X86_FEATURE_PAUSEFILTER
 #define X86_FEATURE_PAUSEFILTER (8*32+13) /* AMD filtered pause intercept */
 #endif
