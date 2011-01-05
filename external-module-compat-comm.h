@@ -808,3 +808,7 @@ typedef struct {
 #define kvm_siginfo_t	siginfo_t
 
 #endif
+
+#ifndef __rcu
+#define __rcu
+#endif
