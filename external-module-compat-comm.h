@@ -327,16 +327,21 @@ static inline ktime_t kvm_hrtimer_expires_remaining(const struct hrtimer *timer)
 
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
-
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,31)
 #include <linux/pci.h>
 
-static inline int pci_reset_function(struct pci_dev *dev)
+static inline int __pci_reset_function(struct pci_dev *dev)
 {
 	return 0;
 }
 
-#endif
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
+static inline int pci_reset_function(struct pci_dev *dev)
+{
+	return 0;
+}
+#endif /* < 2.6.28 */
+#endif /* < 2.6.31 */
 
 /* dynamically allocated cpu masks introduced in 2.6.28 */
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
