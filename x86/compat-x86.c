@@ -25,7 +25,7 @@ EXPORT_SYMBOL_GPL(kvm_amd_erratum_383);
 
 #endif /* < 2.6.36 */
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,37) && defined(CONFIG_KVM_GUEST)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,38) && defined(CONFIG_KVM_GUEST)
 void kvm_async_pf_task_wait(u32 token)
 {
 	BUG();
@@ -44,4 +44,4 @@ u32 kvm_read_and_reset_pf_reason(void)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(kvm_read_and_reset_pf_reason);
-#endif /* < 2.6.37 && CONFIG_KVM_GUEST */
+#endif /* < 2.6.38 && CONFIG_KVM_GUEST */
