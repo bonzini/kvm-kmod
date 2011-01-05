@@ -212,6 +212,9 @@ def hack_content(data):
         result.append('#else\n'
                       'void kvm_eventfd_init(struct kvm *kvm) { }\n'
                       'void kvm_irqfd_release(struct kvm *kvm) { }\n'
+                      'void kvm_irq_routing_update(struct kvm *kvm,\n'
+                      '                            struct kvm_irq_routing_table *irq_rt)\n'
+                      '{\n\trcu_assign_pointer(kvm->irq_routing, irq_rt);\n}\n'
                       '#endif')
     data = str.join('', [line + '\n' for line in result])
     return data
