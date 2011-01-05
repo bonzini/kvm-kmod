@@ -660,6 +660,10 @@ void kvm_exit_srcu(void);
 })
 #endif
 
+#ifndef WARN
+#define WARN(condition, format...)	WARN_ON(condition)
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
 #define get_online_cpus lock_cpu_hotplug
 #define put_online_cpus unlock_cpu_hotplug
