@@ -863,3 +863,19 @@ static inline void *vzalloc(unsigned long size)
 	return addr;
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,32)
+#include <linux/interrupt.h>
+
+#define IRQF_ONESHOT	0x00002000
+
+static inline int
+kvm_request_threaded_irq(unsigned int irq, irq_handler_t handler,
+                         irq_handler_t thread_fn,
+                         unsigned long flags, const char *name, void *dev)
+{
+	return -ENOSYS;
+}
+#else
+#define kvm_request_threaded_irq	request_threaded_irq
+#endif
