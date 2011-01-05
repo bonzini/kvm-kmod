@@ -738,6 +738,7 @@ perf_unregister_guest_info_callbacks(struct perf_guest_info_callbacks *cbs)
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,34)
 #define rcu_dereference_check(p, sp)	rcu_dereference(p)
+#define rcu_dereference_protected(p, c)	rcu_dereference(p)
 #define srcu_dereference(p, sp)		rcu_dereference(p)
 #define srcu_read_lock_held(sp)		(1)
 #endif
