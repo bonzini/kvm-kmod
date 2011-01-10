@@ -321,33 +321,9 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #undef X86_CR8_TPR
 #define X86_CR8_TPR 0x0f
 
-/*
- * 2.6.22 does not define set_64bit() under nonpae
- */
 #ifdef CONFIG_X86_32
 
 #include <asm/cmpxchg.h>
-
-static inline void __kvm_set_64bit(u64 *ptr, u64 val)
-{
-	unsigned int low = val;
-	unsigned int high = val >> 32;
-
-	__asm__ __volatile__ (
-		"\n1:\t"
-		"movl (%0), %%eax\n\t"
-		"movl 4(%0), %%edx\n\t"
-		"lock cmpxchg8b (%0)\n\t"
-		"jnz 1b"
-		: /* no outputs */
-		:	"D"(ptr),
-			"b"(low),
-			"c"(high)
-		:	"ax","dx","memory");
-}
-
-#undef  set_64bit
-#define set_64bit __kvm_set_64bit
 
 static inline unsigned long long __kvm_cmpxchg64(volatile void *ptr,
 						 unsigned long long old,
@@ -764,3 +740,25 @@ static inline void kvm_do_machine_check(struct pt_regs *regs, long error_code)
 #else
 #define kvm_check_tsc_unstable		check_tsc_unstable
 #endif
+
+#ifdef CONFIG_X86_64
+static inline void kvm_set_64bit(unsigned long *ptr, u64 val)
+#else
+static inline void kvm_set_64bit(unsigned long long *ptr, u64 val)
+#endif
+{
+	unsigned int low = val;
+	unsigned int high = val >> 32;
+
+	__asm__ __volatile__ (
+		"\n1:\t"
+		"movl (%0), %%eax\n\t"
+		"movl 4(%0), %%edx\n\t"
+		"lock cmpxchg8b (%0)\n\t"
+		"jnz 1b"
+		: /* no outputs */
+		:	"D"(ptr),
+			"b"(low),
+			"c"(high)
+		:	"ax","dx","memory");
+}

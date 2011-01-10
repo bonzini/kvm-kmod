@@ -42,6 +42,7 @@ def __hack(data):
         'user_return_notifier_register user_return_notifier_unregister '
         'getboottime monotonic_to_bootbased tboot_enabled '
         'native_write_msr_safe load_gdt store_gdt check_tsc_unstable '
+        'set_64bit '
         )
     anon_inodes = anon_inodes_exit = False
     mce = False
