@@ -482,6 +482,16 @@ static inline unsigned long kvm_get_desc_limit(const struct kvm_desc_struct *des
 	return desc->limit0 | (desc->limit << 16);
 }
 
+static inline void kvm_load_gdt(const struct kvm_desc_ptr *dtr)
+{
+	asm volatile("lgdt %0"::"m" (*dtr));
+}
+
+static inline void kvm_store_gdt(struct kvm_desc_ptr *dtr)
+{
+	asm volatile("sgdt %0":"=m" (*dtr));
+}
+
 #include <asm/msr.h>
 #ifndef MSR_FS_BASE
 #define MSR_FS_BASE 0xc0000100
