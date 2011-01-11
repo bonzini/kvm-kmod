@@ -75,7 +75,7 @@ else
     version="$name"
 fi
 
-./configure
+./configure --force
 make sync KVM_VERSION="$version"
 make distclean
 
