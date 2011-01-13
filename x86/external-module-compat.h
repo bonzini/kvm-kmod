@@ -960,6 +960,16 @@ static inline void kvm_xstate_size_init(void)
 
 #endif /* >= 2.6.36 */
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,38)
+static inline int kvm_init_fpu(struct task_struct *tsk)
+{
+	__asm__ ("movups %xmm0, %xmm0");
+	return 0;
+}
+#else /* >= 2.6.38 */
+#define kvm_init_fpu	init_fpu
+#endif /* >= 2.6.38 */
+
 #ifndef XSTATE_FP
 #define XSTATE_FP       0x1
 #define XSTATE_SSE      0x2
