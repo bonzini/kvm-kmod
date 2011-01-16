@@ -34,7 +34,7 @@ def hack_content(data):
         'hrtimer_add_expires_ns hrtimer_get_expires '
         'hrtimer_get_expires_ns hrtimer_start_expires '
         'hrtimer_expires_remaining smp_send_reschedule '
-        'on_each_cpu relay_open '
+        'on_each_cpu relay_open anon_inode_getfd '
         'synchronize_srcu srcu_batches_completed '
         'do_machine_check get_desc_base get_desc_limit '
         'vma_kernel_pagesize native_read_tsc user_return_notifier '
@@ -97,12 +97,9 @@ def hack_content(data):
         line = sub(r'pr_debug\(([^),]*)', r'pr_debug(' + pr_fmt + r'\1', line)
         if inside_block(r'^int kvm_init\(', r'^}'):
             if match(r'r = kvm_arch_init\(opaque\);'):
-                w('\tr = kvm_init_anon_inodes();')
-                w('\tif (r)')
-                w('\t\treturn r;\n')
                 w('\tr = kvm_init_srcu();')
                 w('\tif (r)')
-                w('\t\tgoto cleanup_anon_inodes;\n')
+                w('\t\treturn r;\n')
                 w('\tpreempt_notifier_sys_init();\n')
             elif match(r'return 0;'):
                 w('\tprintk("loaded kvm module (%s)\\n");\n' % (version,))
@@ -110,12 +107,9 @@ def hack_content(data):
             elif match(r'return r;'):
                 w('\tpreempt_notifier_sys_exit();')
                 w('\tkvm_exit_srcu();')
-                w('cleanup_anon_inodes:')
-                w('\tkvm_exit_anon_inodes();')
         if match_block_end(r'^void kvm_exit', r'^}'):
             w('\tpreempt_notifier_sys_exit();')
             w('\tkvm_exit_srcu();')
-            w('\tkvm_exit_anon_inodes();')
         if match(r'MODULE_AUTHOR'):
             w('MODULE_INFO(version, "%s");' % (version,))
         if match(r'atomic_inc\(&kvm->mm->mm_count\);'):

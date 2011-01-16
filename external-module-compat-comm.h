@@ -90,12 +90,41 @@ struct inode;
 #include <linux/fs.h>
 #include <linux/anon_inodes.h>
 
-#define anon_inode_getfd kvm_anon_inode_getfd
-int kvm_init_anon_inodes(void);
-void kvm_exit_anon_inodes(void);
-int anon_inode_getfd(const char *name,
-		     const struct file_operations *fops,
-		     void *priv , int flags);
+/* anon_inodes on RHEL >= 5.2 is equivalent to 2.6.27 version */
+#ifdef RHEL_RELEASE_CODE
+#  if (RHEL_RELEASE_CODE >= RHEL_RELEASE_VERSION(5,2)) && defined(CONFIG_ANON_INODES)
+#    define RHEL_ANON_INODES
+#  endif
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26) && !defined(RHEL_ANON_INODES)
+
+static inline int kvm_anon_inode_getfd(const char *name,
+				       const struct file_operations *fops,
+				       void *priv, int flags)
+{
+	int r;
+	int fd;
+	struct inode *inode;
+	struct file *file;
+
+	r = anon_inode_getfd(&fd, &inode, &file, name, fops, priv);
+	if (r < 0)
+		return r;
+	return fd;
+}
+
+#elif LINUX_VERSION_CODE == KERNEL_VERSION(2,6,26) && !defined(RHEL_ANON_INODES)
+
+#define kvm_anon_inode_getfd(name, fops, priv, flags) \
+	anon_inode_getfd(name, fops, priv)
+}
+
+#else /* > 2.6.26 || RHEL_ANON_INODES */
+
+#define kvm_anon_inode_getfd	anon_inode_getfd
+
+#endif /* > 2.6.26 || RHEL_ANON_INODES */
 
 /* div64_u64 is fairly new */
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26)
