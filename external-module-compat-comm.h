@@ -917,3 +917,12 @@ kvm_request_threaded_irq(unsigned int irq, irq_handler_t handler,
 #else
 #define kvm_request_threaded_irq	request_threaded_irq
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,38)
+#define compound_trans_head(page) compound_head(page)
+
+static inline int PageTransCompound(struct page *page)
+{
+        return 0;
+}
+#endif
