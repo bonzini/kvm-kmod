@@ -46,7 +46,8 @@ def hack_content(data):
         'fpu_alloc fpu_free fpu_restore_checking fpu_save_init fpu_finit '
         'load_gdt store_gdt xstate_size cpu_has_xsave __get_user_pages_fast '
         'amd_erratum_383 cpu_has_amd_erratum set_64bit siginfo_t use_mm '
-        'unuse_mm request_threaded_irq init_fpu '
+        'unuse_mm request_threaded_irq init_fpu __this_cpu_read '
+        '__this_cpu_write '
         )
     eventfd_file = False
     result = []

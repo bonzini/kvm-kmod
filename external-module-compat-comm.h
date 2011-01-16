@@ -926,3 +926,11 @@ static inline int PageTransCompound(struct page *page)
         return 0;
 }
 #endif
+
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(2,6,33)
+#define kvm___this_cpu_read(n)		__get_cpu_var(n)
+#define kvm___this_cpu_write(n, v)	__get_cpu_var(n) = v
+#else /* > 2.6.33 */
+#define kvm___this_cpu_read		__this_cpu_read
+#define kvm___this_cpu_write		__this_cpu_write
+#endif /* > 2.6.33 */
