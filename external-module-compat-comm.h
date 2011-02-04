@@ -811,10 +811,21 @@ static inline int iommu_unmap(struct iommu_domain *domain, unsigned long iova,
 #define lower_32_bits(n) ((u32)(n))
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
-static inline int is_hwpoison_address(unsigned long addr)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,39)
+#define EHWPOISON	133	/* Memory page has hardware error */
+#define FOLL_HWPOISON	0x100	/* check page is hwpoisoned */
+
+static inline int 
+__get_user_pages(struct task_struct *tsk, struct mm_struct *mm,
+		 unsigned long start, int len, unsigned int foll_flags,
+		 struct page **pages, struct vm_area_struct **vmas,
+		 int *nonblocking)
 {
-	return 0;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,36)
+	return is_hwpoison_address(start) ? -EHWPOISON : -ENOSYS;
+#else
+	return -ENOSYS;
+#endif
 }
 #endif
 
