@@ -200,8 +200,6 @@ def hack_content(data):
             line = '#endif'
         if match(r'static int kvm_mmu_notifier_test_young'):
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,38)')
-        if match_block_end(r'^static int kvm_mmu_notifier_test_young', r'^}'):
-            line = '#endif'
         w(line)
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
@@ -210,6 +208,8 @@ def hack_content(data):
         if line == '\t\tprintk(KERN_ERR "kvm: disabled by bios\\n");':
             w('#ifndef KVM_TBOOT_ENABLED_WORKS\n')
             w('\t\tprintk(KERN_ERR "kvm: if TXT is enabled in the BIOS, disable it\\n");')
+            w('#endif')
+        if match_block_end(r'^static int kvm_mmu_notifier_test_young', r'^}'):
             w('#endif')
     if eventfd_file:
         result.append('#else\n'
