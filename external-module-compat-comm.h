@@ -945,3 +945,11 @@ static inline int PageTransCompound(struct page *page)
 #define kvm___this_cpu_read		__this_cpu_read
 #define kvm___this_cpu_write		__this_cpu_write
 #endif /* > 2.6.33 */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,39)
+#define kvm_get_task_pid(t, pt)	NULL
+#define kvm_put_pid(p)		p = p
+#else /* >= 2.6.39 */
+#define kvm_get_task_pid	get_task_pid
+#define kvm_put_pid		put_pid
+#endif /* >= 2.6.39 */

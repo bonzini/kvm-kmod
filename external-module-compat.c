@@ -266,3 +266,22 @@ int schedule_hrtimeout(ktime_t *expires, const enum hrtimer_mode mode)
 DEFINE_PER_CPU(struct kvm_user_return_notifier *, kvm_urn) = NULL;
 
 #endif /* CONFIG_USER_RETURN_NOTIFIER */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,39)
+
+#include <linux/kvm_host.h>
+
+void kvm_vcpu_on_spin(struct kvm_vcpu *vcpu)
+{
+	ktime_t expires;
+	DEFINE_WAIT(wait);
+
+	prepare_to_wait(&vcpu->wq, &wait, TASK_INTERRUPTIBLE);
+
+	/* Sleep for 100 us, and hope lock-holder got scheduled */
+	expires = ktime_add_ns(ktime_get(), 100000UL);
+	schedule_hrtimeout(&expires, HRTIMER_MODE_ABS);
+
+	finish_wait(&vcpu->wq, &wait);
+}
+#endif /* < 2.6.39 */
