@@ -735,22 +735,14 @@ pci_get_domain_bus_and_slot(int domain, unsigned int bus, unsigned int devfn)
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,33)
 
-#ifdef CONFIG_PREEMPT_RT
-#if LINUX_VERSION_CODE != KERNEL_VERSION(2,6,31)
-#error PREEMPT_RT only supported on 2.6.31
-#endif
-#define raw_spinlock_t		atomic_spinlock_t
-#define raw_spin_lock_init	atomic_spin_lock_init
-#define raw_spin_lock		atomic_spin_lock
-#define raw_spin_unlock		atomic_spin_unlock
-
-#else
-
-#define raw_spinlock_t		spinlock_t
-#define raw_spin_lock_init	spin_lock_init
-#define raw_spin_lock		spin_lock
-#define raw_spin_unlock		spin_unlock
-#endif
+#define DEFINE_RAW_SPINLOCK		DEFINE_SPINLOCK
+#define raw_spinlock_t			spinlock_t
+#define raw_spin_lock_init		spin_lock_init
+#define raw_spin_lock			spin_lock
+#define raw_spin_lock_irqsave		spin_lock_irqsave
+#define raw_spin_unlock			spin_unlock
+#define raw_spin_unlock_irqrestore	spin_unlock_irqrestore
+#define raw_spin_is_locked		spin_is_locked
 
 #endif
 
