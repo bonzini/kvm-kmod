@@ -939,7 +939,7 @@ static inline int PageTransCompound(struct page *page)
 #endif /* > 2.6.33 */
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,39)
-#define kvm_get_task_pid(t, pt)	NULL
+#define kvm_get_task_pid(t, pt)	(t)->pids[pt].pid
 #define kvm_put_pid(p)		p = p
 #else /* >= 2.6.39 */
 #define kvm_get_task_pid	get_task_pid
