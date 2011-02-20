@@ -945,3 +945,11 @@ static inline int PageTransCompound(struct page *page)
 #define kvm_get_task_pid	get_task_pid
 #define kvm_put_pid		put_pid
 #endif /* >= 2.6.39 */
+
+#ifndef __noclone
+#if defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 5
+#define __noclone	__attribute__((__noclone__))
+#else /* !GCC || GCC < 4.5 */
+#define __noclone
+#endif /* !GCC || GCC < 4.5 */
+#endif /* !__noclone */
