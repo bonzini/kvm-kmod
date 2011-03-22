@@ -722,7 +722,8 @@ static inline void kvm_clock_warn_suspend_bug(void)
 #endif
 }
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,33) && defined(CONFIG_PCI)
+#if defined(CONFIG_PCI) && LINUX_VERSION_CODE < KERNEL_VERSION(2,6,33) && \
+    (!defined(CONFIG_SUSE_KERNEL) || LINUX_VERSION_CODE < KERNEL_VERSION(2,6,32))
 #include <linux/pci.h>
 static inline struct pci_dev *
 pci_get_domain_bus_and_slot(int domain, unsigned int bus, unsigned int devfn)
