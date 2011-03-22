@@ -40,7 +40,6 @@ EXPORT_SYMBOL_GPL(kvm_async_pf_task_wake);
 
 u32 kvm_read_and_reset_pf_reason(void)
 {
-	BUG();
 	return 0;
 }
 EXPORT_SYMBOL_GPL(kvm_read_and_reset_pf_reason);
