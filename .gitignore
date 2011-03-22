@@ -45,6 +45,7 @@ x86/assigned-dev.c
 x86/emulate.c
 x86/eventfd.c
 x86/mmutrace.h
+x86/async_pf.[ch]
 ia64/asm-offsets.c
 ia64/coalesced_mmio.[ch]
 ia64/ioapic.[ch]
@@ -72,4 +73,5 @@ ia64/vti.h
 ia64/vtlb.c
 ia64/assigned-dev.c
 ia64/eventfd.c
+ia64/async_pf.[ch]
 .stgit-*
