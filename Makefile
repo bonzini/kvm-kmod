@@ -3,8 +3,8 @@ include config.mak
 
 ARCH_DIR = $(if $(filter $(ARCH),x86_64 i386),x86,$(ARCH))
 ARCH_CONFIG := $(shell echo $(ARCH_DIR) | tr '[:lower:]' '[:upper:]')
-# NONARCH_CONFIG used for unifdef, and only cover X86 and IA64 now
-NONARCH_CONFIG = $(filter-out $(ARCH_CONFIG),X86 IA64)
+# NONARCH_CONFIG used for unifdef, and only cover X86 now
+NONARCH_CONFIG = $(filter-out $(ARCH_CONFIG),X86)
 
 PREFIX = /usr/local
 DESTDIR = /
@@ -44,7 +44,7 @@ sync-kmod:
 	./sync -v $(KVM_VERSION_GIT) -l $(LINUX)
 
 sync-hdr:
-	for a in ia64 x86; do \
+	for a in x86; do \
 		$(MAKE) -C $(LINUX) INSTALL_HDR_PATH=`pwd`/.tmp-hdrs SRCARCH="$$a" headers_install; \
 		mkdir -p usr/include/asm-"$$a"; \
 		cp .tmp-hdrs/include/asm/kvm.h .tmp-hdrs/include/asm/kvm_para.h usr/include/asm-"$$a"; \

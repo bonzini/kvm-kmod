@@ -19,12 +19,6 @@
 #endif
 #endif
 
-#ifdef __ia64__
-#ifndef CONFIG_IA64
-#define CONFIG_IA64 1
-#endif
-#endif
-
 #ifdef __PPC__
 #ifndef CONFIG_PPC
 #define CONFIG_PPC 1
