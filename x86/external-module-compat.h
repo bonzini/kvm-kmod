@@ -1123,3 +1123,9 @@ static inline u64 pvclock_scale_delta(u64 delta, u32 mul_frac, int shift)
 #ifndef MSR_IA32_BBL_CR_CTL3
 #define MSR_IA32_BBL_CR_CTL3	0x0000011e
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,37)
+bool kvm_boot_cpu_has(unsigned int bit);
+#else
+#define kvm_boot_cpu_has	boot_cpu_has
+#endif
