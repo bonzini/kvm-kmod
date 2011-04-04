@@ -947,3 +947,14 @@ static inline int PageTransCompound(struct page *page)
 #ifndef FOLL_NOWAIT
 #define FOLL_NOWAIT	0x20
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,37)
+#include <linux/delay.h>
+
+static inline void flush_work_sync(struct work_struct *work)
+{
+	flush_work(work);
+	/* pragmatic sync as we have no way to wait explicitly */
+	msleep(100);
+}
+#endif
