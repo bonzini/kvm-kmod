@@ -45,3 +45,45 @@ u32 kvm_read_and_reset_pf_reason(void)
 }
 EXPORT_SYMBOL_GPL(kvm_read_and_reset_pf_reason);
 #endif /* < 2.6.38 && CONFIG_KVM_GUEST */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,37)
+
+#ifndef SVM_CPUID_FUNC
+#define SVM_CPUID_FUNC 0x8000000a
+#endif
+
+#define SVM_FEATURE_NPT            (1 <<  0)
+#define SVM_FEATURE_LBRV           (1 <<  1)
+#define SVM_FEATURE_NRIP           (1 <<  3)
+#define SVM_FEATURE_FLUSH_ASID     (1 <<  6)
+#define SVM_FEATURE_DECODE_ASSIST  (1 <<  7)
+#define SVM_FEATURE_PAUSE_FILTER   (1 << 10)
+
+bool kvm_boot_cpu_has(unsigned int bit)
+{
+	static u32 svm_features;
+	static bool initialized;
+
+	if (!initialized) {
+		svm_features = cpuid_edx(SVM_CPUID_FUNC);
+		initialized = true;
+	}
+	switch (bit) {
+	case X86_FEATURE_NPT:
+		return svm_features & SVM_FEATURE_NPT;
+	case X86_FEATURE_LBRV:
+		return svm_features & SVM_FEATURE_LBRV;
+	case X86_FEATURE_NRIPS:
+		return svm_features & SVM_FEATURE_NRIP;
+	case X86_FEATURE_FLUSHBYASID:
+		return svm_features & SVM_FEATURE_FLUSH_ASID;
+	case X86_FEATURE_DECODEASSISTS:
+		return svm_features & SVM_FEATURE_DECODE_ASSIST;
+	case X86_FEATURE_PAUSEFILTER:
+		return svm_features & SVM_FEATURE_PAUSE_FILTER;
+	default:
+		return boot_cpu_has(bit);
+	}
+}
+EXPORT_SYMBOL_GPL(kvm_boot_cpu_has);
+#endif /* < 2.6.37 */

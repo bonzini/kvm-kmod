@@ -1119,3 +1119,9 @@ static inline u64 pvclock_scale_delta(u64 delta, u32 mul_frac, int shift)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35)
 #define static_cpu_has(bit) boot_cpu_has(bit)
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,37)
+bool kvm_boot_cpu_has(unsigned int bit);
+#else
+#define kvm_boot_cpu_has	boot_cpu_has
+#endif

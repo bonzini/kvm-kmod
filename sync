@@ -28,7 +28,7 @@ def re_cache(regexp):
         _re_cache[regexp] = re.compile(regexp)
     return _re_cache[regexp]
 
-def hack_content(data):
+def hack_content(fname, data):
     compat_apis = str.split(
         'desc_struct ldttss_desc64 desc_ptr '
         'hrtimer_add_expires_ns hrtimer_get_expires '
@@ -139,6 +139,8 @@ def hack_content(data):
             line = '#ifdef CONFIG_MMU_NOTIFIER\n' + line + '\n#endif'
         for ident in compat_apis:
             line = sub(r'\b' + ident + r'\b', 'kvm_' + ident, line)
+        if fname == 'svm.c':
+            line = sub(r'\bboot_cpu_has\b', 'kvm_boot_cpu_has', line)
         if match(r'kvm_.*_fops\.owner = module;'):
             line = 'IF_ANON_INODES_DOES_REFCOUNTS(' + line + ')'
         if not match(r'#include'):
@@ -223,10 +225,10 @@ def hack_content(data):
     return data
 
 def hack_file(T, fname):
-    fname = T + '/' + fname
-    data = file(fname).read()
-    data = hack_content(data)
-    file(fname, 'w').write(data)
+    fullname = T + '/' + fname
+    data = file(fullname).read()
+    data = hack_content(fname, data)
+    file(fullname, 'w').write(data)
 
 def unifdef(fname):
     data = file('unifdef.h').read() + file(fname).read()
