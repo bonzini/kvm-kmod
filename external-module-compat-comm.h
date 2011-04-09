@@ -853,17 +853,6 @@ typedef struct {
 
 /* Services below are only referenced by code unused in older kernels */
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,38)
-static inline int
-get_user_pages_noio(struct task_struct *tsk, struct mm_struct *mm,
-		    unsigned long start, int nr_pages, int write, int force,
-		    struct page **pages, struct vm_area_struct **vmas)
-{
-	BUG();
-	return 0;
-}
-#endif
-
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,34)
 static inline void kvm_use_mm(struct mm_struct *mm)
 {

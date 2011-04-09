@@ -185,11 +185,11 @@ def hack_content(fname, data):
         if line == '\tsend_sig_info(SIGBUS, &info, tsk);':
             line = '\tsend_sig_info(SIGBUS, (siginfo_t *)&info, tsk);'
         if line == '\tcase KVM_CAP_ASYNC_PF:':
-            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,38)')
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,39)')
             w(line)
             line = '#endif'
         if match(r'\treturn hva_to_pfn\(kvm, addr, atomic, async'):
-            w('#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,38)')
+            w('#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,39)')
             w('\tasync = NULL;')
             w('#endif')
         if line == '\t.llseek\t\t= noop_llseek,':
