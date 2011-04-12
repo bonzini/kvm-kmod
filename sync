@@ -204,6 +204,10 @@ def hack_content(fname, data):
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,38)')
         if match(r'^void kvm_vcpu_on_spin'):
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,39)')
+        if line == 'static int kvm_suspend(void)':
+            line = 'int kvm_suspend(void)'
+        if line == 'static void kvm_resume(void)':
+            line = 'void kvm_resume(void)'
         w(line)
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')

@@ -285,3 +285,52 @@ void kvm_vcpu_on_spin(struct kvm_vcpu *vcpu)
 	finish_wait(&vcpu->wq, &wait);
 }
 #endif /* < 2.6.39 */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,39)
+#include <linux/sysdev.h>
+#include <linux/syscore_ops.h>
+
+int kvm_suspend(void);
+void kvm_resume(void);
+
+static int kvm_compat_suspend(struct sys_device *dev, pm_message_t state)
+{
+	kvm_suspend();
+	return 0;
+}
+
+static struct sysdev_class kvm_sysdev_class = {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,25)
+	.name = "kvm",
+#else
+	set_kset_name("kvm"),
+#endif
+	.suspend = kvm_compat_suspend,
+	.resume = (int (*)(struct sys_device *))kvm_resume,
+};
+
+static struct sys_device kvm_sysdev = {
+	.id = 0,
+	.cls = &kvm_sysdev_class,
+};
+
+void register_syscore_ops(struct syscore_ops *ops)
+{
+	int r;
+
+	r = sysdev_class_register(&kvm_sysdev_class);
+	BUG_ON(r);
+
+	r = sysdev_register(&kvm_sysdev);
+	BUG_ON(r);
+}
+EXPORT_SYMBOL_GPL(register_syscore_ops);
+
+void unregister_syscore_ops(struct syscore_ops *ops)
+{
+	sysdev_unregister(&kvm_sysdev);
+	sysdev_class_unregister(&kvm_sysdev_class);
+}
+EXPORT_SYMBOL_GPL(unregister_syscore_ops);
+
+#endif /* < 2.6.39 */
