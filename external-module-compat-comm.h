@@ -958,3 +958,7 @@ static inline void flush_work_sync(struct work_struct *work)
 	msleep(100);
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,39)
+#define __set_bit_le	ext2_set_bit
+#endif
