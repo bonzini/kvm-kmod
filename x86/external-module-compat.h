@@ -276,6 +276,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_NRIPS	(8*32+ 8) /* "nrip_save" AMD SVM next_rip save */
 #endif
 
+#ifndef X86_FEATURE_TSCRATEMSR
+#define X86_FEATURE_TSCRATEMSR  (8*32+ 9) /* "tsc_scale" AMD TSC scaling support */
+#endif
+
 #ifndef X86_FEATURE_FLUSHBYASID
 #define X86_FEATURE_FLUSHBYASID (8*32+11) /* AMD flush-by-ASID support */
 #endif
