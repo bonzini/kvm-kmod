@@ -255,14 +255,6 @@ static inline void pagefault_enable(void)
 
 #endif
 
-/* set_kset_name() is gone in 2.6.25 */
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,25)
-
-#define set_kset_name(x) .name = x
-
-#endif
-
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,25)
 #ifndef FASTCALL
 #define FASTCALL(x)	x

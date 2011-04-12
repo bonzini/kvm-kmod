@@ -122,8 +122,6 @@ def hack_content(fname, data):
             w('MAKE_SIMPLE_ATTRIBUTE_GETTER(' + name + ')')
         line = sub(r'linux/mm_types\.h', 'linux/mm.h', line)
         line = sub(r'\b__user\b', ' ', line)
-        if match(r'^\t\.name = "kvm"'):
-            line = '\tset_kset_name("kvm"),'
         if match(r'#include <linux/compiler.h>'):
             line = ''
         if match(r'#include <linux/clocksource.h>'):
