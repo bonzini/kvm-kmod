@@ -954,3 +954,9 @@ static inline void flush_work_sync(struct work_struct *work)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,39)
 #define __set_bit_le	ext2_set_bit
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,40)
+static inline void rcu_virt_note_context_switch(int cpu)
+{
+}
+#endif
