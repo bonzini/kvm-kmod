@@ -881,7 +881,11 @@ static inline u32 hash_32(u32 val, unsigned int bits)
 #define __rcu
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,37)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,37) && \
+    (!defined(CONFIG_FEDORA_KERNEL) || \
+     (LINUX_VERSION_CODE == KERNEL_VERSION(2,6,35) && \
+      KERNEL_EXTRAVERSION < 11) || \
+     LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35))
 #include <linux/vmalloc.h>
 static inline void *vzalloc(unsigned long size)
 {
