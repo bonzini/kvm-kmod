@@ -843,11 +843,8 @@ struct kvm_i387_fxsave_struct {
 	u32	mxcsr;
 	u32	mxcsr_mask;
 	u32	st_space[32];	/* 8*16 bytes for each FP-reg = 128 bytes */
-#ifdef CONFIG_X86_64
 	u32	xmm_space[64];	/* 16*16 bytes for each XMM-reg = 256 bytes */
-#else
-	u32	xmm_space[32];	/* 8*16 bytes for each XMM-reg = 128 bytes */
-#endif
+	u32	padding[12 + 12];
 } __aligned(16);
 
 struct kvm_ymmh_struct {
