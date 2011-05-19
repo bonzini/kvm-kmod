@@ -11,6 +11,7 @@ void kvm_xstate_size_init(void)
 	if (cpu_has_xsave) {
 		cpuid_count(0xd, 0, &eax, &ebx, &ecx, &edx);
 		kvm_xstate_size = ebx;
+		BUG_ON(kvm_xstate_size > sizeof(union kvm_thread_xstate));
 	}
 }
 
