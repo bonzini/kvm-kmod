@@ -244,7 +244,6 @@ hack_files = {
     'x86': str.split('kvm_main.c mmu.c vmx.c svm.c x86.c irq.h lapic.c'
                      ' i8254.c timer.c eventfd.c emulate.c async_pf.c'
                      ' assigned-dev.c'),
-    'ia64': str.split('kvm_main.c kvm_fw.c kvm_lib.c kvm-ia64.c'),
 }
 
 def mkdir(dir):
@@ -331,6 +330,6 @@ def source_sync(arch):
     copy_if_changed(T, arch)
     rmtree(T)
 
-for arch in ['x86', 'ia64']:
+for arch in ['x86']:
     header_sync(arch)
     source_sync(arch)
