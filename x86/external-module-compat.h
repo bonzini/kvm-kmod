@@ -196,6 +196,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_PCLMULQDQ	(4*32+ 1) /* PCLMULQDQ instruction */
 #endif
 
+#ifndef X86_FEATURE_VMX
+#define X86_FEATURE_VMX		(4*32+ 5) /* Hardware virtualization */
+#endif
+
 #ifndef X86_FEATURE_SSSE3
 #define X86_FEATURE_SSSE3	(4*32+ 9) /* Supplemental SSE-3 */
 #endif
@@ -1133,4 +1137,15 @@ static inline u64 pvclock_scale_delta(u64 delta, u32 mul_frac, int shift)
 bool kvm_boot_cpu_has(unsigned int bit);
 #else
 #define kvm_boot_cpu_has	boot_cpu_has
+#endif
+
+#ifndef MSR_IA32_VMX_TRUE_PINBASED_CTLS
+#define MSR_IA32_VMX_TRUE_PINBASED_CTLS  0x0000048d
+#define MSR_IA32_VMX_TRUE_PROCBASED_CTLS 0x0000048e
+#define MSR_IA32_VMX_TRUE_EXIT_CTLS      0x0000048f
+#define MSR_IA32_VMX_TRUE_ENTRY_CTLS     0x00000490
+
+#define VMX_BASIC_VMCS_SIZE_SHIFT	32
+#define VMX_BASIC_MEM_TYPE_SHIFT	50
+#define VMX_BASIC_MEM_TYPE_WB	6LLU
 #endif
