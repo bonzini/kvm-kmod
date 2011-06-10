@@ -14,7 +14,7 @@ parser.add_option('-v', action = 'store', type = 'string', dest = 'version', \
                   help = 'kvm-kmod release version', default = 'kvm-devel')
 parser.add_option('-l', action = 'store', type = 'string', dest = 'linux', \
                   help = 'Linux kernel tree to sync from', \
-                  default = 'linux-2.6')
+                  default = 'linux')
 parser.set_defaults()
 (options, args) = parser.parse_args()
 version = options.version

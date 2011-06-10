@@ -17,7 +17,7 @@ PKGCONFIGDIR = $(PREFIX)/lib/pkgconfig
 
 rpmrelease = devel
 
-LINUX = ./linux-2.6
+LINUX = ./linux
 
 all:: prerequisite
 #	include header priority 1) $LINUX 2) $KERNELDIR 3) include-compat

@@ -43,13 +43,13 @@ fi
 tarball="$releasedir/$name.tar.bz2"
 
 cd "$(dirname "$0")"/..
-LINUX="$(readlink -f "linux-2.6")"
+LINUX="$(readlink -f "linux")"
 
 kvm_git="$(readlink -f .git)"
 linux_git="$(readlink -f "$LINUX/.git")"
 
 mkdir -p "$tmpdir/$name"
-mkdir -p "$tmpdir/$name/linux-2.6"
+mkdir -p "$tmpdir/$name/linux"
 
 files=("virt/kvm" "arch/x86" "include" "scripts" "Makefile"
        )
@@ -59,12 +59,12 @@ index="$tmpdir/index"
 rm -f "$index"
 GIT_INDEX_FILE="$index" git --git-dir="$kvm_git" read-tree "$commit"
 GIT_INDEX_FILE="$index" git --git-dir="$kvm_git" --work-tree="$tmpdir/$name" checkout "$commit" .
-lcommit=($(git --git-dir="$kvm_git" ls-tree "$commit" linux-2.6))
+lcommit=($(git --git-dir="$kvm_git" ls-tree "$commit" linux))
 lcommit="${lcommit[2]}"
 rm -f "$index"
 GIT_INDEX_FILE="$index" git --git-dir="$linux_git" read-tree "$lcommit"
 GIT_INDEX_FILE="$index" git --git-dir="$linux_git" \
-    --work-tree="$tmpdir/$name/linux-2.6" \
+    --work-tree="$tmpdir/$name/linux" \
     checkout "$lcommit" "${files[@]}"
 
 cd "$tmpdir/$name"
@@ -79,7 +79,7 @@ fi
 make sync KVM_VERSION="$version"
 make distclean
 
-rm -rf "$tmpdir/$name/linux-2.6"
+rm -rf "$tmpdir/$name/linux"
 
 if [[ -n "$formal" ]]; then
     echo "$name" > "$tmpdir/$name/KVM_VERSION"
