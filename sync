@@ -160,11 +160,17 @@ def hack_content(fname, data):
             line = ''
         if match(r'struct fpu '):
             line = sub(r'struct fpu ', 'struct kvm_compat_fpu ', line)
-        if line == 'static int mmu_shrink(struct shrinker *shrink, int nr_to_scan, gfp_t gfp_mask)':
-            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,35)')
+        if match(r'^static int mmu_shrink\('):
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)')
+            w(line)
+            w('#elif LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,35)')
             w('static int mmu_shrink(struct shrinker *shrink, int nr_to_scan, gfp_t gfp_mask)')
             w('#else')
             w('static int mmu_shrink(int nr_to_scan, gfp_t gfp_mask)')
+            line = '#endif'
+        if line == '\tint nr_to_scan = sc->nr_to_scan;':
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)')
+            w(line)
             line = '#endif'
         if line == '\tkvm_x86_ops = ops;':
             w('\tkvm_xstate_size_init();\n')
