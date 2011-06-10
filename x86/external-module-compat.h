@@ -366,6 +366,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_CR4_OSXSAVE 0x00040000
 #endif
 
+#ifndef X86_CR4_SMEP
+#define X86_CR4_SMEP 0x00100000
+#endif
+
 #undef X86_CR8_TPR
 #define X86_CR8_TPR 0x0f
 
@@ -1148,4 +1152,8 @@ bool kvm_boot_cpu_has(unsigned int bit);
 #define VMX_BASIC_VMCS_SIZE_SHIFT	32
 #define VMX_BASIC_MEM_TYPE_SHIFT	50
 #define VMX_BASIC_MEM_TYPE_WB	6LLU
+#endif
+
+#ifndef X86_FEATURE_SMEP
+#define X86_FEATURE_SMEP	(9*32+ 7) /* Supervisor Mode Execution Protection */
 #endif
