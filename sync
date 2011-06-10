@@ -212,6 +212,10 @@ def hack_content(fname, data):
             line = 'int kvm_suspend(void)'
         if line == 'static void kvm_resume(void)':
             line = 'void kvm_resume(void)'
+        if line == '\tpci_save_state(dev);' or \
+           line == '\tif (pci_load_and_free_saved_state(dev, &match->pci_saved_state))' or \
+           line == '\tif (pci_load_and_free_saved_state(assigned_dev->dev,':
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)')
         w(line)
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
@@ -224,6 +228,10 @@ def hack_content(fname, data):
         if match_block_end(r'^static int kvm_mmu_notifier_test_young', r'^}'):
             w('#endif')
         if match_block_end(r'^void kvm_vcpu_on_spin', r'^}'):
+            w('#endif')
+        if match_block_end(r'^\tpci_save_state\(dev\);', r'^\t\t       __func__, dev_name\(&dev->dev\)\);') or \
+           match_block_end(r'^\tif \(pci_load_and_free_saved_state\(dev, &match->pci_saved_state\)\)', '^\t\t       __func__, dev_name\(&dev->dev\)\);') or \
+           match_block_end(r'^\tif \(pci_load_and_free_saved_state\(assigned_dev->dev,', r'^\t\tpci_restore_state\(assigned_dev->dev\);'):
             w('#endif')
     if eventfd_file:
         result.append('#else\n'
