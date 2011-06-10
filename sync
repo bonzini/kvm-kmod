@@ -216,6 +216,12 @@ def hack_content(fname, data):
            line == '\tif (pci_load_and_free_saved_state(dev, &match->pci_saved_state))' or \
            line == '\tif (pci_load_and_free_saved_state(assigned_dev->dev,':
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)')
+        if line == '\t\t\tcpuid_mask(&entry->ebx, 9);':
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,36)')
+            w(line)
+            w('#else')
+            w('\t\t\tentry->ebx = 0;');
+            w('#endif')
         w(line)
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
