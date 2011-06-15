@@ -47,7 +47,7 @@ def hack_content(fname, data):
         'load_gdt store_gdt xstate_size cpu_has_xsave __get_user_pages_fast '
         'amd_erratum_383 cpu_has_amd_erratum set_64bit siginfo_t use_mm '
         'unuse_mm request_threaded_irq init_fpu __this_cpu_read '
-        '__this_cpu_write get_task_pid put_pid'
+        '__this_cpu_write get_task_pid put_pid sigset_from_compat '
         )
     eventfd_file = False
     result = []
