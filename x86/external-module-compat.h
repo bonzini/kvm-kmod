@@ -224,6 +224,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_AVX		(4*32+28) /* Advanced Vector Extensions */
 #endif
 
+#ifndef X86_FEATURE_RDRAND
+#define X86_FEATURE_RDRAND	(4*32+30) /* The RDRAND instruction */
+#endif
+
 #ifndef X86_FEATURE_CR8_LEGACY
 #define X86_FEATURE_CR8_LEGACY	(6*32+ 4) /* CR8 in 32-bit mode */
 #endif
@@ -296,6 +300,14 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_PAUSEFILTER (8*32+13) /* AMD filtered pause intercept */
 #endif
 
+#ifndef X86_FEATURE_FSGSBASE
+#define X86_FEATURE_FSGSBASE	(9*32+ 0) /* {RD/WR}{FS/GS}BASE instructions*/
+#endif
+
+#ifndef X86_FEATURE_ERMS
+#define X86_FEATURE_ERMS	(9*32+ 9) /* Enhanced REP MOVSB/STOSB */
+#endif
+
 #ifndef MSR_AMD64_PATCH_LOADER
 #define MSR_AMD64_PATCH_LOADER         0xc0010020
 #endif
@@ -360,6 +372,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 
 #ifndef X86_CR4_VMXE
 #define X86_CR4_VMXE 0x00002000
+#endif
+
+#ifndef X86_CR4_RDWRGSFS
+#define X86_CR4_RDWRGSFS 0x00010000 /* enable RDWRGSFS support */
 #endif
 
 #ifndef X86_CR4_OSXSAVE
