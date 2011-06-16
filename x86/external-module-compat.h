@@ -180,16 +180,16 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 
 #include <asm/cpufeature.h>
 
-#ifndef X86_FEATURE_SVM
-#define X86_FEATURE_SVM               (6*32+ 2) /* Secure virtual machine */
-#endif
-
 #ifndef X86_FEATURE_FXSR_OPT
-#define X86_FEATURE_FXSR_OPT  (1*32+25)
+#define X86_FEATURE_FXSR_OPT	(1*32+25)
 #endif
 
 #ifndef X86_FEATURE_GBPAGES
 #define X86_FEATURE_GBPAGES	(1*32+26) /* GB pages */
+#endif
+
+#ifndef X86_FEATURE_NX
+#define X86_FEATURE_NX		(1*32+20) /* Execute Disable */
 #endif
 
 #ifndef X86_FEATURE_PCLMULQDQ
@@ -212,20 +212,44 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_XMM4_2	(4*32+20) /* "sse4_2" SSE-4.2 */
 #endif
 
+#ifndef X86_FEATURE_X2APIC
+#define X86_FEATURE_X2APIC	(4*32+21) /* x2APIC */
+#endif
+
 #ifndef X86_FEATURE_MOVBE
 #define X86_FEATURE_MOVBE	(4*32+22) /* MOVBE instruction */
 #endif
 
 #ifndef X86_FEATURE_POPCNT
-#define X86_FEATURE_POPCNT      (4*32+23) /* POPCNT instruction */
+#define X86_FEATURE_POPCNT	(4*32+23) /* POPCNT instruction */
+#endif
+
+#ifndef X86_FEATURE_AES
+#define X86_FEATURE_AES		(4*32+25) /* AES instructions */
+#endif
+
+#ifndef X86_FEATURE_XSAVE
+#define X86_FEATURE_XSAVE	(4*32+26) /* XSAVE/XRSTOR/XSETBV/XGETBV */
+#endif
+
+#ifndef X86_FEATURE_OSXSAVE
+#define X86_FEATURE_OSXSAVE	(4*32+27) /* "" XSAVE enabled in the OS */
 #endif
 
 #ifndef X86_FEATURE_AVX
 #define X86_FEATURE_AVX		(4*32+28) /* Advanced Vector Extensions */
 #endif
 
+#ifndef X86_FEATURE_F16C
+#define X86_FEATURE_F16C	(4*32+29) /* 16-bit fp conversions */
+#endif
+
 #ifndef X86_FEATURE_RDRAND
 #define X86_FEATURE_RDRAND	(4*32+30) /* The RDRAND instruction */
+#endif
+
+#ifndef X86_FEATURE_SVM
+#define X86_FEATURE_SVM		(6*32+ 2) /* Secure virtual machine */
 #endif
 
 #ifndef X86_FEATURE_CR8_LEGACY
@@ -248,6 +272,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_3DNOWPREFETCH (6*32+ 8) /* 3DNow prefetch instructions */
 #endif
 
+#ifndef X86_FEATURE_OSVW
+#define X86_FEATURE_OSVW	(6*32+ 9) /* OS Visible Workaround */
+#endif
+
 #ifndef X86_FEATURE_XOP
 #define X86_FEATURE_XOP		(6*32+11) /* extended AVX instructions */
 #endif
@@ -258,18 +286,6 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 
 #ifndef X86_FEATURE_TBM
 #define X86_FEATURE_TBM		(6*32+21) /* trailing bit manipulations */
-#endif
-
-#ifndef X86_FEATURE_X2APIC
-#define X86_FEATURE_X2APIC    (4*32+21) /* x2APIC */
-#endif
-
-#ifndef X86_FEATURE_AES
-#define X86_FEATURE_AES		(4*32+25) /* AES instructions */
-#endif
-
-#ifndef X86_FEATURE_F16C
-#define X86_FEATURE_F16C	(4*32+29) /* 16-bit fp conversions */
 #endif
 
 #ifndef X86_FEATURE_NPT
@@ -302,6 +318,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 
 #ifndef X86_FEATURE_FSGSBASE
 #define X86_FEATURE_FSGSBASE	(9*32+ 0) /* {RD/WR}{FS/GS}BASE instructions*/
+#endif
+
+#ifndef X86_FEATURE_SMEP
+#define X86_FEATURE_SMEP	(9*32+ 7) /* Supervisor Mode Execution Protection */
 #endif
 
 #ifndef X86_FEATURE_ERMS
@@ -448,20 +468,6 @@ static inline void preempt_notifier_sys_exit(void) {}
 /* CONFIG_HAS_IOMEM is apparently fairly new too (2.6.21 for x86_64). */
 #ifndef CONFIG_HAS_IOMEM
 #define CONFIG_HAS_IOMEM 1
-#endif
-
-#include <asm/cpufeature.h>
-
-#ifndef X86_FEATURE_NX
-#define X86_FEATURE_NX		(1*32+20)
-#endif
-
-#ifndef X86_FEATURE_XSAVE
-#define X86_FEATURE_XSAVE	(4*32+26)
-#endif
-
-#ifndef X86_FEATURE_OSXSAVE
-#define X86_FEATURE_OSXSAVE	(4*32+27)
 #endif
 
 #ifndef cpu_has_xsave
@@ -1033,10 +1039,6 @@ static inline int kvm_init_fpu(struct task_struct *tsk)
 #define AMD_MODEL_RANGE_END(range)	((range) & 0xfff)
 #endif
 
-#ifndef X86_FEATURE_OSVW
-#define X86_FEATURE_OSVW	(6*32+ 9) /* OS Visible Workaround */
-#endif
-
 #ifndef MSR_AMD64_OSVW_ID_LENGTH
 #define MSR_AMD64_OSVW_ID_LENGTH	0xc0010140
 #define MSR_AMD64_OSVW_STATUS		0xc0010141
@@ -1168,8 +1170,4 @@ bool kvm_boot_cpu_has(unsigned int bit);
 #define VMX_BASIC_VMCS_SIZE_SHIFT	32
 #define VMX_BASIC_MEM_TYPE_SHIFT	50
 #define VMX_BASIC_MEM_TYPE_WB	6LLU
-#endif
-
-#ifndef X86_FEATURE_SMEP
-#define X86_FEATURE_SMEP	(9*32+ 7) /* Supervisor Mode Execution Protection */
 #endif
