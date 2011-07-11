@@ -1095,12 +1095,15 @@ static inline bool kvm_cpu_has_amd_erratum(const int *erratum)
 
 #endif /* >= 2.6.36 */
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,37)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,37) || \
+    (LINUX_VERSION_CODE == KERNEL_VERSION(2,6,32) && KERNEL_EXTRAVERSION < 40)
 static inline u64 pvclock_scale_delta(u64 delta, u32 mul_frac, int shift)
 {
 	u64 product;
 #ifdef __i386__
 	u32 tmp1, tmp2;
+#else
+	ulong tmp;
 #endif
 
 	if (shift < 0)
@@ -1121,8 +1124,11 @@ static inline u64 pvclock_scale_delta(u64 delta, u32 mul_frac, int shift)
 		: "a" ((u32)delta), "1" ((u32)(delta >> 32)), "2" (mul_frac) );
 #elif defined(__x86_64__)
 	__asm__ (
-		"mul %%rdx ; shrd $32,%%rdx,%%rax"
-		: "=a" (product) : "0" (delta), "d" ((u64)mul_frac) );
+		"mul %[mul_frac] ; shrd $32, %[hi], %[lo]"
+		: [lo]"=a"(product),
+		  [hi]"=d"(tmp)
+		: "0"(delta),
+		  [mul_frac]"rm"((u64)mul_frac));
 #else
 #error implement me!
 #endif
