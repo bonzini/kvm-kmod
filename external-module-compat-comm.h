@@ -471,6 +471,10 @@ static inline int iommu_domain_has_cap(struct iommu_domain *domain,
 
 #endif
 
+#ifndef IOMMU_CAP_INTR_REMAP
+#define IOMMU_CAP_INTR_REMAP		0x2	/* isolates device intrs */
+#endif
+
 /*
  * Tracepoints were introduced in 2.6.28, but changed several times in
  * incompatible ways.
