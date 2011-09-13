@@ -986,3 +986,38 @@ void kvm_sigset_from_compat(sigset_t *set, compat_sigset_t *compat)
 #define kvm_sigset_from_compat	sigset_from_compat
 #endif /* >= 3.1 */
 #endif /* CONFIG_COMPAT */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,33)
+
+#ifdef CONFIG_PRINTK
+#define printk_ratelimited(fmt, ...)					\
+({									\
+	static DEFINE_RATELIMIT_STATE(_rs,				\
+				      DEFAULT_RATELIMIT_INTERVAL,	\
+				      DEFAULT_RATELIMIT_BURST);		\
+									\
+	if (__ratelimit(&_rs))						\
+		printk(fmt, ##__VA_ARGS__);				\
+})
+#else
+#define printk_ratelimited(fmt, ...)
+#endif
+
+#define pr_err_ratelimited(fmt, ...)					\
+	printk_ratelimited(KERN_ERR fmt, ##__VA_ARGS__)
+#define pr_warn_ratelimited(fmt, ...)					\
+	printk_ratelimited(KERN_WARNING fmt, ##__VA_ARGS__)
+#define pr_info_ratelimited(fmt, ...)					\
+	printk_ratelimited(KERN_INFO fmt, ##__VA_ARGS__)
+#if defined(DEBUG)
+#define pr_debug_ratelimited(fmt, ...)					\
+	printk_ratelimited(KERN_DEBUG fmt, ##__VA_ARGS__)
+#else
+#define pr_debug_ratelimited(fmt, ...)
+#endif
+
+#elif LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35)
+
+#define pr_warn_ratelimited	pr_warning_ratelimited
+
+#endif /* < 2.6.35 */
