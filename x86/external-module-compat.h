@@ -224,6 +224,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_POPCNT	(4*32+23) /* POPCNT instruction */
 #endif
 
+#ifndef X86_FEATURE_TSC_DEADLINE_TIMER
+#define X86_FEATURE_TSC_DEADLINE_TIMER	(4*32+24) /* Tsc deadline timer */
+#endif
+
 #ifndef X86_FEATURE_AES
 #define X86_FEATURE_AES		(4*32+25) /* AES instructions */
 #endif
@@ -1176,4 +1180,16 @@ bool kvm_boot_cpu_has(unsigned int bit);
 #define VMX_BASIC_VMCS_SIZE_SHIFT	32
 #define VMX_BASIC_MEM_TYPE_SHIFT	50
 #define VMX_BASIC_MEM_TYPE_WB	6LLU
+#endif
+
+#ifndef MSR_IA32_TSCDEADLINE
+#define MSR_IA32_TSCDEADLINE		0x000006e0
+#endif
+
+#ifndef APIC_LVT_TIMER_ONESHOT
+#define APIC_LVT_TIMER_ONESHOT		(0 << 17)
+#endif
+
+#ifndef APIC_LVT_TIMER_TSCDEADLINE
+#define APIC_LVT_TIMER_TSCDEADLINE	(2 << 17)
 #endif
