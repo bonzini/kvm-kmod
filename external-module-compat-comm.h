@@ -1021,3 +1021,16 @@ void kvm_sigset_from_compat(sigset_t *set, compat_sigset_t *compat)
 #define pr_warn_ratelimited	pr_warning_ratelimited
 
 #endif /* < 2.6.35 */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,1,0)
+static inline int kvm_sched_info_on(void)
+{
+#ifdef CONFIG_SCHEDSTATS
+        return 1;
+#else
+        return 0;
+#endif
+}
+#else /* >= 3.1 */
+#define kvm_sched_info_on sched_info_on
+#endif /* >= 3.1 */
