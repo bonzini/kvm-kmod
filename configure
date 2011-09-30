@@ -171,17 +171,17 @@ ln -sf asm-"$karch" include/asm
 ln -sf asm-"$karch" include-compat/asm
 
 cat <<EOF > config.mak
-ARCH=$arch
+export ARCH=$arch
 PROCESSOR=$processor
 PREFIX=$prefix
 KERNELDIR=$kerneldir
 KERNELSOURCEDIR=$kernelsourcedir
 KERNELVERSION=$kernel_version_str
-CROSS_COMPILE=$cross_prefix
-CC=$cross_prefix$cc
-LD=$cross_prefix$ld
-OBJCOPY=$cross_prefix$objcopy
-AR=$cross_prefix$ar
+export CROSS_COMPILE=$cross_prefix
+export CC=$cross_prefix$cc
+export LD=$cross_prefix$ld
+export OBJCOPY=$cross_prefix$objcopy
+export AR=$cross_prefix$ar
 KVM_VERSION=$(kvm_version)
 EOF
 
