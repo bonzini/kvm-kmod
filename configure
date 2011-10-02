@@ -86,7 +86,6 @@ kvm_version() {
     fi
 }
 
-processor=${arch#*-}
 arch=${arch%%-*}
 
 kerneldir=$(cd $kerneldir; pwd)
@@ -172,7 +171,6 @@ ln -sf asm-"$karch" include-compat/asm
 
 cat <<EOF > config.mak
 export ARCH=$arch
-PROCESSOR=$processor
 PREFIX=$prefix
 KERNELDIR=$kerneldir
 KERNELSOURCEDIR=$kernelsourcedir
