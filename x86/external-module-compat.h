@@ -1193,3 +1193,7 @@ bool kvm_boot_cpu_has(unsigned int bit);
 #ifndef APIC_LVT_TIMER_TSCDEADLINE
 #define APIC_LVT_TIMER_TSCDEADLINE	(2 << 17)
 #endif
+
+#ifndef MSR_IA32_MISC_ENABLE_FAST_STRING
+#define MSR_IA32_MISC_ENABLE_FAST_STRING	(1ULL << 0)
+#endif
