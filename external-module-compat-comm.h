@@ -1034,3 +1034,7 @@ static inline int kvm_sched_info_on(void)
 #else /* >= 3.1 */
 #define kvm_sched_info_on sched_info_on
 #endif /* >= 3.1 */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,2,0)
+#define PCI_DEV_FLAGS_ASSIGNED	0
+#endif
