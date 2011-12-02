@@ -1043,3 +1043,10 @@ static inline int kvm_sched_info_on(void)
 #define iommu_present(x)	iommu_found()
 #define iommu_domain_alloc(x)	iommu_domain_alloc()
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,39)
+static inline int __test_and_set_bit_le(int nr, void *addr)
+{
+        return __test_and_set_bit(nr ^ BITOP_LE_SWIZZLE, addr);
+}
+#endif
