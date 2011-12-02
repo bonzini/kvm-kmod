@@ -1050,3 +1050,7 @@ static inline int __test_and_set_bit_le(int nr, void *addr)
         return __test_and_set_bit(nr ^ BITOP_LE_SWIZZLE, addr);
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,34)
+#define for_each_set_bit(bit, addr, size) for_each_bit(bit, addr, size)
+#endif
