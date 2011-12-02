@@ -1197,3 +1197,16 @@ bool kvm_boot_cpu_has(unsigned int bit);
 #ifndef MSR_IA32_MISC_ENABLE_FAST_STRING
 #define MSR_IA32_MISC_ENABLE_FAST_STRING	(1ULL << 0)
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,2,0)
+struct perf_guest_switch_msr {
+	unsigned msr;
+	u64 host, guest;
+};
+
+static inline struct perf_guest_switch_msr *perf_guest_get_msrs(int *nr)
+{
+	*nr = 0;
+	return NULL;
+}
+#endif
