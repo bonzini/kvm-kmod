@@ -1038,3 +1038,8 @@ static inline int kvm_sched_info_on(void)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,2,0)
 #define PCI_DEV_FLAGS_ASSIGNED	0
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,2,0)
+#define iommu_present(x)	iommu_found()
+#define iommu_domain_alloc(x)	iommu_domain_alloc()
+#endif
