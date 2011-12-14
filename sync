@@ -223,6 +223,8 @@ def hack_content(fname, data):
             w('#else')
             w('\t\t\tentry->ebx = 0;');
             w('#endif')
+        if match(r'#ifdef CONFIG_KVM_MMU_AUDIT'):
+            w('#undef CONFIG_KVM_MMU_AUDIT')
         w(line)
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
