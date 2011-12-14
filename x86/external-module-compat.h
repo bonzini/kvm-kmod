@@ -204,6 +204,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_SSSE3	(4*32+ 9) /* Supplemental SSE-3 */
 #endif
 
+#ifndef X86_FEATURE_FMA
+#define X86_FEATURE_FMA		(4*32+12) /* Fused multiply-add */
+#endif
+
 #ifndef X86_FEATURE_XMM4_1
 #define X86_FEATURE_XMM4_1	(4*32+19) /* "sse4_1" SSE-4.1 */
 #endif
@@ -324,8 +328,20 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_FSGSBASE	(9*32+ 0) /* {RD/WR}{FS/GS}BASE instructions*/
 #endif
 
+#ifndef X86_FEATURE_BMI1
+#define X86_FEATURE_BMI1	(9*32+ 3) /* 1st group bit manipulation extensions */
+#endif
+
+#ifndef X86_FEATURE_AVX2
+#define X86_FEATURE_AVX2	(9*32+ 5) /* AVX2 instructions */
+#endif
+
 #ifndef X86_FEATURE_SMEP
 #define X86_FEATURE_SMEP	(9*32+ 7) /* Supervisor Mode Execution Protection */
+#endif
+
+#ifndef X86_FEATURE_BMI2
+#define X86_FEATURE_BMI2	(9*32+ 8) /* 2nd group bit manipulation extensions */
 #endif
 
 #ifndef X86_FEATURE_ERMS
