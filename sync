@@ -242,6 +242,9 @@ def hack_content(fname, data):
            match_block_end(r'^\tif \(pci_load_and_free_saved_state\(dev, &match->pci_saved_state\)\)', '^\t\t       __func__, dev_name\(&dev->dev\)\);') or \
            match_block_end(r'^\tif \(pci_load_and_free_saved_state\(assigned_dev->dev,', r'^\t\tpci_restore_state\(assigned_dev->dev\);'):
             w('#endif')
+        if fname == 'cpuid.c' and line == '#include <linux/module.h>':
+            w('#include <linux/vmalloc.h>')
+            w('#include <linux/uaccess.h>')
     if eventfd_file:
         result.append('#else\n'
                       'void kvm_eventfd_init(struct kvm *kvm) { }\n'
