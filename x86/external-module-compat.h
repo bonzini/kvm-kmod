@@ -1226,3 +1226,40 @@ static inline struct perf_guest_switch_msr *perf_guest_get_msrs(int *nr)
 	return NULL;
 }
 #endif
+
+#include <asm/perf_event.h>
+
+#ifndef X86_PMC_MAX_GENERIC
+#define X86_PMC_MAX_GENERIC				       32
+#endif
+
+#ifndef X86_PMC_MAX_FIXED
+#define X86_PMC_MAX_FIXED					3
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35)
+union kvm_cpuid10_eax {
+	struct {
+		unsigned int version_id:8;
+		unsigned int num_counters:8;
+		unsigned int bit_width:8;
+		unsigned int mask_length:8;
+	} split;
+	unsigned int full;
+};
+#else /* >= 2.6.35 */
+#define kvm_cpuid10_eax	cpuid10_eax
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
+union kvm_cpuid10_edx {
+	struct {
+		unsigned int num_counters_fixed:5;
+		unsigned int bit_width_fixed:8;
+		unsigned int reserved:19;
+	} split;
+	unsigned int full;
+};
+#else /* >= 2.6.36 */
+#define kvm_cpuid10_edx	cpuid10_edx
+#endif

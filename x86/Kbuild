@@ -1,5 +1,5 @@
 obj-m := kvm.o kvm-intel.o kvm-amd.o
-kvm-objs := kvm_main.o x86.o mmu.o emulate.o irq.o i8259.o \
+kvm-objs := kvm_main.o x86.o mmu.o emulate.o irq.o i8259.o pmu.o \
 	 lapic.o ioapic.o preempt.o i8254.o coalesced_mmio.o irq_comm.o \
 	 timer.o eventfd.o assigned-dev.o compat-x86.o async_pf.o cpuid.o \
 	 ../external-module-compat.o

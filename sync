@@ -48,7 +48,8 @@ def hack_content(fname, data):
         'amd_erratum_383 cpu_has_amd_erratum set_64bit siginfo_t use_mm '
         'unuse_mm request_threaded_irq init_fpu __this_cpu_read '
         '__this_cpu_write get_task_pid put_pid sigset_from_compat '
-        'sched_info_on '
+        'sched_info_on x86_pmu_capability perf_get_x86_pmu_capability '
+        'cpuid10_eax cpuid10_edx '
         )
     eventfd_file = False
     result = []
@@ -225,6 +226,8 @@ def hack_content(fname, data):
             w('#endif')
         if match(r'#ifdef CONFIG_KVM_MMU_AUDIT'):
             w('#undef CONFIG_KVM_MMU_AUDIT')
+        if line == 'static struct kvm_arch_event_perf_mapping {':
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,3,0)')
         w(line)
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
@@ -245,6 +248,10 @@ def hack_content(fname, data):
         if fname == 'cpuid.c' and line == '#include <linux/module.h>':
             w('#include <linux/vmalloc.h>')
             w('#include <linux/uaccess.h>')
+        if match_block_end(r'void kvm_handle_pmu_event\(struct kvm_vcpu \*vcpu\)', r'^}'):
+            w('#else')
+            w('#include "pmu-stubs.c"')
+            w('#endif')
     if eventfd_file:
         result.append('#else\n'
                       'void kvm_eventfd_init(struct kvm *kvm) { }\n'
@@ -269,7 +276,7 @@ def unifdef(fname):
 hack_files = {
     'x86': str.split('kvm_main.c mmu.c vmx.c svm.c x86.c irq.h lapic.c'
                      ' i8254.c timer.c eventfd.c emulate.c async_pf.c'
-                     ' assigned-dev.c cpuid.c'),
+                     ' assigned-dev.c cpuid.c pmu.c'),
 }
 
 def mkdir(dir):

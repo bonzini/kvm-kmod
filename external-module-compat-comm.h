@@ -1054,3 +1054,24 @@ static inline int __test_and_set_bit_le(int nr, void *addr)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,34)
 #define for_each_set_bit(bit, addr, size) for_each_bit(bit, addr, size)
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,3,0)
+struct kvm_x86_pmu_capability {
+	int		version;
+	int		num_counters_gp;
+	int		num_counters_fixed;
+	int		bit_width_gp;
+	int		bit_width_fixed;
+	unsigned int	events_mask;
+	int		events_mask_len;
+};
+
+static inline void
+kvm_perf_get_x86_pmu_capability(struct kvm_x86_pmu_capability *cap)
+{
+	memset(cap, 0, sizeof(*cap));
+}
+#else /* >= 3.3 */
+#define kvm_x86_pmu_capability		x86_pmu_capability
+#define kvm_perf_get_x86_pmu_capability	perf_get_x86_pmu_capability
+#endif /* >= 3.3 */
