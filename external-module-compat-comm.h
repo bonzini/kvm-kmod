@@ -1054,3 +1054,8 @@ static inline int __test_and_set_bit_le(int nr, void *addr)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,34)
 #define for_each_set_bit(bit, addr, size) for_each_bit(bit, addr, size)
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)
+#define PCI_STD_RESOURCES	0
+#define PCI_STD_RESOURCE_END	5
+#endif
