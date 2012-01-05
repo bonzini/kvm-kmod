@@ -49,7 +49,7 @@ def hack_content(fname, data):
         'unuse_mm request_threaded_irq init_fpu __this_cpu_read '
         '__this_cpu_write get_task_pid put_pid sigset_from_compat '
         'sched_info_on x86_pmu_capability perf_get_x86_pmu_capability '
-        'cpuid10_eax cpuid10_edx '
+        'cpuid10_eax cpuid10_edx kern_path inode_permission path_put '
         )
     eventfd_file = False
     result = []
