@@ -1075,3 +1075,8 @@ kvm_perf_get_x86_pmu_capability(struct kvm_x86_pmu_capability *cap)
 #define kvm_x86_pmu_capability		x86_pmu_capability
 #define kvm_perf_get_x86_pmu_capability	perf_get_x86_pmu_capability
 #endif /* >= 3.3 */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)
+#define PCI_STD_RESOURCES	0
+#define PCI_STD_RESOURCE_END	5
+#endif
