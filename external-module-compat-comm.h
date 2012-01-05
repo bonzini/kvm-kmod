@@ -1059,3 +1059,38 @@ static inline int __test_and_set_bit_le(int nr, void *addr)
 #define PCI_STD_RESOURCES	0
 #define PCI_STD_RESOURCE_END	5
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
+static inline int
+kvm_path_put(struct path *path)
+{
+	BUG();
+	return -EPERM;
+}
+#else /* >= 2.6.25 */
+#define kvm_path_put		path_put
+#endif /* >= 2.6.25 */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
+static inline int kvm_inode_permission(struct inode *inode, int mask)
+{
+	BUG();
+	return -EPERM;
+}
+#else /* >= 2.6.28 */
+#define kvm_inode_permission	inode_permission
+#endif /* >= 2.6.28 */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
+static inline int
+kvm_kern_path(const char *name, unsigned int flags, struct path *path)
+{
+	return -EPERM;
+}
+#else /* >= 2.6.28 */
+#define kvm_kern_path		kern_path
+#endif /* >= 2.6.28 */
+
+#ifndef MAY_ACCESS
+#define MAY_ACCESS		0x00000010
+#endif

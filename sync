@@ -48,7 +48,7 @@ def hack_content(fname, data):
         'amd_erratum_383 cpu_has_amd_erratum set_64bit siginfo_t use_mm '
         'unuse_mm request_threaded_irq init_fpu __this_cpu_read '
         '__this_cpu_write get_task_pid put_pid sigset_from_compat '
-        'sched_info_on '
+        'sched_info_on kern_path inode_permission path_put '
         )
     eventfd_file = False
     result = []
