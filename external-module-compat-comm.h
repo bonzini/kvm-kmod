@@ -1129,3 +1129,10 @@ static inline void *memdup_user(const void __user *user, size_t size)
 	return buf;
 }
 #endif /* < 2.6.30 */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,27)
+static inline void debugfs_remove_recursive(struct dentry *dentry)
+{
+	WARN("kvm-kmod: leaving some debugfs entries behind");
+}
+#endif /* < 2.6.27 */
