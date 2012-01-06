@@ -1115,3 +1115,17 @@ kvm_kern_path(const char *name, unsigned int flags, struct path *path)
 #ifndef MAY_ACCESS
 #define MAY_ACCESS		0x00000010
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,30)
+#include <linux/uaccess.h>
+static inline void *memdup_user(const void __user *user, size_t size)
+{
+	void *buf = kzalloc(size, GFP_KERNEL);
+
+	if (!buf)
+		return ERR_PTR(-ENOMEM);
+	if (copy_from_user(buf, user, size))
+		return ERR_PTR(-EFAULT);
+	return buf;
+}
+#endif /* < 2.6.30 */
