@@ -1045,9 +1045,9 @@ static inline int kvm_sched_info_on(void)
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,39)
-static inline int __test_and_set_bit_le(int nr, void *addr)
+static inline int test_and_set_bit_le(int nr, void *addr)
 {
-        return __test_and_set_bit(nr ^ BITOP_LE_SWIZZLE, addr);
+        return test_and_set_bit(nr ^ BITOP_LE_SWIZZLE, addr);
 }
 #endif
 
