@@ -1115,8 +1115,8 @@ static inline bool kvm_cpu_has_amd_erratum(const int *erratum)
 
 #endif /* >= 2.6.36 */
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,37) || \
-    (LINUX_VERSION_CODE == KERNEL_VERSION(2,6,32) && KERNEL_EXTRAVERSION < 40)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,37) && \
+    (LINUX_VERSION_CODE != KERNEL_VERSION(2,6,32) || KERNEL_EXTRAVERSION < 40)
 static inline u64 pvclock_scale_delta(u64 delta, u32 mul_frac, int shift)
 {
 	u64 product;
