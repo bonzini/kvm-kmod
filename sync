@@ -52,6 +52,12 @@ def hack_content(fname, data):
         'cpuid10_eax cpuid10_edx kern_path inode_permission path_put '
         'iommu_map iommu_unmap '
         )
+    modparam_vars = str.split(
+        'dbg enable_vpid flexpriority_enabled enable_ept '
+        'enable_unrestricted_guest emulate_invalid_guest_state '
+        'vmm_exclusive yield_on_hlt fasteoi nested ignore_msrs '
+        'allow_unsafe_assigned_interrupts '
+        )
     eventfd_file = False
     result = []
     pr_fmt = ''
@@ -229,6 +235,13 @@ def hack_content(fname, data):
             w('#undef CONFIG_KVM_MMU_AUDIT')
         if line == 'static struct kvm_arch_event_perf_mapping {':
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,3,0)')
+        for modparam_var in modparam_vars:
+            if match(r'^static bool.* ' + modparam_var + '[ ;]'):
+                w('#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,31)')
+                w(sub(r' bool ', r' int ', line))
+                w('#else')
+                w(line)
+                line = '#endif'
         w(line)
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
