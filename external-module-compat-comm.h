@@ -774,27 +774,48 @@ perf_unregister_guest_info_callbacks(struct perf_guest_info_callbacks *cbs)
 #define lockdep_is_held(m)		(1)
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35) && defined(CONFIG_IOMMU_API)
+#ifdef CONFIG_IOMMU_API
 #include <linux/iommu.h>
 
-static inline int iommu_map(struct iommu_domain *domain, unsigned long iova,
-			    phys_addr_t paddr, int gfp_order, int prot)
-{
-	size_t size = 0x1000UL << gfp_order;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,3,0)
 
+#define kvm_iommu_map	iommu_map
+#define kvm_iommu_unmap	iommu_unmap
+
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,35)
+
+static inline int kvm_iommu_map(struct iommu_domain *domain,
+				unsigned long iova, phys_addr_t paddr,
+				size_t size, int prot)
+{
+	return iommu_map(domain, iova, paddr, get_order(size), prot);
+}
+
+static inline int kvm_iommu_unmap(struct iommu_domain *domain,
+				  unsigned long iova, size_t size)
+{
+	return PAGE_SIZE << iommu_unmap(domain, iova, get_order(size));
+}
+
+#else /* < 2.6.35 */
+
+static inline int kvm_iommu_map(struct iommu_domain *domain,
+				unsigned long iova, phys_addr_t paddr,
+				size_t size, int prot)
+{
 	return iommu_map_range(domain, iova, paddr, size, prot);
 }
 
-static inline int iommu_unmap(struct iommu_domain *domain, unsigned long iova,
-			      int gfp_order)
+static inline int kvm_iommu_unmap(struct iommu_domain *domain,
+				  unsigned long iova, size_t size)
 {
-	size_t size = 0x1000UL << gfp_order;
-
 	iommu_unmap_range(domain, iova, size);
 
-	return gfp_order;
+	return size;
 }
-#endif
+#endif /* < 2.6.35 */
+
+#endif /* CONFIG_IOMMU_API */
 
 #ifndef lower_32_bits
 #define lower_32_bits(n) ((u32)(n))
