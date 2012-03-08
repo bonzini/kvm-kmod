@@ -1157,3 +1157,22 @@ static inline void debugfs_remove_recursive(struct dentry *dentry)
 	WARN("kvm-kmod: leaving some debugfs entries behind");
 }
 #endif /* < 2.6.27 */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,3,0)
+static inline bool pci_intx_mask_supported(struct pci_dev *dev)
+{
+	return false;
+}
+
+static inline bool pci_check_and_mask_intx(struct pci_dev *dev)
+{
+	BUG();
+	return false;
+}
+
+static inline bool pci_check_and_unmask_intx(struct pci_dev *dev)
+{
+	BUG();
+	return false;
+}
+#endif /* < 3.3 */
