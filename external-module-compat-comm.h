@@ -1176,3 +1176,7 @@ static inline bool pci_check_and_unmask_intx(struct pci_dev *dev)
 	return false;
 }
 #endif /* < 3.3 */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,30)
+#define IRQ_WAKE_THREAD		IRQ_NONE	/* will never be used */
+#endif
