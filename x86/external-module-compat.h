@@ -1272,3 +1272,8 @@ static inline int __thread_has_fpu(struct task_struct *tsk)
 	return task_thread_info(tsk)->status & TS_USEDFPU;
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,2,10)
+static inline void amd_pmu_enable_virt(void) { }
+static inline void amd_pmu_disable_virt(void) { }
+#endif
