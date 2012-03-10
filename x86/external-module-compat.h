@@ -1277,3 +1277,7 @@ static inline int __thread_has_fpu(struct task_struct *tsk)
 static inline void amd_pmu_enable_virt(void) { }
 static inline void amd_pmu_disable_virt(void) { }
 #endif
+
+#ifndef ARCH_PERFMON_EVENTSEL_PIN_CONTROL
+#define ARCH_PERFMON_EVENTSEL_PIN_CONTROL		(1ULL << 19)
+#endif
