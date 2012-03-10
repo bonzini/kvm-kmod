@@ -26,6 +26,7 @@ all:: prerequisite
 			$(if $(KERNELSOURCEDIR),\
 			-Iinclude2 -I$(KERNELSOURCEDIR)/include -I$(KERNELSOURCEDIR)/arch/${ARCH_DIR}/include, \
 				-Iarch/${ARCH_DIR}/include) \
+			-Iarch/${ARCH_DIR}/include/generated \
 			-I`pwd`/include-compat -I`pwd`/${ARCH_DIR} \
 			-include $(if $(wildcard $(KERNELDIR)/include/generated), \
 				include/generated/autoconf.h, \
