@@ -332,6 +332,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_BMI1	(9*32+ 3) /* 1st group bit manipulation extensions */
 #endif
 
+#ifndef X86_FEATURE_HLE
+#define X86_FEATURE_HLE		(9*32+ 4) /* Hardware Lock Elision */
+#endif
+
 #ifndef X86_FEATURE_AVX2
 #define X86_FEATURE_AVX2	(9*32+ 5) /* AVX2 instructions */
 #endif
@@ -346,6 +350,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 
 #ifndef X86_FEATURE_ERMS
 #define X86_FEATURE_ERMS	(9*32+ 9) /* Enhanced REP MOVSB/STOSB */
+#endif
+
+#ifndef X86_FEATURE_RTM
+#define X86_FEATURE_RTM		(9*32+11) /* Restricted Transactional Memory */
 #endif
 
 #ifndef MSR_AMD64_PATCH_LOADER
