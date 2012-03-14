@@ -1289,3 +1289,9 @@ static inline void amd_pmu_disable_virt(void) { }
 #ifndef ARCH_PERFMON_EVENTSEL_PIN_CONTROL
 #define ARCH_PERFMON_EVENTSEL_PIN_CONTROL		(1ULL << 19)
 #endif
+
+#include <asm/pvclock-abi.h>
+
+#ifndef PVCLOCK_GUEST_STOPPED
+#define PVCLOCK_GUEST_STOPPED	(1 << 1)
+#endif
