@@ -1275,9 +1275,9 @@ union kvm_cpuid10_edx {
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,2,8) && \
     (LINUX_VERSION_CODE >= KERNEL_VERSION(3,1,0) || \
      LINUX_VERSION_CODE < KERNEL_VERSION(3,0,23))
-static inline int __thread_has_fpu(struct task_struct *tsk)
+static inline int user_has_fpu(void)
 {
-	return task_thread_info(tsk)->status & TS_USEDFPU;
+	return current_thread_info()->status & TS_USEDFPU;
 }
 #endif
 
