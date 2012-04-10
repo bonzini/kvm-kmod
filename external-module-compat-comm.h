@@ -1185,3 +1185,11 @@ static inline bool pci_check_and_unmask_intx(struct pci_dev *dev)
 struct x86_cpu_id { };
 #define X86_FEATURE_MATCH(x) { }
 #endif /* < 3.4 */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,37)
+#define kvm_kmap_atomic(page)	kmap_atomic(page, KM_USER0)
+#define kvm_kunmap_atomic(page)	kunmap_atomic(page, KM_USER0)
+#else /* >= 2.6.37 */
+#define kvm_kmap_atomic		kmap_atomic
+#define kvm_kunmap_atomic	kunmap_atomic
+#endif
