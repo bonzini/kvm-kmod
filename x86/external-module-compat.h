@@ -897,6 +897,7 @@ struct kvm_pvclock_vcpu_time_info {
 #endif
 
 #include <asm/i387.h>
+#include <asm/fpu-internal.h>
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35)
 struct kvm_i387_fxsave_struct {
