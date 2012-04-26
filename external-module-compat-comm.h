@@ -83,8 +83,6 @@ int kvm_smp_call_function_single(int cpu, void (*func)(void *info),
 #define CPU_DYING_FROZEN (CPU_DYING | CPU_TASKS_FROZEN)
 #endif
 
-#include <asm/system.h>
-
 struct inode;
 
 #include <linux/fs.h>
