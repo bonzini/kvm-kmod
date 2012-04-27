@@ -34,6 +34,10 @@ typedef u64 phys_addr_t;
 #define CONFIG_KVM_ASYNC_PF 1
 #endif
 
+#ifndef CONFIG_HAVE_KVM_MSI
+#define CONFIG_HAVE_KVM_MSI 1
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
 
 #ifdef CONFIG_X86_64
