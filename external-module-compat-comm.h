@@ -1191,3 +1191,12 @@ struct x86_cpu_id { };
 #define kvm_kmap_atomic		kmap_atomic
 #define kvm_kunmap_atomic	kunmap_atomic
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
+#include <linux/workqueue.h>
+#define kthread_worker			workqueue_struct *
+#define kthread_work			work_struct
+#define queue_kthread_work(q, w)	queue_work(*(q), w)
+#define flush_kthread_work		cancel_work_sync
+#define init_kthread_work		INIT_WORK
+#endif

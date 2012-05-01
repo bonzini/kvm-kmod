@@ -242,6 +242,15 @@ def hack_content(fname, data):
                 w('#else')
                 w(line)
                 line = '#endif'
+        if line == '\tinit_kthread_worker(&pit->worker);':
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,36)')
+        if match(r'kthread_stop\(.*->worker_task\)'):
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,36)')
+            w(line)
+            w('#else')
+            line = sub(r'kthread_stop', 'destroy_workqueue', line)
+            w(sub(r'worker_task', 'worker', line))
+            line = '#endif'
         w(line)
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
@@ -265,6 +274,12 @@ def hack_content(fname, data):
         if match_block_end(r'void kvm_handle_pmu_event\(struct kvm_vcpu \*vcpu\)', r'^}'):
             w('#else')
             w('#include "pmu-stubs.c"')
+            w('#endif')
+        if match_block_end(r'init_kthread_worker\(&pit->worker\);', r'if \(IS_ERR\(pit->worker_task\)\) {'):
+            w('#else')
+            w('\t(void)pid_nr;')
+            w('\tpit->worker = create_singlethread_workqueue("kvm-pit");')
+            w('\tif (!pit->worker) {')
             w('#endif')
     if eventfd_file:
         result.append('#else\n'
