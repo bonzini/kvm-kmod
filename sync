@@ -215,8 +215,10 @@ def hack_content(fname, data):
             line = '#endif'
         if match(r'static int kvm_mmu_notifier_test_young'):
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,38)')
-        if match(r'^void kvm_vcpu_on_spin'):
+        if match(r'^bool kvm_vcpu_yield_to'):
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,39)')
+        if line == 'EXPORT_SYMBOL_GPL(kvm_vcpu_on_spin);':
+            w('#endif')
         if line == 'static int kvm_suspend(void)':
             line = 'int kvm_suspend(void)'
         if line == 'static void kvm_resume(void)':
@@ -261,8 +263,6 @@ def hack_content(fname, data):
             w('\t\tprintk(KERN_ERR "kvm: if TXT is enabled in the BIOS, disable it\\n");')
             w('#endif')
         if match_block_end(r'^static int kvm_mmu_notifier_test_young', r'^}'):
-            w('#endif')
-        if match_block_end(r'^void kvm_vcpu_on_spin', r'^}'):
             w('#endif')
         if match_block_end(r'^\tpci_save_state\(dev\);', r'^\t\t       __func__, dev_name\(&dev->dev\)\);') or \
            match_block_end(r'^\tif \(pci_load_and_free_saved_state\(dev, &match->pci_saved_state\)\)', '^\t\t       __func__, dev_name\(&dev->dev\)\);') or \
