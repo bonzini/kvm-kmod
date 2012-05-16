@@ -13,6 +13,16 @@ typedef u64 phys_addr_t;
 
 #endif
 
+#include <asm/cpufeature.h>
+
+#ifndef X86_FEATURE_HYPERVISOR
+#define X86_FEATURE_HYPERVISOR	(4*32+31) /* Running on a hypervisor */
+#endif
+
+#ifndef cpu_has_hypervisor
+#define cpu_has_hypervisor boot_cpu_has(X86_FEATURE_HYPERVISOR)
+#endif
+
 #include "../external-module-compat-comm.h"
 
 #include <asm/msr.h>
@@ -181,8 +191,6 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #ifndef MSR_K8_INT_PENDING_MSG
 #define MSR_K8_INT_PENDING_MSG  0xc0010055
 #endif
-
-#include <asm/cpufeature.h>
 
 #ifndef X86_FEATURE_FXSR_OPT
 #define X86_FEATURE_FXSR_OPT	(1*32+25)
