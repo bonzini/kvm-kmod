@@ -1200,3 +1200,29 @@ struct x86_cpu_id { };
 #define flush_kthread_work		cancel_work_sync
 #define init_kthread_work		INIT_WORK
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,4,0)
+static inline unsigned long vm_mmap(struct file *file, unsigned long addr,
+				    unsigned long len, unsigned long prot,
+				    unsigned long flag, unsigned long offset)
+{
+	unsigned long ret;
+	struct mm_struct *mm = current->mm;
+
+	down_write(&mm->mmap_sem);
+	ret = do_mmap(file, addr, len, prot, flag, offset);
+	up_write(&mm->mmap_sem);
+	return ret;
+}
+
+static inline int vm_munmap(unsigned long start, size_t len)
+{
+	struct mm_struct *mm = current->mm;
+	int ret;
+
+	down_write(&mm->mmap_sem);
+	ret = do_munmap(mm, start, len);
+	up_write(&mm->mmap_sem);
+	return ret;
+}
+#endif
