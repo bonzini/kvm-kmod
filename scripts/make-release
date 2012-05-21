@@ -51,7 +51,7 @@ linux_git="$(readlink -f "$LINUX/.git")"
 mkdir -p "$tmpdir/$name"
 mkdir -p "$tmpdir/$name/linux"
 
-files=("virt/kvm" "arch/x86" "include" "scripts" "Makefile"
+files=("virt/kvm" "arch/x86" "include" "scripts" "Makefile" "tools"
        )
 
 index="$tmpdir/index"
