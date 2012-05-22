@@ -6,14 +6,11 @@ ARCH_CONFIG := $(shell echo $(ARCH_DIR) | tr '[:lower:]' '[:upper:]')
 # NONARCH_CONFIG used for unifdef, and only cover X86 now
 NONARCH_CONFIG = $(filter-out $(ARCH_CONFIG),X86)
 
-PREFIX = /usr/local
 DESTDIR = /
 
 MAKEFILE_PRE = $(ARCH_DIR)/Makefile.pre
 
 export INSTALL_MOD_DIR=updates
-HEADERDIR = $(PREFIX)/include/kvm-kmod
-PKGCONFIGDIR = $(PREFIX)/lib/pkgconfig
 
 rpmrelease = devel
 
@@ -41,25 +38,8 @@ KVM_VERSION_GIT = $(if $(and $(filter kvm-devel,$(KVM_VERSION)), \
 			   $(shell git --git-dir=$(LINUX)/.git describe), \
 			   $(KVM_VERSION))
 
-sync-kmod:
+sync:
 	./sync -v $(KVM_VERSION_GIT) -l $(LINUX)
-
-sync-hdr:
-	for a in x86; do \
-		$(MAKE) -C $(LINUX) INSTALL_HDR_PATH=`pwd`/.tmp-hdrs SRCARCH="$$a" headers_install; \
-		mkdir -p usr/include/asm-"$$a"; \
-		cp .tmp-hdrs/include/asm/kvm.h .tmp-hdrs/include/asm/kvm_para.h usr/include/asm-"$$a"; \
-		if test $$a == x86; then \
-			cp .tmp-hdrs/include/asm/hyperv.h usr/include/asm-x86; \
-		fi \
-	done
-	mkdir -p usr/include/linux
-	cp .tmp-hdrs/include/linux/kvm.h .tmp-hdrs/include/linux/kvm_para.h usr/include/linux
-	rm -rf .tmp-hdrs
-
-sync: sync-kmod sync-hdr
-
-tmppc = .tmp.kvm-kmod.pc
 
 KVM_KMOD_VERSION = $(strip $(if $(wildcard KVM_VERSION), \
 			$(shell cat KVM_VERSION), \
@@ -67,18 +47,10 @@ KVM_KMOD_VERSION = $(strip $(if $(wildcard KVM_VERSION), \
 				$(shell git describe), \
 				kvm-devel)))
 
-install-hdr:
-	mkdir -p $(DESTDIR)/$(HEADERDIR)/asm/
-	install -m 644 usr/include/asm-$(ARCH_DIR)/*.h $(DESTDIR)/$(HEADERDIR)/asm/
-	mkdir -p $(DESTDIR)/$(HEADERDIR)/linux/
-	install -m 644 usr/include/linux/*.h $(DESTDIR)/$(HEADERDIR)/linux/
-	sed 's|PREFIX|$(PREFIX)|; s/VERSION/$(KVM_KMOD_VERSION)/' kvm-kmod.pc > $(tmppc)
-	install -m 644 -D $(tmppc) $(DESTDIR)/$(PKGCONFIGDIR)/kvm-kmod.pc
-
 modules_install:
 	$(MAKE) -C $(KERNELDIR) M=`pwd` INSTALL_MOD_PATH=$(DESTDIR)/$(INSTALL_MOD_PATH) $@
 
-install: install-hdr modules_install
+install: modules_install
 	install -m 644 -D scripts/65-kvm.rules $(DESTDIR)/etc/udev/rules.d/65-kvm.rules
 
 tmpspec = .tmp.kvm-kmod.spec
@@ -101,6 +73,6 @@ clean:
 	$(MAKE) -C $(KERNELDIR) M=`pwd` $@
 
 distclean: clean
-	rm -f config.mak kvm-kmod-config.h include/asm include-compat/asm $(tmppc) $(tmpspec)
+	rm -f config.mak kvm-kmod-config.h include/asm include-compat/asm $(tmpspec)
 
-.PHONY: all sync sync-kmod sync-hdr install install-hdr rpm clean distclean
+.PHONY: all sync install rpm clean distclean
