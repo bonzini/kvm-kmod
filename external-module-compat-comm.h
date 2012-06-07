@@ -1226,3 +1226,13 @@ static inline int vm_munmap(unsigned long start, size_t len)
 	return ret;
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
+#include <linux/highmem.h>
+static inline int is_vmalloc_addr(const void *x)
+{
+	unsigned long addr = (unsigned long)x;
+
+	return addr >= VMALLOC_START && addr < VMALLOC_END;
+}
+#endif
