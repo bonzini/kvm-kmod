@@ -253,6 +253,8 @@ def hack_content(fname, data):
             line = sub(r'kthread_stop', 'destroy_workqueue', line)
             w(sub(r'worker_task', 'worker', line))
             line = '#endif'
+        if inside_block(r'^void kvm_kvfree\(', r'^}') and line == '\t\tvfree(addr);':
+            line = '\t\tvfree((void *)addr);'
         w(line)
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
