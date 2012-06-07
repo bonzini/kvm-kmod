@@ -55,7 +55,7 @@ def hack_content(fname, data):
     modparam_vars = str.split(
         'dbg enable_vpid flexpriority_enabled enable_ept '
         'enable_unrestricted_guest emulate_invalid_guest_state '
-        'vmm_exclusive yield_on_hlt fasteoi nested ignore_msrs '
+        'vmm_exclusive fasteoi nested ignore_msrs enable_ept_ad_bits '
         'allow_unsafe_assigned_interrupts '
         )
     eventfd_file = False
