@@ -430,12 +430,20 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_CR3_PCD 0x00000010
 #endif
 
+#ifndef X86_CR3_PCID_MASK
+#define X86_CR3_PCID_MASK 0x00000fff
+#endif
+
 #ifndef X86_CR4_VMXE
 #define X86_CR4_VMXE 0x00002000
 #endif
 
 #ifndef X86_CR4_RDWRGSFS
 #define X86_CR4_RDWRGSFS 0x00010000 /* enable RDWRGSFS support */
+#endif
+
+#ifndef X86_CR4_PCIDE
+#define X86_CR4_PCIDE 0x00020000
 #endif
 
 #ifndef X86_CR4_OSXSAVE
