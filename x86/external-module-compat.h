@@ -220,6 +220,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_FMA		(4*32+12) /* Fused multiply-add */
 #endif
 
+#ifndef X86_FEATURE_PCID
+#define X86_FEATURE_PCID	(4*32+17) /* Process Context Identifiers */
+#endif
+
 #ifndef X86_FEATURE_XMM4_1
 #define X86_FEATURE_XMM4_1	(4*32+19) /* "sse4_1" SSE-4.1 */
 #endif
@@ -362,6 +366,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 
 #ifndef X86_FEATURE_ERMS
 #define X86_FEATURE_ERMS	(9*32+ 9) /* Enhanced REP MOVSB/STOSB */
+#endif
+
+#ifndef X86_FEATURE_INVPCID
+#define X86_FEATURE_INVPCID	(9*32+10) /* Invalidate Processor Context ID */
 #endif
 
 #ifndef X86_FEATURE_RTM
