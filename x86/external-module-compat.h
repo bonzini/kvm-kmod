@@ -1336,3 +1336,13 @@ static inline void amd_pmu_disable_virt(void) { }
 #ifndef PVCLOCK_GUEST_STOPPED
 #define PVCLOCK_GUEST_STOPPED	(1 << 1)
 #endif
+
+#if !defined(CONFIG_X86_64) && LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26)
+static inline unsigned long __fls(unsigned long word)
+{
+	asm("bsr %1,%0"
+	    : "=r" (word)
+	    : "rm" (word));
+	return word;
+}
+#endif
