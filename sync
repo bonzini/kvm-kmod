@@ -255,6 +255,8 @@ def hack_content(fname, data):
             line = '#endif'
         if inside_block(r'^void kvm_kvfree\(', r'^}') and line == '\t\tvfree(addr);':
             line = '\t\tvfree((void *)addr);'
+        if fname == 'include/linux/kvm_host.h' and line == '#if defined(CONFIG_MMU_NOTIFIER) && defined(KVM_ARCH_WANT_MMU_NOTIFIER)':
+            line ='#if defined(KVM_ARCH_WANT_MMU_NOTIFIER)'
         w(line)
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
@@ -364,6 +366,7 @@ def header_sync(arch):
         cp(file, out)
         unifdef(out)
     hack_file(T, 'include/linux/kvm.h')
+    hack_file(T, 'include/linux/kvm_host.h')
     hack_file(T, 'include/asm-%(arch)s/kvm.h' % { 'arch': arch })
     hack_file(T, 'include/asm-%(arch)s/kvm_host.h' % { 'arch': arch })
     if arch == 'x86':
