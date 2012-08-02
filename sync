@@ -105,7 +105,7 @@ def hack_content(fname, data):
             pr_fmt = sub(r'#define pr_fmt\([^)]*\) ("[^"]*").*', r'\1', line) + ' '
             line = ''
         line = sub(r'pr_debug\(([^),]*)', r'pr_debug(' + pr_fmt + r'\1', line)
-        if inside_block(r'^int kvm_init\(', r'^}'):
+        if fname == 'kvm_main.c' and inside_block(r'^int kvm_init\(', r'^}'):
             if match(r'r = kvm_arch_init\(opaque\);'):
                 w('\tr = kvm_init_srcu();')
                 w('\tif (r)')
@@ -117,7 +117,7 @@ def hack_content(fname, data):
             elif match(r'return r;'):
                 w('\tpreempt_notifier_sys_exit();')
                 w('\tkvm_exit_srcu();')
-        if match_block_end(r'^void kvm_exit', r'^}'):
+        if match_block_end(r'^void kvm_exit\(void\)$', r'^}'):
             w('\tpreempt_notifier_sys_exit();')
             w('\tkvm_exit_srcu();')
         if match(r'MODULE_AUTHOR'):
@@ -215,7 +215,7 @@ def hack_content(fname, data):
             line = '#endif'
         if match(r'static int kvm_mmu_notifier_test_young'):
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,38)')
-        if match(r'^bool kvm_vcpu_yield_to'):
+        if match(r'^bool kvm_vcpu_yield_to\(struct kvm_vcpu \*target\)$'):
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,39)')
         if line == 'EXPORT_SYMBOL_GPL(kvm_vcpu_on_spin);':
             w('#endif')
