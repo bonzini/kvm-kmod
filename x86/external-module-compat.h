@@ -1262,8 +1262,20 @@ static inline struct perf_guest_switch_msr *perf_guest_get_msrs(int *nr)
 #define X86_PMC_MAX_GENERIC				       32
 #endif
 
+#ifndef INTEL_PMC_MAX_GENERIC
+#define INTEL_PMC_MAX_GENERIC	X86_PMC_MAX_GENERIC
+#endif
+
 #ifndef X86_PMC_MAX_FIXED
 #define X86_PMC_MAX_FIXED					3
+#endif
+
+#ifndef INTEL_PMC_MAX_FIXED
+#define INTEL_PMC_MAX_FIXED	X86_PMC_MAX_FIXED
+#endif
+
+#ifndef INTEL_PMC_IDX_FIXED
+#define INTEL_PMC_IDX_FIXED	X86_PMC_IDX_FIXED
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35)
