@@ -526,6 +526,36 @@ struct tracepoint;
 #define DEFINE_EVENT(template, name, proto, args)		\
 	DECLARE_TRACE(name, PARAMS(proto), PARAMS(args))
 
+#define __print_hex(buf, buf_len)	(buf)
+
+#elif LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35)
+
+#include <linux/trace_seq.h>
+
+#define __print_hex(buf, buf_len)	ftrace_print_hex_seq(p, buf, buf_len)
+
+static inline const char *
+ftrace_print_hex_seq(struct trace_seq *p, const unsigned char *buf,
+		     int buf_len)
+{
+	int i;
+	const char *ret = p->buffer + p->len;
+
+	for (i = 0; i < buf_len; i++)
+		trace_seq_printf(p, "%s%2.2x", i == 0 ? "" : " ", buf[i]);
+
+	if (p->full)
+		return ret;
+
+	if (p->len >= (PAGE_SIZE - 1)) {
+		p->full = 1;
+		return ret;
+	}
+
+	p->buffer[p->len++] = 0;
+
+	return ret;
+}
 #endif
 
 #include <linux/ftrace_event.h>
