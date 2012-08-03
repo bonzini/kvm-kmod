@@ -1346,3 +1346,11 @@ static inline unsigned long __fls(unsigned long word)
 	return word;
 }
 #endif
+
+#if defined(CONFIG_X86_64) && LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
+#define cmpxchg64(ptr, o, n)						\
+({									\
+	BUILD_BUG_ON(sizeof(*(ptr)) != 8);				\
+	cmpxchg((ptr), (o), (n));					\
+})
+#endif
