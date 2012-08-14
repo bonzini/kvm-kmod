@@ -1236,3 +1236,38 @@ static inline int is_vmalloc_addr(const void *x)
 	return addr >= VMALLOC_START && addr < VMALLOC_END;
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,32)
+static inline void
+kvm_set_normalized_timespec(struct timespec *ts, time_t sec, s64 nsec)
+{
+	while (nsec >= NSEC_PER_SEC) {
+		/*
+		 * The following asm() prevents the compiler from
+		 * optimising this loop into a modulo operation. See
+		 * also __iter_div_u64_rem() in include/linux/time.h
+		 */
+		asm("" : "+rm"(nsec));
+		nsec -= NSEC_PER_SEC;
+		++sec;
+	}
+	while (nsec < 0) {
+		asm("" : "+rm"(nsec));
+		nsec += NSEC_PER_SEC;
+		--sec;
+	}
+	ts->tv_sec = sec;
+	ts->tv_nsec = nsec;
+}
+
+static inline struct timespec kvm_timespec_sub(struct timespec lhs,
+					       struct timespec rhs)
+{
+	struct timespec ts_delta;
+	kvm_set_normalized_timespec(&ts_delta, lhs.tv_sec - rhs.tv_sec,
+				    lhs.tv_nsec - rhs.tv_nsec);
+	return ts_delta;
+}
+#else
+#define kvm_timespec_sub	timespec_sub
+#endif
