@@ -50,7 +50,7 @@ def hack_content(fname, data):
         '__this_cpu_write get_task_pid put_pid sigset_from_compat '
         'sched_info_on x86_pmu_capability perf_get_x86_pmu_capability '
         'cpuid10_eax cpuid10_edx kern_path inode_permission path_put '
-        'iommu_map iommu_unmap kmap_atomic kunmap_atomic '
+        'iommu_map iommu_unmap kmap_atomic kunmap_atomic timespec_sub '
         )
     modparam_vars = str.split(
         'dbg enable_vpid flexpriority_enabled enable_ept '
