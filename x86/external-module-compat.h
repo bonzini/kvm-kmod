@@ -1354,3 +1354,18 @@ static inline unsigned long __fls(unsigned long word)
 	cmpxchg((ptr), (o), (n));					\
 })
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)
+static inline unsigned long get_debugctlmsr(void)
+{
+	unsigned long debugctlmsr = 0;
+
+#ifndef CONFIG_X86_DEBUGCTLMSR
+	if (boot_cpu_data.x86 < 6)
+		return 0;
+#endif
+	rdmsrl(MSR_IA32_DEBUGCTLMSR, debugctlmsr);
+
+	return debugctlmsr;
+}
+#endif
