@@ -1369,3 +1369,14 @@ static inline unsigned long get_debugctlmsr(void)
 	return debugctlmsr;
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26)
+static inline void update_debugctlmsr(unsigned long debugctlmsr)
+{
+#ifndef CONFIG_X86_DEBUGCTLMSR
+	if (boot_cpu_data.x86 < 6)
+		return;
+#endif
+	wrmsrl(MSR_IA32_DEBUGCTLMSR, debugctlmsr);
+}
+#endif
