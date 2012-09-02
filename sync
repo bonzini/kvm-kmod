@@ -51,6 +51,9 @@ def hack_content(fname, data):
         'sched_info_on x86_pmu_capability perf_get_x86_pmu_capability '
         'cpuid10_eax cpuid10_edx kern_path inode_permission path_put '
         'iommu_map iommu_unmap kmap_atomic kunmap_atomic timespec_sub '
+        'static_key static_key_deferred static_key_false '
+        'static_key_slow_inc static_key_slow_dec static_key_slow_dec_deferred '
+        'jump_label_rate_limit '
         )
     modparam_vars = str.split(
         'dbg enable_vpid flexpriority_enabled enable_ept '
@@ -307,8 +310,8 @@ def unifdef(fname):
     file(fname, 'w').write(data)
 
 hack_files = {
-    'x86': str.split('kvm_main.c mmu.c vmx.c svm.c x86.c irq.h lapic.c'
-                     ' i8254.c eventfd.c emulate.c async_pf.c'
+    'x86': str.split('kvm_main.c mmu.c vmx.c svm.c x86.c x86.h irq.h lapic.c'
+                     ' lapic.h i8254.c eventfd.c emulate.c async_pf.c'
                      ' assigned-dev.c cpuid.c pmu.c iommu.c paging_tmpl.h'),
 }
 

@@ -1301,3 +1301,23 @@ static inline struct timespec kvm_timespec_sub(struct timespec lhs,
 #else
 #define kvm_timespec_sub	timespec_sub
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,6,0)
+struct kvm_static_key {
+};
+struct kvm_static_key_deferred {
+};
+#define kvm_static_key_false(key)		(1)
+#define kvm_static_key_slow_inc(key)		do { } while (0)
+#define kvm_static_key_slow_dec(key)		do { } while (0)
+#define kvm_static_key_slow_dec_deferred(key)	do { } while (0)
+#define kvm_jump_label_rate_limit(key, hz)	do { } while (0)
+#else /* >= 3.6.0 */
+#define kvm_static_key				static_key
+#define kvm_static_key_deferred			static_key_deferred
+#define kvm_static_key_false			static_key_false
+#define kvm_static_key_slow_inc			static_key_slow_inc
+#define kvm_static_key_slow_dec			static_key_slow_dec
+#define kvm_static_key_slow_dec_deferred	static_key_slow_dec_deferred
+#define kvm_jump_label_rate_limit		jump_label_rate_limit
+#endif /* >= 3.6.0 */
