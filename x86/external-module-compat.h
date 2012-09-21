@@ -1380,3 +1380,18 @@ static inline void update_debugctlmsr(unsigned long debugctlmsr)
 	wrmsrl(MSR_IA32_DEBUGCTLMSR, debugctlmsr);
 }
 #endif
+
+#ifndef __ASM_REG
+#define __ASM_REG(reg)	__ASM_SEL(e##reg, r##reg)
+#define _ASM_AX		__ASM_REG(ax)
+#define _ASM_BX		__ASM_REG(bx)
+#define _ASM_CX		__ASM_REG(cx)
+#define _ASM_DX		__ASM_REG(dx)
+#endif
+
+#ifndef _ASM_SP
+#define _ASM_SP		__ASM_REG(sp)
+#define _ASM_BP		__ASM_REG(bp)
+#define _ASM_SI		__ASM_REG(si)
+#define _ASM_DI		__ASM_REG(di)
+#endif
