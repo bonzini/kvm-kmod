@@ -41,6 +41,10 @@ if [[ -z "$name" ]]; then
     name="$commit"
 fi
 
+if [[ -n "$formal" ]] && ! git tag -v $name 2>/dev/null >/dev/null; then
+    git tag -as -m "" $name $commit
+fi
+
 tarball="$releasedir/$name.tar.bz2"
 
 cd "$(dirname "$0")"/..
