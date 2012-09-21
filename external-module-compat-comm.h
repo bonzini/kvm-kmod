@@ -1321,3 +1321,7 @@ struct kvm_static_key_deferred {
 #define kvm_static_key_slow_dec_deferred	static_key_slow_dec_deferred
 #define kvm_jump_label_rate_limit		jump_label_rate_limit
 #endif /* >= 3.7.0 */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
+#define mutex_lock_killable(m)			({ mutex_lock(m); 0; })
+#endif
