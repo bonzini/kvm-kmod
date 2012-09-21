@@ -10,7 +10,6 @@ usage() {
 upload=
 formal=
 
-releasedir=~/sf-release
 [[ -z "$TMP" ]] && TMP="/tmp"
 tmpdir="$TMP/kvm-kmod-make-release.$$"
 while [[ "$1" = -* ]]; do
@@ -45,6 +44,9 @@ if [[ -n "$formal" ]] && ! git tag -v $name 2>/dev/null >/dev/null; then
     git tag -as -m "" $name $commit
 fi
 
+releasedir=~/kvm-kmod-release
+rm -rf "$releasedir"
+mkdir "$releasedir"
 tarball="$releasedir/$name.tar.bz2"
 
 cd "$(dirname "$0")"/..
@@ -95,5 +97,6 @@ tar cjf "$tarball" -C "$tmpdir" "$name"
 rm -rf "$tmpdir"
 
 if [[ -n "$upload" ]]; then
-    scp "$tarball" kiszka,kvm@frs.sourceforge.net:/home/frs/project/k/kv/kvm/kvm-kmod/${name/kvm-kmod-/}/
+    cp readme-changelog.txt "$releasedir"
+    scp -r "$releasedir" kiszka,kvm@frs.sourceforge.net:/home/frs/project/kvm/kvm-kmod/${name/kvm-kmod-/}
 fi
