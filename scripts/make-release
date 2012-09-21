@@ -50,6 +50,7 @@ mkdir "$releasedir"
 tarball="$releasedir/$name.tar.bz2"
 
 cd "$(dirname "$0")"/..
+srcdir=`pwd`
 LINUX="$(readlink -f "linux")"
 
 kvm_git="$(readlink -f .git)"
@@ -97,6 +98,6 @@ tar cjf "$tarball" -C "$tmpdir" "$name"
 rm -rf "$tmpdir"
 
 if [[ -n "$upload" ]]; then
-    cp readme-changelog.txt "$releasedir"
+    cp "$srcdir/readme-changelog.txt" "$releasedir"
     scp -r "$releasedir" kiszka,kvm@frs.sourceforge.net:/home/frs/project/kvm/kvm-kmod/${name/kvm-kmod-/}
 fi
