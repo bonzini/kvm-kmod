@@ -311,7 +311,7 @@ def unifdef(fname):
 
 hack_files = {
     'x86': str.split('kvm_main.c mmu.c vmx.c svm.c x86.c x86.h irq.h lapic.c'
-                     ' lapic.h i8254.c eventfd.c emulate.c async_pf.c'
+                     ' lapic.h timer.c i8254.c eventfd.c emulate.c async_pf.c'
                      ' assigned-dev.c cpuid.c pmu.c iommu.c paging_tmpl.h'),
 }
 
