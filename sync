@@ -260,6 +260,12 @@ def hack_content(fname, data):
             line = '\t\tvfree((void *)addr);'
         if fname == 'include/linux/kvm_host.h' and line == '#if defined(CONFIG_MMU_NOTIFIER) && defined(KVM_ARCH_WANT_MMU_NOTIFIER)':
             line ='#if defined(KVM_ARCH_WANT_MMU_NOTIFIER)'
+        if line == '\t\tkfree_rcu(old, rcu);':
+            w('#if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)')
+            w('\t\tcall_rcu(&old->rcu, kvm_apic_map_kfree_callback);')
+            w('#else')
+            w(line)
+            line = '#endif'
         w(line)
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
@@ -287,6 +293,13 @@ def hack_content(fname, data):
             w('\t(void)pid_nr;')
             w('\tpit->worker = create_singlethread_workqueue("kvm-pit");')
             w('\tif (!pit->worker) {')
+            w('#endif')
+        if line == 'module_param(min_timer_period_us, uint, S_IRUGO | S_IWUSR);':
+            w('\n#if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)')
+            w('static void kvm_apic_map_kfree_callback(struct rcu_head *p)')
+            w('{')
+            w('\tkfree(container_of(p, struct kvm_apic_map, rcu));')
+            w('}')
             w('#endif')
     if eventfd_file:
         result.append('#else\n'
