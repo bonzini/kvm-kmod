@@ -1395,3 +1395,8 @@ static inline void update_debugctlmsr(unsigned long debugctlmsr)
 #define _ASM_SI		__ASM_REG(si)
 #define _ASM_DI		__ASM_REG(di)
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,7,0)
+#define __kernel_fpu_begin()	unlazy_fpu(current)
+#define __kernel_fpu_end()	do { } while (0)
+#endif

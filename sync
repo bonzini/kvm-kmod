@@ -266,6 +266,20 @@ def hack_content(fname, data):
             w('#else')
             w(line)
             line = '#endif'
+        if line == '\tif (!user_has_fpu() && !vmx->vcpu.guest_fpu_loaded)':
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,7,0)')
+        if line == '\t\tstts();':
+            w(line)
+            w('#else')
+            w('\tif (user_has_fpu())')
+            w('\t\tclts();')
+            line = '#endif'
+        if line == '\tvmcs_writel(HOST_CR0, read_cr0() & ~X86_CR0_TS);  /* 22.2.3 */':
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,7,0)')
+            w(line)
+            w('#else')
+            w('\tvmcs_writel(HOST_CR0, read_cr0() | X86_CR0_TS);  /* 22.2.3 */')
+            line = '#endif'
         w(line)
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
