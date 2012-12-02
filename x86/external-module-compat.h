@@ -906,6 +906,8 @@ static inline void hw_breakpoint_restore(void)
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35)
+#define PVCLOCK_TSC_STABLE_BIT (1 << 0)
+
 struct kvm_pvclock_vcpu_time_info {
 	u32   version;
 	u32   pad0;
