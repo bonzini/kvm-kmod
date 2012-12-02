@@ -65,6 +65,7 @@ def hack_content(fname, data):
     result = []
     pr_fmt = ''
     inside_block_state = {}
+    finish_endif = False
 
     def sub(regexp, repl, str):
         return re_cache(regexp).sub(repl, str)
@@ -280,6 +281,21 @@ def hack_content(fname, data):
             w('#else')
             w('\tvmcs_writel(HOST_CR0, read_cr0() | X86_CR0_TS);  /* 22.2.3 */')
             line = '#endif'
+        if (inside_block('#ifdef CONFIG_X86_64', '#endif') and \
+            (line == 'struct pvclock_gtod_data {' or \
+             line == 'static atomic_t kvm_guest_has_master_clock = ATOMIC_INIT(0);' or \
+             line == 'static cycle_t read_tsc(void)' or \
+             line == 'static void pvclock_gtod_update_fn(struct work_struct *work)' or \
+             line == '\tbool vcpus_matched;' or \
+             match(r'^\tpvclock_gtod_(un)*register_notifier'))) or \
+            ((inside_block('static void kvm_gen_update_masterclock', '}') or \
+              inside_block('static void pvclock_update_vm_gtod_copy', '}')) and \
+             line == '#ifdef CONFIG_X86_64'):
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,8,0)')
+            finish_endif = True
+        if line == '#endif' and finish_endif:
+            w('#endif')
+            finish_endif = False
         w(line)
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
