@@ -344,6 +344,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_FSGSBASE	(9*32+ 0) /* {RD/WR}{FS/GS}BASE instructions*/
 #endif
 
+#ifndef X86_FEATURE_TSC_ADJUST
+#define X86_FEATURE_TSC_ADJUST	(9*32+ 1) /* TSC adjustment MSR 0x3b */
+#endif
+
 #ifndef X86_FEATURE_BMI1
 #define X86_FEATURE_BMI1	(9*32+ 3) /* 1st group bit manipulation extensions */
 #endif
@@ -1399,4 +1403,8 @@ static inline void update_debugctlmsr(unsigned long debugctlmsr)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,7,0)
 #define __kernel_fpu_begin()	unlazy_fpu(current)
 #define __kernel_fpu_end()	do { } while (0)
+#endif
+
+#ifndef MSR_IA32_TSC_ADJUST
+#define MSR_IA32_TSC_ADJUST             0x0000003b
 #endif
