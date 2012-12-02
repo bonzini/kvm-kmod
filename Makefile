@@ -21,9 +21,12 @@ all:: prerequisite
 	$(MAKE) -C $(KERNELDIR) M=`pwd` \
 		LINUXINCLUDE="-I`pwd`/include -Iinclude \
 			$(if $(KERNELSOURCEDIR),\
-			-Iinclude2 -I$(KERNELSOURCEDIR)/include -I$(KERNELSOURCEDIR)/arch/${ARCH_DIR}/include, \
-				-Iarch/${ARCH_DIR}/include) \
-			-Iarch/${ARCH_DIR}/include/generated \
+				-Iinclude2 -I$(KERNELSOURCEDIR)/include \
+				-I$(KERNELSOURCEDIR)/include/uapi \
+				-I$(KERNELSOURCEDIR)/arch/${ARCH_DIR}/include, \
+				-Iinclude/uapi -Iarch/${ARCH_DIR}/include) \
+			-Iinclude/generated/uapi -Iarch/${ARCH_DIR}/include/generated \
+			-Iarch/${ARCH_DIR}/include/generated/uapi \
 			-I`pwd`/include-compat -I`pwd`/${ARCH_DIR} \
 			-include $(if $(wildcard $(KERNELDIR)/include/generated), \
 				include/generated/autoconf.h, \
