@@ -1333,3 +1333,10 @@ struct kvm_static_key_deferred {
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,7,0)
 #define vtime_account	account_system_vtime
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,7,0)
+static inline void set_bit_le(int nr, void *addr)
+{
+	set_bit(nr ^ BITOP_LE_SWIZZLE, addr);
+}
+#endif
