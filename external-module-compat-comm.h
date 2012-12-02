@@ -18,6 +18,10 @@
 #include <linux/hrtimer.h>
 #include <asm/bitops.h>
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,1,0)
+#include <linux/kconfig.h>
+#endif
+
 #include "kvm-kmod-config.h"
 
 /*
