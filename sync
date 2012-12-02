@@ -315,6 +315,8 @@ def hack_content(fname, data):
             w('\tkfree(container_of(p, struct kvm_apic_map, rcu));')
             w('}')
             w('#endif')
+        if line == '#define _ASM_X86_KVM_HOST_H':
+            w('#include <linux/clocksource.h>')
     if eventfd_file:
         result.append('#else\n'
                       'void kvm_eventfd_init(struct kvm *kvm) { }\n'
