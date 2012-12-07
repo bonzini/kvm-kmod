@@ -296,6 +296,8 @@ def hack_content(fname, data):
         if line == '#endif' and finish_endif:
             w('#endif')
             finish_endif = False
+        if line == '#ifdef CONFIG_KEXEC':
+            line = '#if defined(CONFIG_KEXEC) && LINUX_VERSION_CODE >= KERNEL_VERSION(3,8,0)'
         w(line)
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
