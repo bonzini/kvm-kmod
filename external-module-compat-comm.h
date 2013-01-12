@@ -1331,7 +1331,9 @@ struct kvm_static_key_deferred {
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,7,0)
-#define vtime_account	account_system_vtime
+#define vtime_account_system_irqsafe		account_system_vtime
+#elif LINUX_VERSION_CODE < KERNEL_VERSION(3,8,0)
+#define vtime_account_system_irqsafe		vtime_account
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,7,0)
