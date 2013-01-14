@@ -14,6 +14,7 @@
 #include <linux/kvm_para.h>
 #include <linux/cpu.h>
 #include <linux/time.h>
+#include <linux/kernel.h>
 #include <asm/processor.h>
 #include <linux/hrtimer.h>
 #include <asm/bitops.h>
@@ -1341,4 +1342,9 @@ static inline void set_bit_le(int nr, void *addr)
 {
 	set_bit(nr ^ BITOP_LE_SWIZZLE, addr);
 }
+#endif
+
+#ifndef SHRT_MAX
+#define USHRT_MAX	((u16)(~0U))
+#define SHRT_MAX	((s16)(USHRT_MAX>>1))
 #endif
