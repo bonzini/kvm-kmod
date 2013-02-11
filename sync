@@ -61,7 +61,7 @@ def hack_content(fname, data):
         'vmm_exclusive fasteoi nested ignore_msrs enable_ept_ad_bits '
         'allow_unsafe_assigned_interrupts '
         )
-    eventfd_file = False
+    eventfd_file = fname == 'eventfd.c'
     result = []
     pr_fmt = ''
     inside_block_state = {}
@@ -164,9 +164,8 @@ def hack_content(fname, data):
         line = sub(r'boot_cpu_data.x86_phys_bits', 'kvm_x86_phys_bits', line)
         if match(r'^static const struct vm_operations_struct kvm_'):
             line = sub(r' const ', ' ', line)
-        if line == 'struct _irqfd {':
+        if eventfd_file and line == '#include "iodev.h"':
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)')
-            eventfd_file = True
         if match(r'(^\tcase KVM_IRQFD: {|^\tcase KVM_IOEVENTFD: {|^\tcase KVM_CAP_IRQFD:)'):
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)')
         if match(r'#include <asm/desc_defs.h>'):
