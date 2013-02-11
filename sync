@@ -59,7 +59,7 @@ def hack_content(fname, data):
         'dbg enable_vpid flexpriority_enabled enable_ept '
         'enable_unrestricted_guest emulate_invalid_guest_state '
         'vmm_exclusive fasteoi nested ignore_msrs enable_ept_ad_bits '
-        'allow_unsafe_assigned_interrupts '
+        'allow_unsafe_assigned_interrupts enable_apicv_reg_vid '
         )
     eventfd_file = fname == 'eventfd.c'
     result = []
