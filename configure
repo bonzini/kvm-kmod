@@ -167,6 +167,7 @@ fi
 rm -f include/asm include-compat/asm
 mkdir -p include
 ln -sf asm-"$karch" include/asm
+ln -sf asm-"$karch" include/uapi/asm
 ln -sf asm-"$karch" include-compat/asm
 
 cat <<EOF > config.mak
