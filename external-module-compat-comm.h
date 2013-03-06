@@ -1348,3 +1348,7 @@ static inline void set_bit_le(int nr, void *addr)
 #define USHRT_MAX	((u16)(~0U))
 #define SHRT_MAX	((s16)(USHRT_MAX>>1))
 #endif
+
+#ifndef __percpu
+#define __percpu
+#endif
