@@ -1350,3 +1350,37 @@ static inline void set_bit_le(int nr, void *addr)
 #define USHRT_MAX	((u16)(~0U))
 #define SHRT_MAX	((s16)(USHRT_MAX>>1))
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,9,0)
+#include <linux/pci.h>
+#include <linux/list.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,27)
+#include <linux/rculist.h>
+#endif
+
+#define hlist_entry_safe(ptr, type, member) \
+	(ptr) ? hlist_entry(ptr, type, member) : NULL
+
+#undef hlist_for_each_entry
+#define hlist_for_each_entry(pos, head, member)					\
+	for (pos = hlist_entry_safe((head)->first, typeof(*(pos)), member);\
+	     pos;							\
+	     pos = hlist_entry_safe((pos)->member.next, typeof(*(pos)), member))
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,37)
+#define hlist_first_rcu(head)	(*((struct hlist_node __rcu **)(&(head)->first)))
+#define hlist_next_rcu(node)	(*((struct hlist_node __rcu **)(&(node)->next)))
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,34)
+#define rcu_dereference_raw	rcu_dereference
+#endif
+
+#undef hlist_for_each_entry_rcu
+#define hlist_for_each_entry_rcu(pos, head, member)			\
+	for (pos = hlist_entry_safe (rcu_dereference_raw(hlist_first_rcu(head)),\
+			typeof(*(pos)), member);			\
+		pos;							\
+		pos = hlist_entry_safe(rcu_dereference_raw(hlist_next_rcu(\
+			&(pos)->member)), typeof(*(pos)), member))
+#endif /* < 3.9 */
