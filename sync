@@ -166,6 +166,13 @@ def hack_content(fname, data):
             line = sub(r' const ', ' ', line)
         if eventfd_file and line == '#include "iodev.h"':
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)')
+        if line == 'int kvm_irqfd_init(void);':
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)')
+        if line == 'void kvm_irqfd_exit(void);':
+            w('#else')
+            w('static inline int kvm_irqfd_init(void) { return 0; }')
+            w('static inline void kvm_irqfd_exit(void) { }')
+            w('#endif')
         if match(r'(^\tcase KVM_IRQFD: {|^\tcase KVM_IOEVENTFD: {|^\tcase KVM_CAP_IRQFD:)'):
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)')
         if match(r'#include <asm/desc_defs.h>'):
