@@ -1384,3 +1384,7 @@ static inline void set_bit_le(int nr, void *addr)
 		pos = hlist_entry_safe(rcu_dereference_raw(hlist_next_rcu(\
 			&(pos)->member)), typeof(*(pos)), member))
 #endif /* < 3.9 */
+
+#ifndef __percpu
+#define __percpu
+#endif
