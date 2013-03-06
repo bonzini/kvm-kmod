@@ -1414,3 +1414,7 @@ static inline void update_debugctlmsr(unsigned long debugctlmsr)
 #ifndef MSR_IA32_TSC_ADJUST
 #define MSR_IA32_TSC_ADJUST             0x0000003b
 #endif
+
+#ifndef X86_EFLAGS_BIT1
+#define X86_EFLAGS_BIT1  0x00000002
+#endif
