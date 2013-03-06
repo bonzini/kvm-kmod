@@ -19,12 +19,14 @@ LINUX = ./linux
 all:: prerequisite
 #	include header priority 1) $LINUX 2) $KERNELDIR 3) include-compat
 	$(MAKE) -C $(KERNELDIR) M=`pwd` \
-		LINUXINCLUDE="-I`pwd`/include -Iinclude \
+		LINUXINCLUDE="-I`pwd`/include -I`pwd`/include/uapi -Iinclude \
 			$(if $(KERNELSOURCEDIR),\
 				-Iinclude2 -I$(KERNELSOURCEDIR)/include \
 				-I$(KERNELSOURCEDIR)/include/uapi \
-				-I$(KERNELSOURCEDIR)/arch/${ARCH_DIR}/include, \
-				-Iinclude/uapi -Iarch/${ARCH_DIR}/include) \
+				-I$(KERNELSOURCEDIR)/arch/${ARCH_DIR}/include \
+				-I$(KERNELSOURCEDIR)/arch/${ARCH_DIR}/include/uapi, \
+				-Iinclude/uapi -Iarch/${ARCH_DIR}/include \
+				-Iarch/${ARCH_DIR}/include/uapi) \
 			-Iinclude/generated/uapi -Iarch/${ARCH_DIR}/include/generated \
 			-Iarch/${ARCH_DIR}/include/generated/uapi \
 			-I`pwd`/include-compat -I`pwd`/${ARCH_DIR} \
