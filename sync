@@ -403,12 +403,10 @@ def header_sync(arch):
         unifdef(out)
     arch_headers = (
         [x
-         for dir in ['%(linux)s/arch/%(arch)s/include/asm/./kvm*.h',
-                     '%(linux)s/arch/%(arch)s/include/asm/./vmx*.h',
-                     '%(linux)s/arch/%(arch)s/include/asm/./svm*.h',
-                     '%(linux)s/arch/%(arch)s/include/asm/./virtext*.h',
-                     '%(linux)s/arch/%(arch)s/include/asm/./hyperv.h',
-                     '%(linux)s/arch/%(arch)s/include/uapi/asm/./kvm*.h']
+         for dir in ['%(linux)s/arch/%(arch)s/include/asm/kvm*.h',
+                     '%(linux)s/arch/%(arch)s/include/asm/vmx.h',
+                     '%(linux)s/arch/%(arch)s/include/asm/svm.h',
+                     '%(linux)s/arch/%(arch)s/include/asm/virtext*.h']
          for x in glob(dir % { 'arch': arch, 'linux': linux })
          ])
     for file in arch_headers:
@@ -416,9 +414,20 @@ def header_sync(arch):
                % { 'T': T, 'name': os.path.basename(file), 'arch': arch })
         cp(file, out)
         unifdef(out)
-    hack_file(T, 'include/linux/kvm.h')
+    arch_uapi_headers = (
+        [x
+         for dir in ['%(linux)s/arch/%(arch)s/include/uapi/asm/kvm*.h',
+                     '%(linux)s/arch/%(arch)s/include/uapi/asm/vmx.h',
+                     '%(linux)s/arch/%(arch)s/include/uapi/asm/svm.h',
+                     '%(linux)s/arch/%(arch)s/include/uapi/asm/hyperv.h']
+         for x in glob(dir % { 'arch': arch, 'linux': linux })
+         ])
+    for file in arch_uapi_headers:
+        out = ('%(T)s/include/uapi/asm-%(arch)s/%(name)s'
+               % { 'T': T, 'name': os.path.basename(file), 'arch': arch })
+        cp(file, out)
+        unifdef(out)
     hack_file(T, 'include/linux/kvm_host.h')
-    hack_file(T, 'include/asm-%(arch)s/kvm.h' % { 'arch': arch })
     hack_file(T, 'include/asm-%(arch)s/kvm_host.h' % { 'arch': arch })
     if arch == 'x86':
         hack_file(T, 'include/asm-x86/kvm_emulate.h')
