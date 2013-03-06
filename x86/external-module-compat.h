@@ -388,6 +388,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define MSR_AMD64_TSC_RATIO		0xc0000104
 #endif
 
+#ifndef MSR_AMD64_BU_CFG2
+#define MSR_AMD64_BU_CFG2		0xc001102a
+#endif
+
 #include <linux/smp.h>
 
 #ifndef X86_CR0_PE
