@@ -164,8 +164,8 @@ else
     config_fedora_kernel="#undef CONFIG_FEDORA_KERNEL"
 fi
 
-rm -f include/asm include-compat/asm
-mkdir -p include
+rm -f include/asm include/uapi/asm include-compat/asm
+mkdir -p include/uapi
 ln -sf asm-"$karch" include/asm
 ln -sf asm-"$karch" include/uapi/asm
 ln -sf asm-"$karch" include-compat/asm
