@@ -29,7 +29,7 @@ int kvm_pmu_get_msr(struct kvm_vcpu *vcpu, u32 index, u64 *data)
 	return -1;
 }
 
-int kvm_pmu_set_msr(struct kvm_vcpu *vcpu, u32 index, u64 data)
+int kvm_pmu_set_msr(struct kvm_vcpu *vcpu, struct msr_data *msr_info)
 {
 	BUG();
 	return -1;
