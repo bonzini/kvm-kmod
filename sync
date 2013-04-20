@@ -60,6 +60,7 @@ def hack_content(fname, data):
         'enable_unrestricted_guest emulate_invalid_guest_state '
         'vmm_exclusive fasteoi nested ignore_msrs enable_ept_ad_bits '
         'allow_unsafe_assigned_interrupts enable_apicv_reg_vid '
+        'enable_apicv '
         )
     eventfd_file = fname == 'eventfd.c'
     result = []
