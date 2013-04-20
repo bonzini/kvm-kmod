@@ -1418,3 +1418,7 @@ static inline void update_debugctlmsr(unsigned long debugctlmsr)
 #ifndef X86_EFLAGS_BIT1
 #define X86_EFLAGS_BIT1  0x00000002
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0)
+#define POSTED_INTR_VECTOR		0xf2
+#endif

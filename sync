@@ -307,6 +307,10 @@ def hack_content(fname, data):
             line = '#if defined(CONFIG_KEXEC) && LINUX_VERSION_CODE >= KERNEL_VERSION(3,8,0)'
         if line == '#ifdef CONFIG_CONTEXT_TRACKING':
             line = '#if defined(CONFIG_CONTEXT_TRACKING) && LINUX_VERSION_CODE >= KERNEL_VERSION(3,9,0)'
+        if line == '\tif (!cpu_has_vmx_apicv())':
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)')
+            w(line)
+            line = '#endif'
         w(line)
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
