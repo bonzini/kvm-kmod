@@ -313,6 +313,10 @@ def hack_content(fname, data):
             line = '#endif'
         if line == '#if IS_ENABLED(CONFIG_KVM)':
             line = '#if 1'
+        if line == '\t\tapic->send_IPI_mask(get_cpu_mask(vcpu->cpu),':
+            line = '\t\t;'
+        if line == '\t\t\t\tPOSTED_INTR_VECTOR);':
+            line = ''
         w(line)
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
