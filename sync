@@ -311,6 +311,8 @@ def hack_content(fname, data):
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)')
             w(line)
             line = '#endif'
+        if line == '#if IS_ENABLED(CONFIG_KVM)':
+            line = '#if 1'
         w(line)
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
