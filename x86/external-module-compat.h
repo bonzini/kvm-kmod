@@ -1422,3 +1422,7 @@ static inline void update_debugctlmsr(unsigned long debugctlmsr)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0)
 #define POSTED_INTR_VECTOR		0xf2
 #endif
+
+#ifndef MSR_IA32_VMX_MISC_VMWRITE_SHADOW_RO_FIELDS
+#define MSR_IA32_VMX_MISC_VMWRITE_SHADOW_RO_FIELDS (1ULL << 29)
+#endif
