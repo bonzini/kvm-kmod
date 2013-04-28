@@ -1447,3 +1447,11 @@ typedef struct gate_struct gate_desc;
 typedef struct desc_struct gate_desc;
 #endif
 #endif /* < 2.6.25 */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
+#ifdef CONFIG_X86_64
+#define gate_offset(g) ((g).offset_low | ((unsigned long)(g).offset_middle << 16) | ((unsigned long)(g).offset_high << 32))
+#else
+#define gate_offset(g) (((g).b & 0xffff0000) | ((g).a & 0x0000ffff))
+#endif
+#endif /* < 2.6.28 */
