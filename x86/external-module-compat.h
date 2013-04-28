@@ -48,6 +48,19 @@ typedef u64 phys_addr_t;
 #define CONFIG_HAVE_KVM_MSI 1
 #endif
 
+#ifndef CONFIG_HAVE_KVM_IRQCHIP
+#define CONFIG_HAVE_KVM_IRQCHIP 1
+#endif
+
+#ifndef CONFIG_HAVE_KVM_IRQ_ROUTING
+#define CONFIG_HAVE_KVM_IRQ_ROUTING 1
+#endif
+
+#if !defined(CONFIG_KVM_DEVICE_ASSIGNMENT) && defined(CONFIG_PCI) && \
+    defined(CONFIG_IOMMU_API)
+#define CONFIG_KVM_DEVICE_ASSIGNMENT 1
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
 
 #ifdef CONFIG_X86_64
@@ -778,10 +791,6 @@ struct mtrr_state_type {
 	mtrr_type def_type;
 };
 
-#endif
-
-#ifndef CONFIG_HAVE_KVM_IRQCHIP
-#define CONFIG_HAVE_KVM_IRQCHIP 1
 #endif
 
 #include <asm/mce.h>
