@@ -1439,3 +1439,11 @@ static inline void update_debugctlmsr(unsigned long debugctlmsr)
 #ifndef MSR_IA32_VMX_MISC_VMWRITE_SHADOW_RO_FIELDS
 #define MSR_IA32_VMX_MISC_VMWRITE_SHADOW_RO_FIELDS (1ULL << 29)
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
+#ifdef CONFIG_X86_64
+typedef struct gate_struct gate_desc;
+#else
+typedef struct desc_struct gate_desc;
+#endif
+#endif /* < 2.6.25 */
