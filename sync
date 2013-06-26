@@ -45,7 +45,7 @@ def hack_content(fname, data):
         'i387_fxsave_struct native_write_msr_safe xsave_struct '
         'fpu_alloc fpu_free fpu_restore_checking fpu_save_init fpu_finit '
         'load_gdt store_gdt xstate_size cpu_has_xsave __get_user_pages_fast '
-        'amd_erratum_383 cpu_has_amd_erratum set_64bit siginfo_t use_mm '
+        'set_64bit siginfo_t use_mm '
         'unuse_mm request_threaded_irq init_fpu __this_cpu_read '
         '__this_cpu_write get_task_pid put_pid sigset_from_compat '
         'sched_info_on x86_pmu_capability perf_get_x86_pmu_capability '
@@ -317,6 +317,12 @@ def hack_content(fname, data):
             line = '\t\t;'
         if line == '\t\t\t\tPOSTED_INTR_VECTOR);':
             line = ''
+        if line == '\tif (!static_cpu_has_bug(X86_BUG_AMD_TLB_MMATCH))':
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)')
+            w(line)
+            w('#else')
+            w('\tif (!kvm_cpu_has_amd_erratum(kvm_amd_erratum_383))')
+            line = '#endif'
         w(line)
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
