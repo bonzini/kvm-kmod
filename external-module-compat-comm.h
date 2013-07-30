@@ -1388,3 +1388,23 @@ static inline void set_bit_le(int nr, void *addr)
 #ifndef __percpu
 #define __percpu
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0)
+#if defined(CONFIG_CONTEXT_TRACKING) && LINUX_VERSION_CODE >= KERNEL_VERSION(3,9,0)
+extern void guest_enter(void);
+extern void guest_exit(void);
+
+#else /* !CONFIG_CONTEXT_TRACKING */
+static inline void guest_enter(void)
+{
+	vtime_account_system(current);
+	current->flags |= PF_VCPU;
+}
+
+static inline void guest_exit(void)
+{
+	vtime_account_system(current);
+	current->flags &= ~PF_VCPU;
+}
+#endif /* !CONFIG_CONTEXT_TRACKING */
+#endif /* < 3.10 */
