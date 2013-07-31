@@ -1455,3 +1455,8 @@ typedef struct desc_struct gate_desc;
 #define gate_offset(g) (((g).b & 0xffff0000) | ((g).a & 0x0000ffff))
 #endif
 #endif /* < 2.6.28 */
+
+#ifndef HSW_IN_TX
+#define HSW_IN_TX			0
+#define HSW_IN_TX_CHECKPOINTED		0
+#endif
