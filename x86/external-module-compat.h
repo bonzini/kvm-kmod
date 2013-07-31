@@ -1428,8 +1428,8 @@ static inline void update_debugctlmsr(unsigned long debugctlmsr)
 #define MSR_IA32_TSC_ADJUST             0x0000003b
 #endif
 
-#ifndef X86_EFLAGS_BIT1
-#define X86_EFLAGS_BIT1  0x00000002
+#ifndef X86_EFLAGS_FIXED
+#define X86_EFLAGS_FIXED		0x00000002
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0)
