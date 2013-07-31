@@ -471,8 +471,8 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_CR4_VMXE 0x00002000
 #endif
 
-#ifndef X86_CR4_RDWRGSFS
-#define X86_CR4_RDWRGSFS 0x00010000 /* enable RDWRGSFS support */
+#ifndef X86_CR4_FSGSBASE
+#define X86_CR4_FSGSBASE 0x00010000
 #endif
 
 #ifndef X86_CR4_PCIDE
