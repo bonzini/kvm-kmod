@@ -23,6 +23,25 @@ typedef u64 phys_addr_t;
 #define cpu_has_hypervisor boot_cpu_has(X86_FEATURE_HYPERVISOR)
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,12,0)
+#include <linux/string.h>
+#include <asm/processor.h>
+static inline uint32_t hypervisor_cpuid_base(const char *sig, uint32_t leaves)
+{
+	uint32_t base, eax, signature[3];
+
+	for (base = 0x40000000; base < 0x40010000; base += 0x100) {
+		cpuid(base, &eax, &signature[0], &signature[1], &signature[2]);
+
+		if (!memcmp(sig, signature, 12) &&
+		    (leaves == 0 || ((eax - base) >= leaves)))
+			return base;
+	}
+
+	return 0;
+}
+#endif
+
 #include "../external-module-compat-comm.h"
 
 #include <asm/msr.h>
