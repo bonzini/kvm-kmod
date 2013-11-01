@@ -196,9 +196,9 @@ def hack_content(fname, data):
             w('\tkvm_xstate_size_init();\n')
         if match_block_end(r'case CPU_STARTING:', r'hardware_enable'):
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,28)')
-            w('\t\thardware_enable(NULL);')
+            w('\t\thardware_enable();')
             w('#else')
-            w('\t\tsmp_call_function_single(cpu, hardware_enable, NULL, 1);')
+            w('\t\tsmp_call_function_single(cpu, (void (*)(void *))hardware_enable, NULL, 1);')
             line = '#endif'
         if match(r'case CPU_STARTING:'):
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,28)')
