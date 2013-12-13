@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# minimum is 2.6.x
-min_kernel_version=24
-# maximum is 3.x
-max_kernel_version=11
+# minimum is 3.x
+min_kernel_version=7
+# maximum is 3.y
+max_kernel_version=13
 
 force_build=
 kernelsourcedir=
@@ -117,9 +117,9 @@ fi
 
 kernel_version=`echo $kernel_version_str | sed 's/\([0-9]*\)\.[0-9]*\.[0-9]*.*/\1/'`
 kernel_patchlevel=`echo $kernel_version_str | sed 's/[0-9]*\.\([0-9]*\)\.[0-9]*.*/\1/'`
-kernel_sublevel=`echo $kernel_version_str | sed 's/[0-9]*\.[0-9]*\.\([0-9]*\).*/\1/'`
 if [ ! -n "$force_build" ]; then
-	if [ $kernel_version -eq 2 ] && [ $kernel_sublevel -lt $min_kernel_version ]; then
+	if [ $kernel_version -eq 2 ] ||
+	   [ $kernel_version -eq 3 -a $kernel_patchlevel -lt $min_kernel_version ]; then
 		echo
 		echo "Error: kernel is too old for this kvm-kmod release."
 		echo
@@ -139,19 +139,6 @@ if [ ! -n $kernel_extraversion ] || [ $kernel_extraversion = $kernel_version_str
 fi
 
 . "$kerneldir/.config"
-if [ "$CONFIG_PREEMPT_NOTIFIERS" = "" ]; then
-	if [ $kernel_version -eq 2 ] && [ $kernel_sublevel -ge 33 ]; then
-		echo
-		echo "Error: kernel lacks KVM support, keeping preemption notifiers disabled."
-		echo "Since kernel 2.6.33, kvm-kmod is no longer able to provide a workaround"
-		echo "implementation for this feature. You have to enable KVM as module(!) in your"
-		echo "kernel first, rebuild and install it."
-		echo
-		exit 1
-	fi
-	echo "WARNING: kvm-kmod will emulate missing preemption notifiers."
-	echo "Do not benchmark this system!"
-fi
 
 if [ -n "$no_uname" -a "$want_module" ]; then
 	depmod_version=$kernel_version_str
