@@ -462,6 +462,7 @@ def header_sync(arch):
          for dir in ['%(linux)s/arch/%(arch)s/include/uapi/asm/kvm*.h',
                      '%(linux)s/arch/%(arch)s/include/uapi/asm/vmx.h',
                      '%(linux)s/arch/%(arch)s/include/uapi/asm/svm.h',
+                     '%(linux)s/arch/%(arch)s/include/uapi/asm/msr-index.h',
                      '%(linux)s/arch/%(arch)s/include/uapi/asm/hyperv.h']
          for x in glob(dir % { 'arch': arch, 'linux': linux })
          ])
