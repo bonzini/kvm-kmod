@@ -180,18 +180,6 @@ void kvm_smp_send_reschedule(int cpu);
 
 #endif
 
-/* empty_zero_page isn't exported in all kernels */
-#include <asm/pgtable.h>
-
-#define empty_zero_page kvm_empty_zero_page
-
-static char empty_zero_page[PAGE_SIZE];
-
-static inline void blahblah(void)
-{
-	(void)empty_zero_page[0];
-}
-
 /* __mmdrop() is not exported before 2.6.25 */
 #include <linux/sched.h>
 
