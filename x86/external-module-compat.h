@@ -24,7 +24,7 @@ typedef u64 phys_addr_t;
 #define cpu_has_hypervisor boot_cpu_has(X86_FEATURE_HYPERVISOR)
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,12,0)
+#if 0 && LINUX_VERSION_CODE < KERNEL_VERSION(3,12,0)
 #include <linux/string.h>
 #include <asm/processor.h>
 static inline uint32_t hypervisor_cpuid_base(const char *sig, uint32_t leaves)
@@ -1560,12 +1560,14 @@ static inline void update_debugctlmsr(unsigned long debugctlmsr)
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,15,0)
 #define VFIO_DMA_CC_IOMMU		4
+#if 0
 static inline void cpu_notifier_register_begin(void) {}
 static inline void cpu_notifier_register_done(void) {}
 static inline int __register_hotcpu_notifier(struct notifier_block *nb)
 {
 	return 0;
 }
+#endif
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,17,0)

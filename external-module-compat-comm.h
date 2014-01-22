@@ -1396,7 +1396,7 @@ static inline void guest_exit(void)
 #endif /* < 3.10 */
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,13,0)
-static inline void smp_mb__after_srcu_read_unlock(void) {}
+#define smp_mb__after_srcu_read_unlock() smp_mb()
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,14,0)
