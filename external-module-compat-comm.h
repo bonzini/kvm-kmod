@@ -12,6 +12,7 @@
 #include <linux/string.h>
 #include <linux/kvm.h>
 #include <linux/kvm_para.h>
+#include <linux/kconfig.h>
 #include <linux/cpu.h>
 #include <linux/time.h>
 #include <linux/kernel.h>
