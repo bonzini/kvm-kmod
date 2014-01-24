@@ -6,6 +6,9 @@ kvm-objs := kvm_main.o x86.o mmu.o emulate.o irq.o i8259.o pmu.o \
 ifeq ($(CONFIG_IOMMU_API)$(CONFIG_PCI),yy)
 kvm-objs += assigned-dev.o iommu.o
 endif
+ifeq ($(CONFIG_KVM_VFIO),y)
+kvm-objs += vfio.o
+endif
 kvm-intel-objs := vmx.o
 kvm-amd-objs := svm.o
 
