@@ -416,6 +416,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_RTM		(9*32+11) /* Restricted Transactional Memory */
 #endif
 
+#ifndef X86_FEATURE_MPX
+#define X86_FEATURE_MPX		(9*32+14) /* Memory Protection Extension */
+#endif
+
 #ifndef MSR_AMD64_PATCH_LOADER
 #define MSR_AMD64_PATCH_LOADER         0xc0010020
 #endif
@@ -1108,6 +1112,15 @@ static inline int kvm_init_fpu(struct task_struct *tsk)
 #define XSTATE_FP       0x1
 #define XSTATE_SSE      0x2
 #define XSTATE_FPSSE    (XSTATE_FP | XSTATE_SSE)
+#endif
+
+#ifndef XSTATE_EXTEND_MASK
+#define XSTATE_EXTEND_MASK	(~(XSTATE_FPSSE | (1ULL << 63)))
+#endif
+
+#ifndef XSTATE_BNDREGS
+#define XSTATE_BNDREGS	0x8
+#define XSTATE_BNDCSR	0x10
 #endif
 
 #ifndef XSTATE_YMM
