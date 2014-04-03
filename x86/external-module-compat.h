@@ -228,6 +228,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define MSR_K8_INT_PENDING_MSG  0xc0010055
 #endif
 
+#ifndef X86_FEATURE_CLFLUSH
+#define X86_FEATURE_CLFLUSH	(0*32+19)
+#endif
+
 #ifndef X86_FEATURE_FXSR_OPT
 #define X86_FEATURE_FXSR_OPT	(1*32+25)
 #endif
