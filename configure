@@ -2,8 +2,6 @@
 
 # minimum is 3.x
 min_kernel_version=7
-# maximum is 3.y
-max_kernel_version=13
 
 force_build=
 kernelsourcedir=
@@ -122,12 +120,6 @@ if [ ! -n "$force_build" ]; then
 	   [ $kernel_version -eq 3 -a $kernel_patchlevel -lt $min_kernel_version ]; then
 		echo
 		echo "Error: kernel is too old for this kvm-kmod release."
-		echo
-		exit 1
-	elif [ $kernel_version -eq 3 ] && [ $kernel_patchlevel -gt $max_kernel_version ]; then
-		echo
-		echo "Error: kernel is more recent than KVM modules delivered with this release."
-		echo "You probably want to use the KVM support that is already part of your kernel."
 		echo
 		exit 1
 	fi
