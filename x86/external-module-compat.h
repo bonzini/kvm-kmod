@@ -1472,6 +1472,16 @@ static inline void update_debugctlmsr(unsigned long debugctlmsr)
 #define POSTED_INTR_VECTOR		0xf2
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,15,0)
+#define VFIO_DMA_CC_IOMMU		4
+static inline void cpu_notifier_register_begin(void) {}
+static inline void cpu_notifier_register_done(void) {}
+static inline int __register_hotcpu_notifier(struct notifier_block *nb)
+{
+	return 0;
+}
+#endif
+
 #ifndef MSR_IA32_VMX_MISC_VMWRITE_SHADOW_RO_FIELDS
 #define MSR_IA32_VMX_MISC_VMWRITE_SHADOW_RO_FIELDS (1ULL << 29)
 #endif
