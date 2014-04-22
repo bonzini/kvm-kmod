@@ -433,6 +433,7 @@ def header_sync(arch):
     T = 'header'
     rmtree(T)
     for file in (glob('%(linux)s/include/linux/kvm*.h' % { 'linux': linux }) +
+                 glob('%(linux)s/include/linux/vfio.h' % { 'linux': linux }) +
                  glob('%(linux)s/include/uapi/linux/kvm*.h' % { 'linux': linux })):
         out = ('%(T)s/include/linux/%(name)s'
                % { 'T': T, 'name': os.path.basename(file) })
