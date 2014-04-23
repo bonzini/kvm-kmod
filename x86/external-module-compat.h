@@ -1506,3 +1506,7 @@ typedef struct desc_struct gate_desc;
 #define HSW_IN_TX			0
 #define HSW_IN_TX_CHECKPOINTED		0
 #endif
+
+#ifndef X86_EFLAGS_AC_BIT
+#define X86_EFLAGS_AC_BIT	18 /* Alignment Check/Access Control */
+#endif
