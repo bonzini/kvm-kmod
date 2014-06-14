@@ -35,7 +35,6 @@ def hack_content(fname, data):
         'hrtimer_get_expires_ns hrtimer_start_expires '
         'hrtimer_expires_remaining smp_send_reschedule '
         'on_each_cpu relay_open anon_inode_getfd '
-        'synchronize_srcu srcu_batches_completed '
         'do_machine_check get_desc_base get_desc_limit '
         'vma_kernel_pagesize native_read_tsc user_return_notifier '
         'user_return_notifier_register user_return_notifier_unregister '
