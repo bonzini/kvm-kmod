@@ -46,7 +46,7 @@ def hack_content(fname, data):
         'load_gdt store_gdt xstate_size cpu_has_xsave __get_user_pages_fast '
         'set_64bit siginfo_t use_mm '
         'unuse_mm request_threaded_irq init_fpu __this_cpu_read '
-        '__this_cpu_write get_task_pid put_pid sigset_from_compat '
+        '__this_cpu_write sigset_from_compat '
         'sched_info_on x86_pmu_capability perf_get_x86_pmu_capability '
         'cpuid10_eax cpuid10_edx kern_path inode_permission path_put '
         'iommu_map iommu_unmap kmap_atomic kunmap_atomic timespec_sub '
@@ -225,10 +225,6 @@ def hack_content(fname, data):
             line = '#endif'
         if match(r'static int kvm_mmu_notifier_test_young'):
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,38)')
-        if match(r'^bool kvm_vcpu_yield_to\(struct kvm_vcpu \*target\)$'):
-            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,39)')
-        if line == 'EXPORT_SYMBOL_GPL(kvm_vcpu_on_spin);':
-            w('#endif')
         if line == 'static int kvm_suspend(void)':
             line = 'int kvm_suspend(void)'
         if line == 'static void kvm_resume(void)':

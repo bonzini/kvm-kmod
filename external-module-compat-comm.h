@@ -971,14 +971,6 @@ static inline int PageTransCompound(struct page *page)
 #define kvm___this_cpu_write		__this_cpu_write
 #endif /* > 2.6.33 */
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,39)
-#define kvm_get_task_pid(t, pt)	(t)->pids[pt].pid
-#define kvm_put_pid(p)		p = p
-#else /* >= 2.6.39 */
-#define kvm_get_task_pid	get_task_pid
-#define kvm_put_pid		put_pid
-#endif /* >= 2.6.39 */
-
 #ifndef __noclone
 #if defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 5
 #define __noclone	__attribute__((__noclone__))
