@@ -1397,3 +1397,7 @@ static inline void smp_mb__after_srcu_read_unlock(void) {}
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,14,0)
 #define pci_enable_msix_exact	pci_enable_msix
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,11,0)
+#define PAGE_ALIGNED(addr)	IS_ALIGNED((unsigned long)addr, PAGE_SIZE)
+#endif
