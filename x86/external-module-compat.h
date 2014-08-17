@@ -75,6 +75,10 @@ static inline uint32_t hypervisor_cpuid_base(const char *sig, uint32_t leaves)
 #define CONFIG_HAVE_KVM_IRQ_ROUTING 1
 #endif
 
+#ifndef CONFIG_HAVE_KVM_IRQFD
+#define CONFIG_HAVE_KVM_IRQFD 1
+#endif
+
 #if !defined(CONFIG_KVM_DEVICE_ASSIGNMENT) && defined(CONFIG_PCI) && \
     defined(CONFIG_IOMMU_API)
 #define CONFIG_KVM_DEVICE_ASSIGNMENT 1
