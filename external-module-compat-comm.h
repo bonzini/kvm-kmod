@@ -682,13 +682,16 @@ static inline void kvm_fire_urn(void) {}
 
 #ifdef CONFIG_SMP
 void kvm_synchronize_srcu_expedited(struct srcu_struct *sp);
+#define kvm_synchronize_srcu kvm_synchronize_srcu_expedited
 #else
 static inline void kvm_synchronize_srcu_expedited(struct srcu_struct *sp) { }
+static inline void kvm_synchronize_srcu(struct srcu_struct *sp) { }
 #endif
 
 #else
 
 #define kvm_synchronize_srcu_expedited synchronize_srcu_expedited
+#define kvm_synchronize_srcu synchronize_srcu
 
 #endif
 
