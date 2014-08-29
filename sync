@@ -299,6 +299,15 @@ def hack_content(fname, data):
         if line == '#endif' and finish_endif:
             w('#endif')
             finish_endif = False
+        if match(r'tkr\.'):
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,17,0)')
+            w(line)
+            w('#else')
+            if match(r'tkr\.cycle_last') or match(r'tkr\.mask'):
+                w(sub(r'tkr\.', 'clock->', line))
+            else:
+                w(sub(r'tkr\.', '', line))
+            line = '#endif'
         if line == '#ifdef CONFIG_KEXEC':
             line = '#if defined(CONFIG_KEXEC) && LINUX_VERSION_CODE >= KERNEL_VERSION(3,8,0)'
         if line == '\tif (!cpu_has_vmx_apicv())':
