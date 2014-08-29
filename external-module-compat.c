@@ -349,4 +349,27 @@ u64 ktime_get_boot_ns(void)
 	kvm_monotonic_to_bootbased(&ts);
 	return timespec_to_ns(&ts);
 }
+
+u64 kvm_get_boot_base_ns(void)
+{
+	struct timespec ts = { 0, 0 };
+
+	kvm_monotonic_to_bootbased(&ts);
+	return timespec_to_ns(&ts);
+}
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,8,0)
+#include <linux/timekeeper_internal.h>
+
+u64 kvm_get_xtime_nsec(struct timekeeper *tk)
+{
+	u64 monotonic_time_sec =
+		tk->xtime_sec + tk->wall_to_monotonic.tv_sec;
+	u64 monotonic_time_snsec =
+		tk->xtime_nsec + (tk->wall_to_monotonic.tv_nsec << tk->shift);
+
+	return ((monotonic_time_sec * (u64)NSEC_PER_SEC) << tk->shift) +
+		monotonic_time_snsec;
+}
+#endif
 #endif
