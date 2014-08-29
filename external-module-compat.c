@@ -339,3 +339,14 @@ void *bsearch(const void *key, const void *base, size_t num, size_t size,
 }
 EXPORT_SYMBOL(bsearch);
 #endif /* < 3.0 */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,17,0)
+u64 ktime_get_boot_ns(void)
+{
+	struct timespec ts;
+
+	ktime_get_ts(&ts);
+	kvm_monotonic_to_bootbased(&ts);
+	return timespec_to_ns(&ts);
+}
+#endif
