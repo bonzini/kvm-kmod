@@ -1135,6 +1135,16 @@ static inline int kvm_init_fpu(struct task_struct *tsk)
 #define XSTATE_YMM      0x4
 #endif
 
+#ifndef XSTATE_BNDCSR
+#define XSTATE_BNDREGS  0x8
+#define XSTATE_BNDCSR   0x10
+#define XSTATE_EAGER	(XSTATE_BNDREGS | XSTATE_BNDCSR)
+#endif
+
+#ifndef XSTATE_EXTEND_MASK
+#define XSTATE_EXTEND_MASK	(~(XSTATE_FPSSE | (1ULL << 63)))
+#endif
+
 #ifndef XSAVE_HDR_OFFSET
 #define XSAVE_HDR_OFFSET    512
 #endif
