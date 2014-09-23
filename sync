@@ -306,9 +306,7 @@ def hack_content(fname, data):
             if match(r'tkr\.cycle_last') or match(r'tkr\.mask'):
                 w(sub(r'tkr\.', 'clock->', line))
             elif match(r'tkr\.base_mono'):
-                w('\tboot_ns = kvm_get_boot_base_ns();')
-            elif match(r'tkr\.xtime_nsec'):
-                w(sub(r'tk->tkr\.xtime_nsec', 'kvm_get_xtime_nsec(tk)', line))
+                w('\tboot_ns = kvm_get_boot_base_ns(tk);')
             else:
                 w(sub(r'tkr\.', '', line))
             line = '#endif'

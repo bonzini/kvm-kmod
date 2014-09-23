@@ -1412,9 +1412,8 @@ static inline void smp_mb__after_srcu_read_unlock(void) {}
  */
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,17,0)
 extern u64 ktime_get_boot_ns(void);
-extern u64 kvm_get_boot_base_ns(void);
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,8,0)
 struct timekeeper;
-extern u64 kvm_get_xtime_nsec(struct timekeeper *tk);
+extern u64 kvm_get_boot_base_ns(struct timekeeper *tk);
 #endif
 #endif
