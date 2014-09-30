@@ -1417,3 +1417,7 @@ struct timekeeper;
 extern u64 kvm_get_boot_base_ns(struct timekeeper *tk);
 #endif
 #endif
+
+#ifndef FOLL_TRIED
+#define FOLL_TRIED	0x800	/* a retry, previous pass started an IO */
+#endif
