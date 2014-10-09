@@ -310,6 +310,22 @@ def hack_content(fname, data):
             else:
                 w(sub(r'tkr\.', '', line))
             line = '#endif'
+        if match_block_end('^static int kvm_mmu_notifier_clear_flush_young', '^}'):
+            w(line)
+            w('#if LINUX_VERSION_CODE < KERNEL_VERSION(3,18,0)')
+            w('static int kvm_mmu_notifier_clear_flush_young(struct mmu_notifier *mn,')
+            w('                                              struct mm_struct *mm,')
+            w('                                              unsigned long hva)')
+            w('{')
+            w('\treturn __kvm_mmu_notifier_clear_flush_young(mn, mm, hva, hva+1);')
+            w('}')
+            line = '#endif'
+        if match(r'^static int kvm_mmu_notifier_clear_flush_young'):
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,18,0)')
+            w(line)
+            w('#else')
+            w(sub('kvm_', '__kvm_', line))
+            line = '#endif'
         if line == '#ifdef CONFIG_KEXEC':
             line = '#if defined(CONFIG_KEXEC) && LINUX_VERSION_CODE >= KERNEL_VERSION(3,8,0)'
         if line == '\tif (!cpu_has_vmx_apicv())':
