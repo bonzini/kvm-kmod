@@ -1421,3 +1421,6 @@ extern u64 kvm_get_boot_base_ns(struct timekeeper *tk);
 #ifndef FOLL_TRIED
 #define FOLL_TRIED 0
 #endif
+
+#undef is_zero_pfn
+#define is_zero_pfn(pfn) ((pfn) == page_to_pfn(ZERO_PAGE(0)))
