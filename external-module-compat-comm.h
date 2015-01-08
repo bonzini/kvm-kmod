@@ -1440,6 +1440,15 @@ static inline void pci_set_dev_assigned(struct pci_dev *pdev)
 	pdev->dev_flags |= PCI_DEV_FLAGS_ASSIGNED;
 }
 
+#undef percpu_counter_init
+#define percpu_counter_init(fbc, value, gfp)                            \
+        ({                                                              \
+                static struct lock_class_key __key;                     \
+                                                                        \
+                __percpu_counter_init(fbc, value, &__key);              \
+        })
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,17,0)
 void *get_xsave_addr(struct xsave_struct *xsave, int feature);
 #endif
