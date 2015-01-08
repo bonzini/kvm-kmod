@@ -14,6 +14,7 @@
 #include <linux/kvm_para.h>
 #include <linux/kconfig.h>
 #include <linux/cpu.h>
+#include <linux/pci.h>
 #include <linux/time.h>
 #include <linux/kernel.h>
 #include <asm/processor.h>
@@ -1424,6 +1425,20 @@ extern u64 kvm_get_boot_base_ns(struct timekeeper *tk);
 
 #undef is_zero_pfn
 #define is_zero_pfn(pfn) ((pfn) == page_to_pfn(ZERO_PAGE(0)))
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,18, 0)
+#define iommu_capable(dummy, cap) \
+    iommu_domain_has_cap(kvm->arch.iommu_domain, cap)
+
+static inline void pci_clear_dev_assigned(struct pci_dev *pdev)
+{
+	pdev->dev_flags &= ~PCI_DEV_FLAGS_ASSIGNED;
+}
+
+static inline void pci_set_dev_assigned(struct pci_dev *pdev)
+{
+	pdev->dev_flags |= PCI_DEV_FLAGS_ASSIGNED;
+}
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,17,0)
 void *get_xsave_addr(struct xsave_struct *xsave, int feature);
