@@ -362,3 +362,14 @@ u64 kvm_get_boot_base_ns(struct timekeeper *tk)
 }
 #endif
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,17,0)
+void *get_xsave_addr(struct xsave_struct *xsave, int feature)
+{
+	int index = fls64(feature) - 1;
+	u32 size, offset, ecx, edx;
+
+	cpuid_count(0xd, index, &size, &offset, &ecx, &edx);
+	return (u8 *)xsave + offset;
+}
+#endif

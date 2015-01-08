@@ -44,8 +44,8 @@ def hack_content(fname, data):
         'set_desc_base set_desc_limit pvclock_vcpu_time_info tboot_enabled '
         'i387_fxsave_struct native_write_msr_safe xsave_struct '
         'fpu_alloc fpu_free fpu_restore_checking fpu_save_init fpu_finit '
-        'load_gdt store_gdt xstate_size cpu_has_xsave __get_user_pages_fast '
-        'set_64bit siginfo_t use_mm '
+        'load_gdt store_gdt xstate_size cpu_has_xsave cpu_has_xsaves '
+        '__get_user_pages_fast set_64bit siginfo_t use_mm '
         'unuse_mm request_threaded_irq init_fpu __this_cpu_read '
         '__this_cpu_write sigset_from_compat '
         'sched_info_on x86_pmu_capability perf_get_x86_pmu_capability '
@@ -299,6 +299,16 @@ def hack_content(fname, data):
         if line == '#endif' and finish_endif:
             w('#endif')
             finish_endif = False
+        if match(r'xcomp_bv'):
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,17,0)')
+            w(line)
+            w('#else')
+            # Will be under if (cpu_has_xsaves), which is always 0.  Just
+            # replace with something that compiles, the C statement might
+            # span more than one line.
+            w('WARN(1, "this should never happen"),')
+            w(sub(r'xcomp_bv', 'xstate_bv', line))
+            line = '#endif'
         if match(r'tkr\.'):
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,17,0)')
             w(line)

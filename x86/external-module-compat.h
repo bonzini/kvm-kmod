@@ -428,6 +428,23 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_MPX		(9*32+14) /* Memory Protection Extension */
 #endif
 
+#if X86_FEATURE_XSAVEOPT < 10 * 32
+#undef X86_FEATURE_XSAVEOPT
+#define X86_FEATURE_XSAVEOPT	(10*32+0) /* XSAVEOPT instruction */
+#endif
+
+#ifndef X86_FEATURE_XSAVEC
+#define X86_FEATURE_XSAVEC	(10*32+1) /* XSAVEC instruction */
+#endif
+
+#ifndef X86_FEATURE_XGETBV1
+#define X86_FEATURE_XGETBV1	(10*32+2) /* "XCR1" register */
+#endif
+
+#ifndef X86_FEATURE_XSAVES
+#define X86_FEATURE_XSAVES	(10*32+3) /* XSAVES instruction */
+#endif
+
 #ifndef MSR_AMD64_PATCH_LOADER
 #define MSR_AMD64_PATCH_LOADER         0xc0010020
 #endif
@@ -584,6 +601,10 @@ static inline void preempt_notifier_sys_exit(void) {}
 
 #ifndef cpu_has_xsave
 #define cpu_has_xsave boot_cpu_has(X86_FEATURE_XSAVE)
+#endif
+
+#ifndef cpu_has_xsaves
+#define cpu_has_xsaves boot_cpu_has(X86_FEATURE_XSAVES)
 #endif
 
 /* EFER_LMA and EFER_LME are missing in pre 2.6.24 i386 kernels */
@@ -1141,6 +1162,16 @@ static inline int kvm_init_fpu(struct task_struct *tsk)
 #define XSTATE_EAGER	(XSTATE_BNDREGS | XSTATE_BNDCSR)
 #endif
 
+#ifndef XSTATE_OPMASK
+#define XSTATE_OPMASK           0x20
+#define XSTATE_ZMM_Hi256        0x40
+#define XSTATE_Hi16_ZMM         0x80
+#endif
+
+#ifndef XSTATE_AVX512
+#define XSTATE_AVX512   (XSTATE_OPMASK | XSTATE_ZMM_Hi256 | XSTATE_Hi16_ZMM)
+#endif
+
 #ifndef XSTATE_EXTEND_MASK
 #define XSTATE_EXTEND_MASK	(~(XSTATE_FPSSE | (1ULL << 63)))
 #endif
@@ -1495,6 +1526,12 @@ static inline int __register_hotcpu_notifier(struct notifier_block *nb)
 	return 0;
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,17,0)
+#define kvm_cpu_has_xsaves	0
+#else /* >= 3.17 */
+#define kvm_cpu_has_xsaves	cpu_has_xsaves
+#endif /* >= 3.17 */
 
 #ifndef MSR_IA32_VMX_MISC_VMWRITE_SHADOW_RO_FIELDS
 #define MSR_IA32_VMX_MISC_VMWRITE_SHADOW_RO_FIELDS (1ULL << 29)
