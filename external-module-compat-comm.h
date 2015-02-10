@@ -1453,6 +1453,10 @@ static inline void pci_set_dev_assigned(struct pci_dev *pdev)
 void *get_xsave_addr(struct xsave_struct *xsave, int feature);
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,18,0)
+bool single_task_running(void);
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,19,0)
 #define trace_seq_buffer_ptr(p) ((p)->buffer + (p)->len)
 #endif

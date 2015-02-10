@@ -373,3 +373,11 @@ void *get_xsave_addr(struct xsave_struct *xsave, int feature)
 	return (u8 *)xsave + offset;
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,18,0)
+bool single_task_running(void)
+{
+	/* Not exactly the same... */
+	return !need_resched();
+}
+#endif
