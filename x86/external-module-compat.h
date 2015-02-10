@@ -51,6 +51,10 @@ static inline uint32_t hypervisor_cpuid_base(const char *sig, uint32_t leaves)
 #define CONFIG_HAVE_KVM_EVENTFD 1
 #endif
 
+#ifndef CONFIG_KVM_GENERIC_DIRTYLOG_READ_PROTECT
+#define CONFIG_KVM_GENERIC_DIRTYLOG_READ_PROTECT 1
+#endif
+
 #ifndef CONFIG_KVM_APIC_ARCHITECTURE
 #define CONFIG_KVM_APIC_ARCHITECTURE
 #endif
