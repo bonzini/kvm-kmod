@@ -363,7 +363,7 @@ u64 kvm_get_boot_base_ns(struct timekeeper *tk)
 #endif
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,17,0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,18,3)
 void *get_xsave_addr(struct xsave_struct *xsave, int feature)
 {
 	int index = fls64(feature) - 1;

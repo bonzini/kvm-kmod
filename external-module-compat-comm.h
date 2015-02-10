@@ -1449,7 +1449,7 @@ static inline void pci_set_dev_assigned(struct pci_dev *pdev)
         })
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,17,0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,18,3)
 void *get_xsave_addr(struct xsave_struct *xsave, int feature);
 #endif
 
