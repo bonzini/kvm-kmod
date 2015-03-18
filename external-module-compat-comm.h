@@ -1460,3 +1460,12 @@ bool single_task_running(void);
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,19,0)
 #define trace_seq_buffer_ptr(p) ((p)->buffer + (p)->len)
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)
+int __get_user_pages_unlocked(struct task_struct *tsk, struct mm_struct *mm,
+			 unsigned long addr, int nr_pages, bool write_fault, bool force,
+			 struct page **pagep, int flags);
+int get_user_pages_unlocked(struct task_struct *tsk, struct mm_struct *mm,
+			    unsigned long addr, int nr_pages, bool write_fault, bool force,
+			    struct page **pagep);
+#endif

@@ -381,3 +381,55 @@ bool single_task_running(void)
 	return !need_resched();
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)
+/* Instead of backporting everything, just include the code from 3.19's
+ * kvm_get_user_page_io, which was generalized into __get_user_pages_unlocked.
+ */
+int __get_user_pages_unlocked(struct task_struct *tsk, struct mm_struct *mm,
+			 unsigned long addr, int nr_pages, bool write_fault, bool force,
+			 struct page **pagep, int flags)
+{
+	int npages;
+	int locked = 1;
+	flags |= (pagep ? FOLL_GET : 0);
+	flags |= (write_fault ? FOLL_WRITE : 0);
+
+	BUG_ON(nr_pages != 1);
+	BUG_ON(force);
+
+	/*
+	 * If retrying the fault, we get here *not* having allowed the filemap
+	 * to wait on the page lock. We should now allow waiting on the IO with
+	 * the mmap semaphore released.
+	 */
+	down_read(&mm->mmap_sem);
+	npages = __get_user_pages(tsk, mm, addr, nr_pages, flags, pagep, NULL,
+				  &locked);
+	if (!locked) {
+		VM_BUG_ON(npages);
+
+		if (!pagep)
+			return 0;
+
+		/*
+		 * The previous call has now waited on the IO. Now we can
+		 * retry and complete. Pass TRIED to ensure we do not re
+		 * schedule async IO (see e.g. filemap_fault).
+		 */
+		down_read(&mm->mmap_sem);
+		npages = __get_user_pages(tsk, mm, addr, nr_pages, flags | FOLL_TRIED,
+					  pagep, NULL, NULL);
+	}
+	up_read(&mm->mmap_sem);
+	return npages;
+}
+
+int get_user_pages_unlocked(struct task_struct *tsk, struct mm_struct *mm,
+			    unsigned long addr, int nr_pages, bool write_fault, bool force,
+			    struct page **pagep)
+{
+	return __get_user_pages_unlocked(tsk, mm, addr, nr_pages, write_fault,
+					 force, pagep, 0);
+}
+#endif
