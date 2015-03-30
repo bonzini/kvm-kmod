@@ -1581,3 +1581,25 @@ typedef struct desc_struct gate_desc;
 #ifndef X86_EFLAGS_AC_BIT
 #define X86_EFLAGS_AC_BIT	18 /* Alignment Check/Access Control */
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 0, 0)
+static inline unsigned long __read_cr4(void)
+{
+	return read_cr4();
+}
+
+static inline unsigned long cr4_read_shadow(void)
+{
+	return read_cr4();
+}
+
+static inline void cr4_set_bits(unsigned long bits)
+{
+	write_cr4(read_cr4() | bits);
+}
+
+static inline void cr4_clear_bits(unsigned long bits)
+{
+	write_cr4(read_cr4() & ~bits);
+}
+#endif
