@@ -165,7 +165,7 @@ def hack_content(fname, data):
         line = sub(r'boot_cpu_data.x86_phys_bits', 'kvm_x86_phys_bits', line)
         if match(r'^static const struct vm_operations_struct kvm_'):
             line = sub(r' const ', ' ', line)
-        if eventfd_file and line == '#include "iodev.h"':
+        if eventfd_file and line == '#include <kvm/iodev.h>':
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)')
         if line == 'int kvm_irqfd_init(void);':
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)')
@@ -474,6 +474,11 @@ def header_sync(arch):
                  glob('%(linux)s/include/linux/vfio.h' % { 'linux': linux }) +
                  glob('%(linux)s/include/uapi/linux/kvm*.h' % { 'linux': linux })):
         out = ('%(T)s/include/linux/%(name)s'
+               % { 'T': T, 'name': os.path.basename(file) })
+        cp(file, out)
+        unifdef(out)
+    for file in (glob('%(linux)s/include/kvm/*.h' % { 'linux': linux })):
+        out = ('%(T)s/include/kvm/%(name)s'
                % { 'T': T, 'name': os.path.basename(file) })
         cp(file, out)
         unifdef(out)
