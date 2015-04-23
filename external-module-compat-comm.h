@@ -16,6 +16,7 @@
 #include <linux/cpu.h>
 #include <linux/pci.h>
 #include <linux/time.h>
+#include <linux/ktime.h>
 #include <linux/kernel.h>
 #include <asm/processor.h>
 #include <linux/hrtimer.h>
@@ -1404,6 +1405,13 @@ static inline void smp_mb__after_srcu_read_unlock(void) {}
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,11,0)
 #define PAGE_ALIGNED(addr)	IS_ALIGNED((unsigned long)addr, PAGE_SIZE)
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,16,0)
+static inline bool ktime_before(const ktime_t cmp1, const ktime_t cmp2)
+{
+        return ktime_compare(cmp1, cmp2) < 0;
+}
 #endif
 
 /*
