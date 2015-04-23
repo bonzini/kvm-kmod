@@ -80,7 +80,9 @@ static inline uint32_t hypervisor_cpuid_base(const char *sig, uint32_t leaves)
 #endif
 
 #ifndef CONFIG_HAVE_KVM_IRQFD
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)
 #define CONFIG_HAVE_KVM_IRQFD 1
+#endif
 #endif
 
 #if !defined(CONFIG_KVM_DEVICE_ASSIGNMENT) && defined(CONFIG_PCI) && \
