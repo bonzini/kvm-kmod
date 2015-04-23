@@ -309,8 +309,12 @@ def hack_content(fname, data):
             w('WARN(1, "this should never happen"),')
             w(sub(r'xcomp_bv', 'xstate_bv', line))
             line = '#endif'
-        if match(r'tkr\.'):
-            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,17,0)')
+        if match(r'tkr_mono\.'):
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)')
+            w(line)
+            line = sub(r'tkr_mono\.base', 'tkr.base_mono', line)
+            line = sub(r'tkr_mono', 'tkr', line)
+            w('#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,17,0)')
             w(line)
             w('#else')
             if match(r'tkr\.cycle_last') or match(r'tkr\.mask'):
