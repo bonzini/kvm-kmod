@@ -1477,3 +1477,14 @@ int get_user_pages_unlocked(struct task_struct *tsk, struct mm_struct *mm,
 			    unsigned long addr, int nr_pages, bool write_fault, bool force,
 			    struct page **pagep);
 #endif
+
+#ifndef CONFIG_CONTEXT_TRACKING
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,1,0)
+static bool context_tracking_cpu_is_enabled(void) { return false; }
+static bool context_tracking_is_enabled(void) { return false; }
+#endif
+#else
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,14,0)
+#define context_tracking_cpu_is_enabled() context_tracking_active()
+#endif
+#endif
