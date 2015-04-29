@@ -1488,3 +1488,7 @@ static bool context_tracking_is_enabled(void) { return false; }
 #define context_tracking_cpu_is_enabled() context_tracking_active()
 #endif
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,1,0)
+#define d_backing_inode(path) ((path)->d_inode)
+#endif
