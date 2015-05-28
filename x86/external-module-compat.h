@@ -1460,7 +1460,10 @@ static inline void amd_pmu_disable_virt(void) { }
 #include <asm/pvclock-abi.h>
 
 #ifndef PVCLOCK_GUEST_STOPPED
-#define PVCLOCK_GUEST_STOPPED	(1 << 1)
+#define PVCLOCK_GUEST_STOPPED	 (1 << 1)
+#endif
+#ifndef PVCLOCK_COUNTS_FROM_ZERO
+#define PVCLOCK_COUNTS_FROM_ZERO (1 << 2)
 #endif
 
 #if !defined(CONFIG_X86_64) && LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26)
