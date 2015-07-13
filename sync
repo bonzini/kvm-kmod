@@ -42,8 +42,8 @@ def hack_content(fname, data):
         'getboottime monotonic_to_bootbased '
         'check_tsc_unstable native_store_gdt native_store_idt '
         'set_desc_base set_desc_limit pvclock_vcpu_time_info tboot_enabled '
-        'i387_fxsave_struct native_write_msr_safe xsave_struct '
-        'fpu_alloc fpu_free fpu_restore_checking fpu_save_init fpu_finit '
+        'native_write_msr_safe '
+        'fpregs_state xregs_state fxregs_state fpregs_active '
         'load_gdt store_gdt xstate_size cpu_has_xsave cpu_has_xsaves '
         '__get_user_pages_fast set_64bit siginfo_t use_mm '
         'unuse_mm request_threaded_irq init_fpu __this_cpu_read '
@@ -270,12 +270,12 @@ def hack_content(fname, data):
             w('#else')
             w(line)
             line = '#endif'
-        if line == '\tif (!user_has_fpu() && !vmx->vcpu.guest_fpu_loaded)':
+        if line == '\tif (!kvm_fpregs_active() && !vmx->vcpu.guest_fpu_loaded)':
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,7,0)')
         if line == '\t\tstts();':
             w(line)
             w('#else')
-            w('\tif (user_has_fpu())')
+            w('\tif (kvm_fpregs_active())')
             w('\t\tclts();')
             line = '#endif'
         if line == '\tvmcs_writel(HOST_CR0, read_cr0() & ~X86_CR0_TS);  /* 22.2.3 */':
@@ -299,16 +299,6 @@ def hack_content(fname, data):
         if line == '#endif' and finish_endif:
             w('#endif')
             finish_endif = False
-        if match(r'xcomp_bv'):
-            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,17,0)')
-            w(line)
-            w('#else')
-            # Will be under if (cpu_has_xsaves), which is always 0.  Just
-            # replace with something that compiles, the C statement might
-            # span more than one line.
-            w('WARN(1, "this should never happen"),')
-            w(sub(r'xcomp_bv', 'xstate_bv', line))
-            line = '#endif'
         if match(r'tkr_mono\.'):
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)')
             w(line)
@@ -381,6 +371,52 @@ def hack_content(fname, data):
         if eventfd_file and line == '#include <linux/kernel.h>':
             w('#include <linux/module.h>')
 
+        # Large FPU changes in 4.2
+        if match(r'\b(__copy_kernel_to_fpregs|fpstate_init)\b'):
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,2,0)')
+            w(line)
+            w('#else')
+            # .state change from union pointer to union.  The older APIs
+            # took a struct fpu.
+            line = sub(r'\b__copy_kernel_to_fpregs\b', 'kvm_fpu_restore_checking', line)
+            line = sub(r'\bfpstate_init\b', 'kvm_fpstate_init', line)
+            line = sub(r'\b.state\b', '', line)
+            w(line)
+            line = '#endif'
+        if match(r'\bguest_fpu\.state\.|\bxsave\b.*\bheader\b'):
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,2,0)')
+            w(line)
+            line = sub(r'\bguest_fpu\.state\.', 'guest_fpu.state->', line)
+            line = sub(r'\bheader\.xfeatures\b', 'xsave_hdr.xstate_bv', line)
+            if match(r'\bheader\.xcomp_bv\b'):
+                w('#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,17,0)')
+                line = sub(r'\bheader\.xcomp_bv\b', 'xsave_hdr.xcomp_bv', line)
+                w(line)
+                # Will be under if (cpu_has_xsaves), which is always 0.  Just
+                # replace with something that compiles, the C statement might
+                # span more than one line.
+                line = 'WARN(1, "this should never happen"),\n' + \
+                           sub(r'xcomp_bv', 'xstate_bv', line)
+            w('#else')
+            w(line)
+            line = '#endif'
+        if line == '#include <asm/fpu/xstate.h>':
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,2,0)')
+            w(line)
+            w('#else')
+            w('#include <asm/i387.h>')
+            w('#include <asm/fpu-internal.h>')
+            w('#include <asm/xsave.h>')
+            line = '#endif'
+        if match(r'^#include <asm/fpu/internal\.h>'):
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,2,0)')
+            w(line)
+            w('#else')
+            w('#include <asm/i387.h>')
+            w('#include <asm/fpu-internal.h>')
+            w('#include <asm/xcr.h>')
+            line = '#endif'
+
         w(line)
 
         if line == '\t.scan_objects = mmu_shrink_scan,':
@@ -421,6 +457,12 @@ def hack_content(fname, data):
             w('#endif')
         if line == '#define _ASM_X86_KVM_HOST_H':
             w('#include <linux/clocksource.h>')
+
+        if match(r'kvm_x86_ops->vcpu_free'):
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,2,0)')
+            w('\tkvm_fpu_free(&vcpu->arch.guest_fpu);')
+            w('#endif')
+
     if eventfd_file:
         result.append('#else\n'
                       'void kvm_eventfd_init(struct kvm *kvm) { }\n'

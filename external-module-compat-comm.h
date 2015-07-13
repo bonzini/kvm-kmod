@@ -1492,3 +1492,8 @@ static bool context_tracking_is_enabled(void) { return false; }
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,1,0)
 #define d_backing_inode(path) ((path)->d_inode)
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,2,0)
+#define preempt_notifier_inc()
+#define preempt_notifier_dec()
+#endif

@@ -1025,7 +1025,7 @@ struct kvm_pvclock_vcpu_time_info {
 #include <asm/fpu-internal.h>
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35)
-struct kvm_i387_fxsave_struct {
+struct kvm_fxregs_state {
 	u16	cwd;
 	u16	swd;
 	u16	twd;
@@ -1050,31 +1050,37 @@ struct kvm_xsave_hdr_struct {
 	u64 reserved2[5];
 } __attribute__((packed));
 
-struct kvm_xsave_struct {
-	struct kvm_i387_fxsave_struct i387;
+struct kvm_xregs_state {
+	struct kvm_fxregs_state i387;
 	struct kvm_xsave_hdr_struct xsave_hdr;
 	struct kvm_ymmh_struct ymmh;
 	/* new processor state extensions will go here */
 } __attribute__ ((packed, aligned (64)));
 
-union kvm_thread_xstate {
-	struct kvm_i387_fxsave_struct fxsave;
-	struct kvm_xsave_struct xsave;
+union kvm_fpregs_state {
+	struct kvm_fxregs_state fxsave;
+	struct kvm_xregs_state xsave;
 };
 
-#else /* >= 2.6.35 */
+#elif LINUX_VERSION_CODE < KERNEL_VERSION(4,2,0) /* && >= 2.6.35 */
 
-#define kvm_i387_fxsave_struct	i387_fxsave_struct
-#define kvm_xsave_struct	xsave_struct
-#define kvm_thread_xstate	thread_xstate
+#define kvm_fpregs_state	thread_xstate
+#define kvm_xregs_state		xsave_struct
+#define kvm_fxregs_state	i387_fxsave_struct
 
-#endif /* >= 2.6.35 */
+#else /* >= 4.2.0 */
+
+#define kvm_fpregs_state	fpregs_state
+#define kvm_xregs_state		xregs_state
+#define kvm_fxregs_state	fxregs_state
+
+#endif /* >= 4.2.0 */
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
 
 struct kvm_compat_fpu {
-	union kvm_thread_xstate state_buffer;
-	union kvm_thread_xstate *state;
+	union kvm_fpregs_state state_buffer;
+	union kvm_fpregs_state *state;
 };
 
 static inline int kvm_fpu_alloc(struct kvm_compat_fpu *fpu)
@@ -1087,12 +1093,12 @@ static inline void kvm_fpu_free(struct kvm_compat_fpu *fpu)
 {
 }
 
-static inline void kvm_fx_save(struct kvm_i387_fxsave_struct *image)
+static inline void kvm_fx_save(struct kvm_fxregs_state *image)
 {
 	asm("fxsave (%0)":: "r" (image));
 }
 
-static inline void kvm_fx_restore(struct kvm_i387_fxsave_struct *image)
+static inline void kvm_fx_restore(struct kvm_fxregs_state *image)
 {
 	asm("fxrstor (%0)":: "r" (image));
 }
@@ -1111,10 +1117,10 @@ static inline void kvm_fpu_finit(struct kvm_compat_fpu *fpu)
 	kvm_fx_save(&fpu->state->fxsave);
 	preempt_enable();
 
-	after_mxcsr_mask = offsetof(struct kvm_i387_fxsave_struct, st_space);
+	after_mxcsr_mask = offsetof(struct kvm_fxregs_state, st_space);
 	fpu->state->fxsave.mxcsr = 0x1f80;
 	memset((void *)&fpu->state->fxsave + after_mxcsr_mask,
-	       0, sizeof(struct kvm_i387_fxsave_struct) - after_mxcsr_mask);
+	       0, sizeof(struct kvm_fxregs_state) - after_mxcsr_mask);
 }
 
 static inline int kvm_fpu_restore_checking(struct kvm_compat_fpu *fpu)
@@ -1606,5 +1612,31 @@ static inline void cr4_set_bits(unsigned long bits)
 static inline void cr4_clear_bits(unsigned long bits)
 {
 	write_cr4(read_cr4() & ~bits);
+}
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,2,0)
+static inline bool kvm_fpregs_active(void)
+{
+	return user_has_fpu();
+}
+
+static inline void copy_fpregs_to_fpstate(struct kvm_compat_fpu *fpu)
+{
+	kvm_fpu_save_init(fpu);
+}
+
+static inline void fpu__activate_curr(struct kvm_compat_fpu *fpu)
+{
+	struct task_struct *tsk =
+		container_of(fpu, struct task_struct, thread.fpu);
+	WARN_ON(!tsk_used_math(tsk) && init_fpu(tsk));
+}
+
+static inline void kvm_fpstate_init(struct kvm_compat_fpu *fpu)
+{
+	if (WARN_ON(kvm_fpu_alloc(fpu)))
+		return;
+	kvm_fpu_finit(fpu);
 }
 #endif
