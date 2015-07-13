@@ -1589,6 +1589,13 @@ typedef struct desc_struct gate_desc;
 #define HSW_IN_TX_CHECKPOINTED		0
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,19,0)
+#define __cm_idx2pte(i)                                        \
+       ((((i) & 4) << (_PAGE_BIT_PAT - 2)) |           \
+        (((i) & 2) << (_PAGE_BIT_PCD - 1)) |           \
+        (((i) & 1) << _PAGE_BIT_PWT))
+#endif
+
 #ifndef X86_EFLAGS_AC_BIT
 #define X86_EFLAGS_AC_BIT	18 /* Alignment Check/Access Control */
 #endif
