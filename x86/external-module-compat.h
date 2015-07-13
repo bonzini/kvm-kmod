@@ -1570,7 +1570,7 @@ static inline int __register_hotcpu_notifier(struct notifier_block *nb)
 #endif
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,17,0)
+#if 0 && LINUX_VERSION_CODE < KERNEL_VERSION(3,17,0)
 #define kvm_cpu_has_xsaves	0
 #else /* >= 3.17 */
 #define kvm_cpu_has_xsaves	cpu_has_xsaves

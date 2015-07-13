@@ -1447,7 +1447,9 @@ static inline void pci_set_dev_assigned(struct pci_dev *pdev)
 {
 	pdev->dev_flags |= PCI_DEV_FLAGS_ASSIGNED;
 }
+#endif
 
+#if 0 && LINUX_VERSION_CODE < KERNEL_VERSION(3,18, 0)
 #undef percpu_counter_init
 #define percpu_counter_init(fbc, value, gfp)                            \
         ({                                                              \
@@ -1484,7 +1486,7 @@ static bool context_tracking_cpu_is_enabled(void) { return false; }
 static bool context_tracking_is_enabled(void) { return false; }
 #endif
 #else
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,14,0)
+#if 0 && LINUX_VERSION_CODE < KERNEL_VERSION(3,14,0)
 #define context_tracking_cpu_is_enabled() context_tracking_active()
 #endif
 #endif
