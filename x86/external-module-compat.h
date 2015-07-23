@@ -560,6 +560,12 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #undef X86_CR8_TPR
 #define X86_CR8_TPR 0x0f
 
+#include <asm/pgtable_types.h>
+
+#ifndef _PAGE_NOCACHE
+#define _PAGE_NOCACHE _PAGE_CACHE_UC
+#endif
+
 #ifndef CONFIG_PREEMPT_NOTIFIERS
 
 #ifdef CONFIG_HAVE_HW_BREAKPOINT
