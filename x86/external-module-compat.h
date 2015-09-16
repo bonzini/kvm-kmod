@@ -177,18 +177,9 @@ static inline int kvm_native_write_msr_safe(unsigned int msr,
 	return err;
 }
 
-static inline unsigned long long kvm_native_read_tsc(void)
-{
-	DECLARE_ARGS(val, low, high);
-
-	asm volatile("rdtsc" : EAX_EDX_RET(val, low, high));
-	return EAX_EDX_VAL(val, low, high);
-}
-
 #else /* >= 2.6.25 */
 
 #define kvm_native_write_msr_safe	native_write_msr_safe
-#define kvm_native_read_tsc		native_read_tsc
 
 #endif /* >= 2.6.25 */
 
@@ -1652,4 +1643,21 @@ static inline void kvm_fpstate_init(struct kvm_compat_fpu *fpu)
 		return;
 	kvm_fpu_finit(fpu);
 }
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,3,0)
+static inline unsigned long long rdtsc(void)
+{
+	DECLARE_ARGS(val, low, high);
+
+	asm volatile("rdtsc" : EAX_EDX_RET(val, low, high));
+	return EAX_EDX_VAL(val, low, high);
+}
+
+static inline unsigned long long rdtsc_ordered(void)
+{
+	smp_mb();
+	return rdtsc();
+}
+
 #endif

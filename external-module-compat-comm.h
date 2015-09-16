@@ -1497,3 +1497,11 @@ static bool context_tracking_is_enabled(void) { return false; }
 #define preempt_notifier_inc()
 #define preempt_notifier_dec()
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,3,0)
+static inline struct page *
+__alloc_pages_node(int nid, gfp_t gfp_mask, unsigned int order)
+{
+	return alloc_pages_exact_node(nid, gfp_mask, order);
+}
+#endif
