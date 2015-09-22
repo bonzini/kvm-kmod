@@ -203,6 +203,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define MSR_TSC_AUX                     0xc0000103
 #endif
 
+#ifndef MSR_K8_TSEG_MASK
+#define MSR_K8_TSEG_MASK		0xc0010113
+#endif
+
 #ifndef MSR_VM_CR
 #define MSR_VM_CR                       0xc0010114
 #endif
