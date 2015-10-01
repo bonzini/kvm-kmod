@@ -433,3 +433,16 @@ int get_user_pages_unlocked(struct task_struct *tsk, struct mm_struct *mm,
 					 force, pagep, 0);
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,4,0)
+#include <linux/irqbypass.h>
+
+int irq_bypass_register_consumer(struct irq_bypass_consumer *c)
+{
+	return 0;
+}
+
+void irq_bypass_unregister_consumer(struct irq_bypass_consumer *c)
+{
+}
+#endif

@@ -433,6 +433,14 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_AVX512F     (9*32+16) /* AVX-512 Foundation */
 #endif
 
+#ifndef X86_FEATURE_CLWB
+#define X86_FEATURE_CLWB	( 9*32+24) /* CLWB instruction */
+#endif
+
+#ifndef X86_FEATURE_PCOMMIT
+#define X86_FEATURE_PCOMMIT	(9*32+22) /* PCOMMIT instruction */
+#endif
+
 #ifndef X86_FEATURE_AVX512PF
 #define X86_FEATURE_AVX512PF    (9*32+26) /* AVX-512 Prefetch */
 #endif
@@ -1647,6 +1655,29 @@ static inline void kvm_fpstate_init(struct kvm_compat_fpu *fpu)
 		return;
 	kvm_fpu_finit(fpu);
 }
+
+enum irq_remap_cap {
+	IRQ_POSTING_CAP = 0,
+};
+
+struct vcpu_data {
+	u64 pi_desc_addr;	/* Physical address of PI Descriptor */
+	u32 vector;		/* Guest vector of the interrupt */
+};
+
+static inline bool irq_remapping_cap(enum irq_remap_cap cap)
+{
+	return false;
+}
+
+static inline int irq_set_vcpu_affinity(unsigned int irq, void *vcpu_info)
+{
+	return -ENOSYS;
+}
+
+#define POSTED_INTR_WAKEUP_VECTOR	0xf1
+
+static inline void kvm_set_posted_intr_wakeup_handler(void (*handler)(void)) {}
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,3,0)
