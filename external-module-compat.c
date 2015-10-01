@@ -445,4 +445,10 @@ int irq_bypass_register_consumer(struct irq_bypass_consumer *c)
 void irq_bypass_unregister_consumer(struct irq_bypass_consumer *c)
 {
 }
+
+void task_cputime_adjusted(struct task_struct *p, cputime_t *ut, cputime_t *st)
+{
+	*ut = p->utime;
+	*st = p->stime;
+}
 #endif

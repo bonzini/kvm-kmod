@@ -1505,3 +1505,8 @@ __alloc_pages_node(int nid, gfp_t gfp_mask, unsigned int order)
 	return alloc_pages_exact_node(nid, gfp_mask, order);
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,4,0)
+/* Not exported until 4.4.  */
+void task_cputime_adjusted(struct task_struct *p, cputime_t *ut, cputime_t *st);
+#endif
