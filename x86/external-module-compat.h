@@ -1175,43 +1175,39 @@ static inline int kvm_init_fpu(struct task_struct *tsk)
 #define kvm_init_fpu	init_fpu
 #endif /* >= 2.6.38 */
 
-#ifndef XSTATE_FP
-#define XSTATE_FP       0x1
-#define XSTATE_SSE      0x2
-#define XSTATE_FPSSE    (XSTATE_FP | XSTATE_SSE)
+#ifndef XFEATURE_MASK_FP
+#define XFEATURE_MASK_FP       0x1
+#define XFEATURE_MASK_SSE      0x2
+#define XFEATURE_MASK_FPSSE    (XFEATURE_MASK_FP | XFEATURE_MASK_SSE)
 #endif
 
-#ifndef XSTATE_EXTEND_MASK
-#define XSTATE_EXTEND_MASK	(~(XSTATE_FPSSE | (1ULL << 63)))
+#ifndef XFEATURE_MASK_EXTEND
+#define XFEATURE_MASK_EXTEND	(~(XFEATURE_MASK_FPSSE | (1ULL << 63)))
 #endif
 
-#ifndef XSTATE_BNDREGS
-#define XSTATE_BNDREGS	0x8
-#define XSTATE_BNDCSR	0x10
+#ifndef XFEATURE_MASK_BNDREGS
+#define XFEATURE_MASK_BNDREGS	0x8
+#define XFEATURE_MASK_BNDCSR	0x10
 #endif
 
-#ifndef XSTATE_YMM
-#define XSTATE_YMM      0x4
+#ifndef XFEATURE_MASK_YMM
+#define XFEATURE_MASK_YMM      0x4
 #endif
 
-#ifndef XSTATE_BNDCSR
-#define XSTATE_BNDREGS  0x8
-#define XSTATE_BNDCSR   0x10
-#define XSTATE_EAGER	(XSTATE_BNDREGS | XSTATE_BNDCSR)
+#ifndef XFEATURE_MASK_BNDCSR
+#define XFEATURE_MASK_BNDREGS  0x8
+#define XFEATURE_MASK_BNDCSR   0x10
+#define XFEATURE_MASK_EAGER	(XFEATURE_MASK_BNDREGS | XFEATURE_MASK_BNDCSR)
 #endif
 
-#ifndef XSTATE_OPMASK
-#define XSTATE_OPMASK           0x20
-#define XSTATE_ZMM_Hi256        0x40
-#define XSTATE_Hi16_ZMM         0x80
+#ifndef XFEATURE_MASK_OPMASK
+#define XFEATURE_MASK_OPMASK           0x20
+#define XFEATURE_MASK_ZMM_Hi256        0x40
+#define XFEATURE_MASK_Hi16_ZMM         0x80
 #endif
 
-#ifndef XSTATE_AVX512
-#define XSTATE_AVX512   (XSTATE_OPMASK | XSTATE_ZMM_Hi256 | XSTATE_Hi16_ZMM)
-#endif
-
-#ifndef XSTATE_EXTEND_MASK
-#define XSTATE_EXTEND_MASK	(~(XSTATE_FPSSE | (1ULL << 63)))
+#ifndef XFEATURE_MASK_AVX512
+#define XFEATURE_MASK_AVX512   (XFEATURE_MASK_OPMASK | XFEATURE_MASK_ZMM_Hi256 | XFEATURE_MASK_Hi16_ZMM)
 #endif
 
 #ifndef XSAVE_HDR_OFFSET
