@@ -5,6 +5,7 @@
 
 #include <linux/compiler.h>
 #include <linux/version.h>
+#include <linux/kconfig.h>
 
 #include <linux/types.h>
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)
