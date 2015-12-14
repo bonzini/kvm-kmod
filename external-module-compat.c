@@ -382,7 +382,7 @@ bool single_task_running(void)
 }
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)
+#if 0 && LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)
 /* Instead of backporting everything, just include the code from 3.19's
  * kvm_get_user_page_io, which was generalized into __get_user_pages_unlocked.
  */

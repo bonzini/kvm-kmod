@@ -1407,7 +1407,7 @@ static inline void guest_exit(void)
 #define PAGE_ALIGNED(addr)	IS_ALIGNED((unsigned long)addr, PAGE_SIZE)
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,16,0)
+#if 0 && LINUX_VERSION_CODE < KERNEL_VERSION(3,16,0)
 static inline bool ktime_before(const ktime_t cmp1, const ktime_t cmp2)
 {
         return ktime_compare(cmp1, cmp2) < 0;
@@ -1471,7 +1471,7 @@ bool single_task_running(void);
 #define trace_seq_buffer_ptr(p) ((p)->buffer + (p)->len)
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)
+#if 0 && LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)
 int __get_user_pages_unlocked(struct task_struct *tsk, struct mm_struct *mm,
 			 unsigned long addr, int nr_pages, bool write_fault, bool force,
 			 struct page **pagep, int flags);
@@ -1511,7 +1511,9 @@ __alloc_pages_node(int nid, gfp_t gfp_mask, unsigned int order)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,4,0)
 /* Not exported until 4.4.  */
 void task_cputime_adjusted(struct task_struct *p, cputime_t *ut, cputime_t *st);
+#endif
 
+#if 0 && LINUX_VERSION_CODE < KERNEL_VERSION(4,4,0)
 #ifndef mul_u64_u64_shr
 static inline u64 mul_u64_u64_shr(u64 a, u64 b, unsigned int shift)
 {
