@@ -216,6 +216,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define MSR_VM_HSAVE_PA                 0xc0010117
 #endif
 
+#ifndef MSR_F15H_IC_CFG
+#define MSR_F15H_IC_CFG			0xc0011021
+#endif
+
 #ifndef _EFER_SVME
 #define _EFER_SVME		12
 #define EFER_SVME		(1<<_EFER_SVME)
@@ -1692,4 +1696,37 @@ static inline unsigned long long rdtsc_ordered(void)
 	return rdtsc();
 }
 
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,5,0)
+static inline unsigned int x86_family(unsigned int sig)
+{
+	unsigned int x86;
+
+	x86 = (sig >> 8) & 0xf;
+
+	if (x86 == 0xf)
+		x86 += (sig >> 20) & 0xff;
+
+	return x86;
+}
+
+static inline unsigned int x86_model(unsigned int sig)
+{
+	unsigned int fam, model;
+
+	fam = x86_family(sig);
+
+	model = (sig >> 4) & 0xf;
+
+	if (fam >= 0x6)
+		model += ((sig >> 16) & 0xf) << 4;
+
+	return model;
+}
+
+static inline unsigned int x86_stepping(unsigned int sig)
+{
+	return sig & 0xf;
+}
 #endif
