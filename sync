@@ -450,11 +450,11 @@ def hack_content(fname, data):
             w('#else')
             w('#include "pmu-stubs.c"')
             w('#endif')
-        if match_block_end(r'init_kthread_worker\(&pit->worker\);', r'if \(IS_ERR\(pit->worker_task\)\) {'):
+        if match_block_end(r'init_kthread_worker\(&pit->worker\);', r'if \(IS_ERR\(pit->worker_task\)\)'):
             w('#else')
             w('\t(void)pid_nr;')
             w('\tpit->worker = create_singlethread_workqueue("kvm-pit");')
-            w('\tif (!pit->worker) {')
+            w('\tif (!pit->worker)')
             w('#endif')
         if line == 'module_param(min_timer_period_us, uint, S_IRUGO | S_IWUSR);':
             w('\n#if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)')
