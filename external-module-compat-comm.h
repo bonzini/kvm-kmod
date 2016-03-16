@@ -1496,6 +1496,7 @@ static bool context_tracking_is_enabled(void) { return false; }
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,2,0)
 #define preempt_notifier_inc()
 #define preempt_notifier_dec()
+#define smp_store_mb(p, val) set_mb(p, val)
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,3,0)
