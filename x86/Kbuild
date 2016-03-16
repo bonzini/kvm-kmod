@@ -12,6 +12,6 @@ endif
 kvm-intel-objs := vmx.o pmu_intel.o
 kvm-amd-objs := svm.o pmu_amd.o
 
-kvm-objs += ../srcu.o
+kvm-objs += ../srcu.o ../swait.o
 
 CFLAGS_kvm_main.o = -DKVM_MAIN
