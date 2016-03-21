@@ -1584,3 +1584,7 @@ static inline u64 mul_u64_u32_div(u64 a, u32 mul, u32 divisor)
 }
 #endif /* mul_u64_u32_div */
 #endif
+
+#ifndef FOLL_REMOTE
+#define FOLL_REMOTE 0
+#endif

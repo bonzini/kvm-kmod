@@ -475,6 +475,14 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_XSAVES	(10*32+3) /* XSAVES instruction */
 #endif
 
+#ifndef X86_FEATURE_PKU
+#define X86_FEATURE_PKU		(16*32+3) /* Protection Keys for Userspace */
+#endif
+
+#ifndef X86_FEATURE_OSPKE
+#define X86_FEATURE_OSPKE	(16*32+ 4) /* OS Protection Keys Enable */
+#endif
+
 #ifndef MSR_AMD64_PATCH_LOADER
 #define MSR_AMD64_PATCH_LOADER         0xc0010020
 #endif
@@ -563,6 +571,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 
 #ifndef X86_CR4_SMEP
 #define X86_CR4_SMEP 0x00100000
+#endif
+
+#ifndef X86_CR4_PKE
+#define X86_CR4_PKE 0x00400000
 #endif
 
 #undef X86_CR8_TPR
@@ -1210,6 +1222,10 @@ static inline int kvm_init_fpu(struct task_struct *tsk)
 #define XFEATURE_MASK_Hi16_ZMM         0x80
 #endif
 
+#ifndef XFEATURE_MASK_PKRU
+#define XFEATURE_MASK_PKRU             0x200
+#endif
+
 #ifndef XFEATURE_MASK_AVX512
 #define XFEATURE_MASK_AVX512   (XFEATURE_MASK_OPMASK | XFEATURE_MASK_ZMM_Hi256 | XFEATURE_MASK_Hi16_ZMM)
 #endif
@@ -1526,18 +1542,45 @@ static inline void update_debugctlmsr(unsigned long debugctlmsr)
 }
 #endif
 
-#ifndef __ASM_REG
-#define __ASM_REG(reg)	__ASM_SEL(e##reg, r##reg)
-#define _ASM_AX		__ASM_REG(ax)
-#define _ASM_BX		__ASM_REG(bx)
-#define _ASM_CX		__ASM_REG(cx)
-#define _ASM_DX		__ASM_REG(dx)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,12,0)
+
+#ifndef __ASM_SEL_RAW
+#ifdef CONFIG_X86_32
+# define __ASM_SEL_RAW(a,b) __ASM_FORM_RAW(a)
+#else
+# define __ASM_SEL_RAW(a,b) __ASM_FORM_RAW(b)
+#endif
 #endif
 
-#ifndef _ASM_SP
+#ifndef __ASM_FORM_RAW
+# define __ASM_FORM_RAW(x)     #x
+#endif
+
+#undef __ASM_REG
+#define __ASM_REG(reg)	__ASM_SEL_RAW(e##reg, r##reg)
+
+#undef _ASM_AX
+#define _ASM_AX		__ASM_REG(ax)
+
+#undef _ASM_BX
+#define _ASM_BX		__ASM_REG(bx)
+
+#undef _ASM_CX
+#define _ASM_CX		__ASM_REG(cx)
+
+#undef _ASM_DX
+#define _ASM_DX		__ASM_REG(dx)
+
+#undef _ASM_SP
 #define _ASM_SP		__ASM_REG(sp)
+
+#undef _ASM_BP
 #define _ASM_BP		__ASM_REG(bp)
+
+#undef _ASM_SI
 #define _ASM_SI		__ASM_REG(si)
+
+#undef _ASM_DI
 #define _ASM_DI		__ASM_REG(di)
 #endif
 
@@ -1729,4 +1772,35 @@ static inline unsigned int x86_stepping(unsigned int sig)
 {
 	return sig & 0xf;
 }
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,6,0)
+static inline u32 __read_pkru(void) { return 0; }
+static inline void __write_pkru(u32 x) { }
+static inline u32 read_pkru(void) { return 0; }
+static inline void write_pkru(u32 x) { }
+static inline u16 pte_flags_pkey(unsigned long pte_flags) { return 0; }
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,5,0)
+enum cpuid_leafs
+{
+        CPUID_1_EDX             = 0,
+        CPUID_8000_0001_EDX,
+        CPUID_8086_0001_EDX,
+        CPUID_LNX_1,
+        CPUID_1_ECX,
+        CPUID_C000_0001_EDX,
+        CPUID_8000_0001_ECX,
+        CPUID_LNX_2,
+        CPUID_LNX_3,
+        CPUID_7_0_EBX,
+        CPUID_D_1_EAX,
+        CPUID_F_0_EDX,
+        CPUID_F_1_EDX,
+        CPUID_8000_0008_EBX,
+        CPUID_6_EAX,
+        CPUID_8000_000A_EDX,
+        CPUID_7_ECX,
+};
 #endif
