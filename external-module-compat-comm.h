@@ -1588,3 +1588,30 @@ static inline u64 mul_u64_u32_div(u64 a, u32 mul, u32 divisor)
 #ifndef FOLL_REMOTE
 #define FOLL_REMOTE 0
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,6,0)
+/*
+ * PageTransCompoundMap is the same as PageTransCompound, but it also
+ * guarantees the primary MMU has the entire compound page mapped
+ * through pmd_trans_huge, which in turn guarantees the secondary MMUs
+ * can also map the entire compound page. This allows the secondary
+ * MMUs to call get_user_pages() only once for each compound page and
+ * to immediately map the entire compound page with a single secondary
+ * MMU fault. If there will be a pmd split later, the secondary MMUs
+ * will get an update through the MMU notifier invalidation through
+ * split_huge_pmd().
+ *
+ * Unlike PageTransCompound, this is safe to be called only while
+ * split_huge_pmd() cannot run from under us, like if protected by the
+ * MMU notifier, otherwise it may result in page->_mapcount < 0 false
+ * positives.
+ */
+static inline int PageTransCompoundMap(struct page *page)
+{
+        return PageTransCompound(page) && atomic_read(&page->_mapcount) < 0;
+}
+
+static inline void intel_pt_handle_vmx(int on)
+{
+}
+#endif
