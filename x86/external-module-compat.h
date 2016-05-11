@@ -475,6 +475,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_XSAVES	(10*32+3) /* XSAVES instruction */
 #endif
 
+#ifndef X86_FEATURE_AVIC
+#define X86_FEATURE_AVIC	(15*32+13) /* Virtual Interrupt Controller */
+#endif
+
 #ifndef X86_FEATURE_PKU
 #define X86_FEATURE_PKU		(16*32+3) /* Protection Keys for Userspace */
 #endif
