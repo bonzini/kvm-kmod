@@ -1808,3 +1808,7 @@ enum cpuid_leafs
         CPUID_7_ECX,
 };
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,7,0)
+#define gsbase gs
+#endif
