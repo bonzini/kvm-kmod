@@ -129,11 +129,12 @@ def hack_content(fname, data):
             w('MODULE_INFO(version, "%s");' % (version,))
         if match(r'atomic_inc\(&kvm->mm->mm_count\);'):
             line = '\tmmget(&kvm->mm->mm_count);'
-        if match(r'^static int (.*_stat_get|lost_records_get)'):
-            line = line[0:11] + '__' + line[11:]
-        if match(r'DEFINE_SIMPLE_ATTRIBUTE.*(_stat_get|lost_records_get)'):
-            name = sub(r',', '', f[1])
-            w('MAKE_SIMPLE_ATTRIBUTE_GETTER(' + name + ')')
+        if match(r'_stat_get|lost_records_get'):
+            if match(r'DEFINE_SIMPLE_ATTRIBUTE'):
+                name = sub(r',', '', f[1])
+                w('MAKE_SIMPLE_ATTRIBUTE_GETTER(' + name + ')')
+	    else:
+                line = sub(r'\b(\w+_stat_get|lost_records_get)', r'__\1', line)
         line = sub(r'linux/mm_types\.h', 'linux/mm.h', line)
         line = sub(r'\b__user\b', ' ', line)
         if match(r'#include <linux/compiler.h>'):
