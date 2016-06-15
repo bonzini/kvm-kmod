@@ -1395,6 +1395,21 @@ static inline void guest_exit(void)
 #endif /* !CONFIG_CONTEXT_TRACKING */
 #endif /* < 3.10 */
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,8,0)
+#include <linux/context_tracking.h>
+static inline void guest_enter_irqoff(void)
+{
+	guest_enter();
+	if (!context_tracking_cpu_is_enabled())
+		rcu_virt_note_context_switch(smp_processor_id());
+}
+
+static inline void guest_exit_irqoff(void)
+{
+	guest_exit();
+}
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,13,0)
 static inline void smp_mb__after_srcu_read_unlock(void) {}
 #endif
