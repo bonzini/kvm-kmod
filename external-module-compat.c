@@ -452,3 +452,91 @@ void task_cputime_adjusted(struct task_struct *p, cputime_t *ut, cputime_t *st)
 	*st = p->stime;
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,8,0)
+#ifndef VM_FAULT_SIGSEGV
+#define VM_FAULT_SIGSEGV 0
+#endif
+
+static inline
+bool vma_permits_fault(struct vm_area_struct *vma, unsigned int fault_flags)
+{
+	bool write   = !!(fault_flags & FAULT_FLAG_WRITE);
+	vm_flags_t vm_flags = write ? VM_WRITE : VM_READ;
+
+	if (!(vm_flags & vma->vm_flags))
+		return false;
+
+	/* arch_vma_access_permitted check removed---assuming that
+	 * pkeys are not in use.
+	 */
+	return true;
+}
+
+int kvm_fixup_user_fault(struct task_struct *tsk, struct mm_struct *mm,
+			 unsigned long address, unsigned int flags,
+			 bool *unlocked)
+{
+	struct vm_area_struct *vma;
+	int ret, major = 0;
+	unsigned int fault_flags = 0;
+
+	VM_WARN_ON_ONCE(flags & ~(FOLL_WRITE|FOLL_NOWAIT|
+				  FOLL_TRIED|FOLL_HWPOISON));
+
+	if (flags & FOLL_WRITE)
+		fault_flags |= FAULT_FLAG_WRITE;
+	if (unlocked)
+		fault_flags |= FAULT_FLAG_ALLOW_RETRY;
+	if (flags & FOLL_NOWAIT) {
+		VM_WARN_ON_ONCE(unlocked);
+		fault_flags |= FAULT_FLAG_ALLOW_RETRY | FAULT_FLAG_RETRY_NOWAIT;
+	}
+	if (flags & FOLL_TRIED) {
+		VM_WARN_ON_ONCE(fault_flags & FAULT_FLAG_ALLOW_RETRY);
+		fault_flags |= FAULT_FLAG_TRIED;
+	}
+
+retry:
+	vma = find_extend_vma(mm, address);
+
+	if (!vma || address < vma->vm_start)
+		return -EFAULT;
+
+	if (!vma_permits_fault(vma, fault_flags))
+		return -EFAULT;
+
+	ret = handle_mm_fault(mm, vma, address, fault_flags);
+	major |= ret & VM_FAULT_MAJOR;
+	if (ret & VM_FAULT_ERROR) {
+		if (ret & VM_FAULT_OOM)
+			return -ENOMEM;
+		if (ret & (VM_FAULT_HWPOISON | VM_FAULT_HWPOISON_LARGE))
+			return flags & FOLL_HWPOISON ? -EHWPOISON : -EFAULT;
+		if (ret & (VM_FAULT_SIGBUS | VM_FAULT_SIGSEGV))
+			return -EFAULT;
+		BUG();
+	}
+
+	if (ret & VM_FAULT_RETRY) {
+		if ((fault_flags & FAULT_FLAG_RETRY_NOWAIT))
+			return -EBUSY;
+
+		down_read(&mm->mmap_sem);
+		if (!(fault_flags & FAULT_FLAG_TRIED)) {
+			*unlocked = true;
+			fault_flags &= ~FAULT_FLAG_ALLOW_RETRY;
+			fault_flags |= FAULT_FLAG_TRIED;
+			goto retry;
+		}
+	}
+
+	if (tsk) {
+		if (major)
+			tsk->maj_flt++;
+		else
+			tsk->min_flt++;
+	}
+	return 0;
+}
+#endif

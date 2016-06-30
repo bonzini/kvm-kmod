@@ -1675,3 +1675,11 @@ static inline void getboottime64(struct timespec64 *ts64)
 	*ts64 = timespec_to_timespec64(ts);
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,8,0)
+int kvm_fixup_user_fault(struct task_struct *tsk, struct mm_struct *mm,
+       			 unsigned long address, unsigned int flags,
+			 bool *unlocked);
+#else
+#define kvm_fixup_user_fault fixup_user_fault
+#endif
