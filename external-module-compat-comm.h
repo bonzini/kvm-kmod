@@ -1630,3 +1630,48 @@ static inline void intel_pt_handle_vmx(int on)
 {
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)
+#include <linux/time64.h>
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,17,0)
+#if __BITS_PER_LONG == 64
+static inline struct timespec timespec64_to_timespec(const struct timespec64 ts64)
+{
+       return ts64;
+}
+
+static inline struct timespec64 timespec_to_timespec64(const struct timespec ts)
+{
+       return ts;
+}
+#else
+static inline struct timespec timespec64_to_timespec(const struct timespec64 ts64)
+{
+       struct timespec ret;
+
+       ret.tv_sec = (time_t)ts64.tv_sec;
+       ret.tv_nsec = ts64.tv_nsec;
+       return ret;
+}
+
+static inline struct timespec64 timespec_to_timespec64(const struct timespec ts)
+{
+       struct timespec64 ret;
+
+       ret.tv_sec = ts.tv_sec;
+       ret.tv_nsec = ts.tv_nsec;
+       return ret;
+}
+
+#endif
+#endif
+
+static inline void getboottime64(struct timespec64 *ts64)
+{
+	struct timespec ts;
+
+	kvm_getboottime(&ts);
+	*ts64 = timespec_to_timespec64(ts);
+}
+#endif
