@@ -540,3 +540,95 @@ retry:
 	return 0;
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,8,0)
+static int (*kvm_cpu_notifier_startup[2])(unsigned int cpu);
+static int (*kvm_cpu_notifier_teardown[2])(unsigned int cpu);
+
+static int kvm_cpu_hotplug(struct notifier_block *notifier, unsigned long val,
+			   void *v)
+{
+	unsigned int cpu = raw_smp_processor_id();
+	val &= ~CPU_TASKS_FROZEN;
+	switch (val) {
+	case CPU_DYING:
+		kvm_cpu_notifier_startup[CPUHP_AP_KVM_STARTING](cpu);
+		break;
+	case CPU_STARTING:
+		kvm_cpu_notifier_teardown[CPUHP_AP_KVM_STARTING](cpu);
+		break;
+	}
+	return NOTIFY_OK;
+}
+
+static int kvmclock_cpu_notifier(struct notifier_block *nfb,
+                                       unsigned long action, void *hcpu)
+{
+	unsigned int cpu = raw_smp_processor_id();
+	switch (action) {
+	case CPU_ONLINE:
+	case CPU_DOWN_FAILED:
+		kvm_cpu_notifier_startup[CPUHP_AP_X86_KVM_CLK_ONLINE](cpu);
+		break;
+	case CPU_DOWN_PREPARE:
+		kvm_cpu_notifier_teardown[CPUHP_AP_X86_KVM_CLK_ONLINE](cpu);
+		break;
+	}
+	return NOTIFY_OK;
+}
+ 
+
+static struct notifier_block kvm_cpu_notifier[] = {
+	[CPUHP_AP_KVM_STARTING] = {
+		.notifier_call = kvm_cpu_hotplug,
+	},
+	[CPUHP_AP_X86_KVM_CLK_ONLINE] = {
+		.notifier_call = kvmclock_cpu_notifier,
+		.priority = -INT_MAX
+	}
+};
+
+static void call_fn(void *info)
+{
+	unsigned int cpu = raw_smp_processor_id();
+	kvm_cpu_notifier_startup[CPUHP_AP_X86_KVM_CLK_ONLINE](cpu);
+}
+
+int cpuhp_setup_state(enum kvm_cpuhp_state state,
+		      const char *name,
+		      int (*startup)(unsigned int cpu),
+		      int (*teardown)(unsigned int cpu))
+{
+	int cpu;
+	BUG_ON(state != CPUHP_AP_X86_KVM_CLK_ONLINE);
+	kvm_cpu_notifier_startup[state] = startup;
+	kvm_cpu_notifier_teardown[state] = teardown;
+
+	cpu_notifier_register_begin();
+	for_each_online_cpu(cpu)
+		smp_call_function_single(cpu, (void *)call_fn, NULL, 1);
+
+	__register_hotcpu_notifier(&kvm_cpu_notifier[state]);
+	cpu_notifier_register_done();
+	return 0;
+}
+
+int cpuhp_setup_state_nocalls(enum kvm_cpuhp_state state,
+			      const char *name,
+			      int (*startup)(unsigned int cpu),
+			      int (*teardown)(unsigned int cpu))
+{
+	BUG_ON(state == CPUHP_AP_X86_KVM_CLK_ONLINE);
+	kvm_cpu_notifier_startup[state] = startup;
+	kvm_cpu_notifier_teardown[state] = teardown;
+	return register_cpu_notifier(&kvm_cpu_notifier[state]);
+}
+
+void cpuhp_remove_state_nocalls(enum kvm_cpuhp_state state)
+{
+	if (state == CPUHP_AP_X86_KVM_CLK_ONLINE)
+		unregister_hotcpu_notifier(&kvm_cpu_notifier[state]);
+	else
+		unregister_cpu_notifier(&kvm_cpu_notifier[state]);
+}
+#endif

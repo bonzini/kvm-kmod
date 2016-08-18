@@ -1680,6 +1680,22 @@ static inline void getboottime64(struct timespec64 *ts64)
 int kvm_fixup_user_fault(struct task_struct *tsk, struct mm_struct *mm,
        			 unsigned long address, unsigned int flags,
 			 bool *unlocked);
+
+enum kvm_cpuhp_state {
+	CPUHP_AP_KVM_STARTING,
+	CPUHP_AP_X86_KVM_CLK_ONLINE,
+};
+
+int cpuhp_setup_state(enum kvm_cpuhp_state state,
+	     	      const char *name,
+	      	      int (*startup)(unsigned int cpu),
+	      	      int (*teardown)(unsigned int cpu));
+int cpuhp_setup_state_nocalls(enum kvm_cpuhp_state state,
+                              const char *name,
+                              int (*startup)(unsigned int cpu),
+                              int (*teardown)(unsigned int cpu));
+void cpuhp_remove_state_nocalls(enum kvm_cpuhp_state state);
+
 #else
 #define kvm_fixup_user_fault fixup_user_fault
 #endif
