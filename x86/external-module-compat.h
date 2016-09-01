@@ -438,6 +438,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_AVX512F     (9*32+16) /* AVX-512 Foundation */
 #endif
 
+#ifndef X86_FEATURE_AVX512DQ
+#define X86_FEATURE_AVX512DQ	(9*32+17) /* AVX-512 DQ (Double/Quad granular) Instructions */
+#endif
+
 #ifndef X86_FEATURE_CLWB
 #define X86_FEATURE_CLWB	( 9*32+24) /* CLWB instruction */
 #endif
@@ -456,6 +460,14 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 
 #ifndef X86_FEATURE_AVX512CD
 #define X86_FEATURE_AVX512CD    (9*32+28) /* AVX-512 Conflict Detection */
+#endif
+
+#ifndef X86_FEATURE_AVX512BW
+#define X86_FEATURE_AVX512BW	(9*32+30) /* AVX-512 BW (Byte/Word granular) Instructions */
+#endif
+
+#ifndef X86_FEATURE_AVX512VL
+#define X86_FEATURE_AVX512VL	(9*32+31) /* AVX-512 VL (128/256 Vector Length) Extensions */
 #endif
 
 #if X86_FEATURE_XSAVEOPT < 10 * 32
