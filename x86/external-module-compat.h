@@ -491,12 +491,20 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_AVIC	(15*32+13) /* Virtual Interrupt Controller */
 #endif
 
+#ifndef X86_FEATURE_UMIP
+#define X86_FEATURE_UMIP	(16*32+ 2) /* User-Mode Instruction Prevention */
+#endif
+
 #ifndef X86_FEATURE_PKU
 #define X86_FEATURE_PKU		(16*32+3) /* Protection Keys for Userspace */
 #endif
 
 #ifndef X86_FEATURE_OSPKE
 #define X86_FEATURE_OSPKE	(16*32+ 4) /* OS Protection Keys Enable */
+#endif
+
+#ifndef X86_FEATURE_RDPID
+#define X86_FEATURE_RDPID	(16*32+22) /* User-Mode Instruction Prevention */
 #endif
 
 #ifndef MSR_AMD64_PATCH_LOADER
@@ -567,6 +575,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 
 #ifndef X86_CR3_PCID_MASK
 #define X86_CR3_PCID_MASK 0x00000fff
+#endif
+
+#ifndef X86_CR4_UMIP
+#define X86_CR4_UMIP 0x00000800
 #endif
 
 #ifndef X86_CR4_VMXE
