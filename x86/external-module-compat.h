@@ -1836,3 +1836,12 @@ enum cpuid_leafs
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,7,0)
 #define gsbase gs
 #endif
+
+static __always_inline
+cycle_t kvm___pvclock_read_cycles(const struct pvclock_vcpu_time_info *src)
+{
+        u64 delta = rdtsc_ordered() - src->tsc_timestamp;
+        cycle_t offset = pvclock_scale_delta(delta, src->tsc_to_system_mul,
+                                             src->tsc_shift);
+        return src->system_time + offset;
+}
