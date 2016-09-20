@@ -1846,3 +1846,26 @@ cycle_t kvm___pvclock_read_cycles(const struct pvclock_vcpu_time_info *src,
                                              src->tsc_shift);
         return src->system_time + offset;
 }
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,9,0)
+struct amd_iommu_pi_data {
+        u32 ga_tag;
+        u32 prev_ga_tag;
+        u64 base;
+        bool is_guest_mode;
+        struct vcpu_data *vcpu_data;
+        void *ir_data;
+};
+
+static inline int
+amd_iommu_register_ga_log_notifier(int (*notifier)(u32))
+{
+	        return 0;
+}
+
+static inline int
+amd_iommu_update_ga(int cpu, bool is_run, void *data)
+{
+	        return 0;
+}
+#endif
