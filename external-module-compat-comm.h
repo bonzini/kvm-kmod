@@ -1484,15 +1484,6 @@ bool single_task_running(void);
 #define trace_seq_buffer_ptr(p) ((p)->buffer + (p)->len)
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)
-int __get_user_pages_unlocked(struct task_struct *tsk, struct mm_struct *mm,
-			 unsigned long addr, int nr_pages, bool write_fault, bool force,
-			 struct page **pagep, int flags);
-int get_user_pages_unlocked(struct task_struct *tsk, struct mm_struct *mm,
-			    unsigned long addr, int nr_pages, bool write_fault, bool force,
-			    struct page **pagep);
-#endif
-
 #ifndef CONFIG_CONTEXT_TRACKING
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,1,0)
 static bool context_tracking_cpu_is_enabled(void) { return false; }
@@ -1699,3 +1690,21 @@ void cpuhp_remove_state_nocalls(enum kvm_cpuhp_state state);
 #else
 #define kvm_fixup_user_fault fixup_user_fault
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,9,0)
+int kvm___get_user_pages_unlocked(struct task_struct *tsk, struct mm_struct *mm,
+			 unsigned long addr, int nr_pages,
+			 struct page **pagep, int flags);
+    
+#define __kthread_init_worker __init_kthread_worker
+#define kthread_init_worker   init_kthread_worker
+#define kthread_init_work     init_kthread_work
+#define kthread_insert_work   insert_kthread_work
+#define kthread_queue_work    queue_kthread_work
+#define kthread_flush_work    flush_kthread_work
+#define kthread_flush_worker  flush_kthread_worker
+#define __ro_after_init
+#else
+#define kvm__get_user_pages_unlocked __get_user_pages_unlocked
+#endif
+

@@ -386,17 +386,15 @@ bool single_task_running(void)
 /* Instead of backporting everything, just include the code from 3.19's
  * kvm_get_user_page_io, which was generalized into __get_user_pages_unlocked.
  */
-int __get_user_pages_unlocked(struct task_struct *tsk, struct mm_struct *mm,
-			 unsigned long addr, int nr_pages, bool write_fault, bool force,
+int kvm___get_user_pages_unlocked(struct task_struct *tsk, struct mm_struct *mm,
+			 unsigned long addr, int nr_pages,
 			 struct page **pagep, int flags)
 {
 	int npages;
 	int locked = 1;
 	flags |= (pagep ? FOLL_GET : 0);
-	flags |= (write_fault ? FOLL_WRITE : 0);
 
 	BUG_ON(nr_pages != 1);
-	BUG_ON(force);
 
 	/*
 	 * If retrying the fault, we get here *not* having allowed the filemap
@@ -424,13 +422,15 @@ int __get_user_pages_unlocked(struct task_struct *tsk, struct mm_struct *mm,
 	up_read(&mm->mmap_sem);
 	return npages;
 }
-
-int get_user_pages_unlocked(struct task_struct *tsk, struct mm_struct *mm,
-			    unsigned long addr, int nr_pages, bool write_fault, bool force,
-			    struct page **pagep)
+#elif LINUX_VERSION_CODE < KERNEL_VERSION(4,9,0)
+int kvm___get_user_pages_unlocked(struct task_struct *tsk, struct mm_struct *mm,
+			 unsigned long addr, int nr_pages, struct page **pagep, int flags)
 {
-	return __get_user_pages_unlocked(tsk, mm, addr, nr_pages, write_fault,
-					 force, pagep, 0);
+	/*
+	 * FOLL_WRITE and FOLL_FORCE are already included in the
+	 * flags argument, so pass write=force=0.
+	 */ 
+	return __get_user_pages_unlocked(tsk, mm, addr, nr_pages, 0, 0, pagep, flags);
 }
 #endif
 
