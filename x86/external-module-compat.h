@@ -24,7 +24,7 @@ typedef u64 phys_addr_t;
 #define cpu_has_hypervisor boot_cpu_has(X86_FEATURE_HYPERVISOR)
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,12,0)
+#if 0 && LINUX_VERSION_CODE < KERNEL_VERSION(3,12,0)
 #include <linux/string.h>
 #include <asm/processor.h>
 static inline uint32_t hypervisor_cpuid_base(const char *sig, uint32_t leaves)
@@ -1708,12 +1708,13 @@ static inline void update_debugctlmsr(unsigned long debugctlmsr)
 #define POSTED_INTR_VECTOR		0xf2
 #endif
 /* Good enough... */
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,13,0)
+#if 0 && LINUX_VERSION_CODE < KERNEL_VERSION(4,13,0)
 #define POSTED_INTR_NESTED_VECTOR	POSTED_INTR_VECTOR
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,15,0)
 #define VFIO_DMA_CC_IOMMU		4
+#if 0
 static inline void cpu_notifier_register_begin(void) {}
 static inline void cpu_notifier_register_done(void) {}
 static inline int __register_hotcpu_notifier(struct notifier_block *nb)
@@ -1721,8 +1722,9 @@ static inline int __register_hotcpu_notifier(struct notifier_block *nb)
 	return 0;
 }
 #endif
+#endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,17,0)
+#if 0 && LINUX_VERSION_CODE < KERNEL_VERSION(3,17,0)
 #define kvm_cpu_has_xsaves	0
 #else /* >= 3.17 */
 #define kvm_cpu_has_xsaves	cpu_has_xsaves
@@ -1816,7 +1818,7 @@ static inline void kvm_fpu_free(struct kvm_compat_fpu *fpu)
 }
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,2,0)
+#if 0 && LINUX_VERSION_CODE < KERNEL_VERSION(4,2,0)
 enum irq_remap_cap {
 	IRQ_POSTING_CAP = 0,
 };
@@ -1841,7 +1843,7 @@ static inline int irq_set_vcpu_affinity(unsigned int irq, void *vcpu_info)
 static inline void kvm_set_posted_intr_wakeup_handler(void (*handler)(void)) {}
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,3,0)
+#if 0 && LINUX_VERSION_CODE < KERNEL_VERSION(4,3,0)
 static inline unsigned long long rdtsc(void)
 {
 	DECLARE_ARGS(val, low, high);
@@ -1926,7 +1928,7 @@ static inline unsigned int x86_stepping(unsigned int sig)
 }
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,6,0)
+#if 0 && LINUX_VERSION_CODE < KERNEL_VERSION(4,6,0)
 static inline u32 __read_pkru(void) { return 0; }
 static inline void __write_pkru(u32 x) { }
 static inline u32 read_pkru(void) { return 0; }
@@ -1934,7 +1936,7 @@ static inline void write_pkru(u32 x) { }
 static inline u16 pte_flags_pkey(unsigned long pte_flags) { return 0; }
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,5,0)
+#if 0 && LINUX_VERSION_CODE < KERNEL_VERSION(4,5,0)
 enum cpuid_leafs
 {
         CPUID_1_EDX             = 0,
@@ -1996,7 +1998,7 @@ amd_iommu_update_ga(int cpu, bool is_run, void *data)
 }
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
+#if 0 && LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
 enum cpuid_regs_idx {
         CPUID_EAX = 0,
         CPUID_EBX,

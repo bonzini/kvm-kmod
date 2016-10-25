@@ -115,7 +115,9 @@ void kvm_do_store_gdt(void)
 	kvm_native_store_gdt(this_cpu_ptr(&kvm_host_gdt));
 }
 
+#if 0
 unsigned int mxcsr_feature_mask __read_mostly = 0xffffffffu;
 EXPORT_SYMBOL_GPL(mxcsr_feature_mask);
+#endif
 #endif
 

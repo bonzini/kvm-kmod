@@ -456,16 +456,16 @@ static inline struct page *compound_head(struct page *page)
 
 #include <linux/iommu.h>
 #ifndef IOMMU_CACHE
-
 #define IOMMU_CACHE	(4)
 #define IOMMU_CAP_CACHE_COHERENCY	0x1
+#endif
+
 static inline int iommu_domain_has_cap(struct iommu_domain *domain,
 				       unsigned long cap)
 {
 	return 0;
 }
 
-#endif
 
 #ifndef IOMMU_CAP_INTR_REMAP
 #define IOMMU_CAP_INTR_REMAP		0x2	/* isolates device intrs */
@@ -1352,7 +1352,7 @@ static inline void guest_exit_irqoff(void)
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,13,0)
-static inline void smp_mb__after_srcu_read_unlock(void) {}
+#define smp_mb__after_srcu_read_unlock() smp_mb()
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,14,0)
@@ -1363,7 +1363,7 @@ static inline void smp_mb__after_srcu_read_unlock(void) {}
 #define PAGE_ALIGNED(addr)	IS_ALIGNED((unsigned long)addr, PAGE_SIZE)
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,16,0)
+#if 0 && LINUX_VERSION_CODE < KERNEL_VERSION(3,16,0)
 static inline bool ktime_before(const ktime_t cmp1, const ktime_t cmp2)
 {
         return ktime_compare(cmp1, cmp2) < 0;
@@ -1390,7 +1390,7 @@ extern u64 kvm_get_boot_base_ns(struct timekeeper *tk);
 #undef is_zero_pfn
 #define is_zero_pfn(pfn) ((pfn) == page_to_pfn(ZERO_PAGE(0)))
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,18, 0)
+#if 0 && LINUX_VERSION_CODE < KERNEL_VERSION(3,18, 0)
 #define iommu_capable(dummy, cap) \
     iommu_domain_has_cap(kvm->arch.iommu_domain, cap)
 
@@ -1403,7 +1403,9 @@ static inline void pci_set_dev_assigned(struct pci_dev *pdev)
 {
 	pdev->dev_flags |= PCI_DEV_FLAGS_ASSIGNED;
 }
+#endif
 
+#if 0 && LINUX_VERSION_CODE < KERNEL_VERSION(3,18, 0)
 #undef percpu_counter_init
 #define percpu_counter_init(fbc, value, gfp)                            \
         ({                                                              \
@@ -1431,7 +1433,7 @@ static bool context_tracking_cpu_is_enabled(void) { return false; }
 static bool context_tracking_is_enabled(void) { return false; }
 #endif
 #else
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,14,0)
+#if 0 && LINUX_VERSION_CODE < KERNEL_VERSION(3,14,0)
 #define context_tracking_cpu_is_enabled() context_tracking_active()
 #endif
 #endif
@@ -1457,7 +1459,9 @@ __alloc_pages_node(int nid, gfp_t gfp_mask, unsigned int order)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,4,0)
 /* Not exported until 4.4.  */
 void task_cputime_adjusted(struct task_struct *p, cputime_t *ut, cputime_t *st);
+#endif
 
+#if 0 && LINUX_VERSION_CODE < KERNEL_VERSION(4,4,0)
 #ifndef mul_u64_u64_shr
 static inline u64 mul_u64_u64_shr(u64 a, u64 b, unsigned int shift)
 {
@@ -1557,7 +1561,9 @@ static inline int PageTransCompoundMap(struct page *page)
 {
         return PageTransCompound(page) && atomic_read(&page->_mapcount) < 0;
 }
+#endif
 
+#if 0
 static inline void intel_pt_handle_vmx(int on)
 {
 }
@@ -1566,7 +1572,7 @@ static inline void intel_pt_handle_vmx(int on)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)
 #include <linux/time64.h>
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,17,0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,17,0) && 0
 #if __BITS_PER_LONG == 64
 static inline struct timespec timespec64_to_timespec(const struct timespec64 ts64)
 {
@@ -1661,14 +1667,16 @@ long kvm_get_user_pages_remote(struct task_struct *tsk, struct mm_struct *mm,
 			       struct vm_area_struct **vmas, int *locked);
 long kvm_get_user_pages_unlocked(unsigned long start, unsigned long nr_pages,
 				 struct page **pages, unsigned int gup_flags);
+#else
+#define kvm_get_user_pages_remote get_user_pages_remote
+#define kvm_get_user_pages_unlocked get_user_pages_unlocked
+#endif
 
+#if 0 && LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
 static inline void static_key_deferred_flush(struct static_key_deferred *key)
 {
 	flush_delayed_work(&key->work);
 }
-#else
-#define kvm_get_user_pages_remote get_user_pages_remote
-#define kvm_get_user_pages_unlocked get_user_pages_unlocked
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,11,0)
@@ -1716,7 +1724,7 @@ static inline void __cpumask_clear_cpu(int cpu, struct cpumask *dstp)
 #define wait_queue_entry_t wait_queue_t
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 0)
+#if 0 && LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 0)
 static inline bool swq_has_sleeper(struct swait_queue_head *wq)
 {
 	/*

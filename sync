@@ -302,14 +302,16 @@ def hack_content(fname, data):
             w('#endif')
             finish_endif = False
         if match(r'tkr_mono\.'):
-            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)')
+            w('#if 1 || LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)')
+            if match(r'tkr_mono\.mask'):
+                line = sub(r'tkr_mono\.', 'tkr_mono.clock->', line)
             w(line)
             line = sub(r'tkr_mono\.base', 'tkr.base_mono', line)
             line = sub(r'tkr_mono', 'tkr', line)
             w('#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,17,0)')
             w(line)
             w('#else')
-            if match(r'tkr\.cycle_last') or match(r'tkr\.mask'):
+            if match(r'tkr\.cycle_last'):
                 w(sub(r'tkr\.', 'clock->', line))
             elif match(r'tkr\.base_mono'):
                 w('\tboot_ns = kvm_get_boot_base_ns(tk);')
