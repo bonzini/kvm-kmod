@@ -632,3 +632,55 @@ void cpuhp_remove_state_nocalls(enum kvm_cpuhp_state state)
 		unregister_cpu_notifier(&kvm_cpu_notifier[state]);
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,9,0)
+
+#include <linux/kthread.h>
+
+struct kthread_worker *
+kthread_create_worker(unsigned int flags, const char namefmt[], ...)
+{
+	struct kthread_worker *worker;
+	va_list args;
+	struct task_struct *task;
+	char comm[sizeof(task->comm) + 1];
+
+	WARN_ON(flags);
+	va_start(args, namefmt);
+	vsnprintf(comm, sizeof(task->comm), namefmt, args);
+	va_end(args);
+
+	worker = kzalloc(sizeof(*worker), GFP_KERNEL);
+	if (!worker)
+		return ERR_PTR(-ENOMEM);
+
+	kthread_init_worker(worker);
+	task = kthread_run(kthread_worker_fn, worker, "%s", comm);
+	if (IS_ERR(task))
+		goto fail_task;
+
+	flush_kthread_worker(worker);
+	WARN_ON(worker->task != task);
+	return worker;
+
+fail_task:
+	kfree(worker);
+	return ERR_CAST(task);
+}
+EXPORT_SYMBOL(kthread_create_worker);
+
+void kthread_destroy_worker(struct kthread_worker *worker)
+{
+	struct task_struct *task;
+
+	task = worker->task;
+	if (WARN_ON(!task))
+		return;
+
+	kthread_flush_worker(worker);
+	kthread_stop(task);
+	WARN_ON(!list_empty(&worker->work_list));
+	kfree(worker);
+}
+EXPORT_SYMBOL(kthread_destroy_worker);
+#endif

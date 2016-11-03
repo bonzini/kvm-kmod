@@ -1696,6 +1696,11 @@ int kvm___get_user_pages_unlocked(struct task_struct *tsk, struct mm_struct *mm,
 			 unsigned long addr, int nr_pages,
 			 struct page **pagep, int flags);
     
+struct kthread_worker;
+void kthread_destroy_worker(struct kthread_worker *worker);
+struct kthread_worker *kthread_create_worker(unsigned int flags,
+					     const char namefmt[], ...);
+
 #define __kthread_init_worker __init_kthread_worker
 #define kthread_init_worker   init_kthread_worker
 #define kthread_init_work     init_kthread_work
