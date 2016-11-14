@@ -45,7 +45,7 @@ def hack_content(fname, data):
         'native_write_msr_safe '
         'fpregs_state xregs_state fxregs_state fpregs_active '
         'load_gdt store_gdt xstate_size cpu_has_xsave cpu_has_xsaves '
-        '__get_user_pages_fast set_64bit siginfo_t use_mm '
+        '__get_user_pages_fast set_64bit siginfo_t use_mm get_user_pages '
         'unuse_mm request_threaded_irq init_fpu __this_cpu_read '
         '__this_cpu_write sigset_from_compat __get_user_pages_unlocked '
         'sched_info_on x86_pmu_capability perf_get_x86_pmu_capability '

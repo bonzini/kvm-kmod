@@ -1695,6 +1695,9 @@ void cpuhp_remove_state_nocalls(enum kvm_cpuhp_state state);
 int kvm___get_user_pages_unlocked(struct task_struct *tsk, struct mm_struct *mm,
 			 unsigned long addr, int nr_pages,
 			 struct page **pagep, int flags);
+long kvm_get_user_pages(unsigned long start, unsigned long nr_pages,
+		 	unsigned int gup_flags, struct page **pages,
+			struct vm_area_struct **vmas);
     
 struct kthread_worker;
 void kthread_destroy_worker(struct kthread_worker *worker);
@@ -1710,6 +1713,7 @@ struct kthread_worker *kthread_create_worker(unsigned int flags,
 #define kthread_flush_worker  flush_kthread_worker
 #define __ro_after_init
 #else
-#define kvm__get_user_pages_unlocked __get_user_pages_unlocked
+#define kvm___get_user_pages_unlocked __get_user_pages_unlocked
+#define kvm_get_user_pages get_user_pages
 #endif
 

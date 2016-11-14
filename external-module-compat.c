@@ -683,4 +683,14 @@ void kthread_destroy_worker(struct kthread_worker *worker)
 	kfree(worker);
 }
 EXPORT_SYMBOL(kthread_destroy_worker);
+
+long kvm_get_user_pages(unsigned long start, unsigned long nr_pages,
+		 	unsigned int gup_flags, struct page **pages,
+			struct vm_area_struct **vmas)
+{
+	return get_user_pages(current, current->mm, start, nr_pages,
+			      !!(gup_flags & FOLL_WRITE),
+			      !!(gup_flags & FOLL_FORCE),
+			      pages, vmas);
+}
 #endif
