@@ -1869,3 +1869,17 @@ amd_iommu_update_ga(int cpu, bool is_run, void *data)
 	        return 0;
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
+enum cpuid_regs_idx {
+        CPUID_EAX = 0,
+        CPUID_EBX,
+        CPUID_ECX,
+        CPUID_EDX,
+};
+
+static inline int get_scattered_cpuid_leaf(int eax, int ecx, enum cpuid_regs_idx reg)
+{
+	return 0;
+}
+#endif
