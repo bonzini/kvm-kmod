@@ -442,6 +442,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_AVX512DQ	(9*32+17) /* AVX-512 DQ (Double/Quad granular) Instructions */
 #endif
 
+#ifndef X86_FEATURE_AVX512IFMA
+#define X86_FEATURE_AVX512IFMA  ( 9*32+21) /* AVX-512 Integer Fused Multiply-Add instructions */
+#endif
+
 #ifndef X86_FEATURE_CLWB
 #define X86_FEATURE_CLWB	( 9*32+24) /* CLWB instruction */
 #endif
@@ -489,6 +493,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 
 #ifndef X86_FEATURE_AVIC
 #define X86_FEATURE_AVIC	(15*32+13) /* Virtual Interrupt Controller */
+#endif
+
+#ifndef X86_FEATURE_AVX512VBMI
+#define X86_FEATURE_AVX512VBMI  (16*32+ 1) /* AVX512 Vector Bit Manipulation instructions*/
 #endif
 
 #ifndef X86_FEATURE_UMIP
