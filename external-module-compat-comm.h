@@ -1720,6 +1720,11 @@ long kvm_get_user_pages_remote(struct task_struct *tsk, struct mm_struct *mm,
 			       struct vm_area_struct **vmas, int *locked);
 long kvm_get_user_pages_unlocked(unsigned long start, unsigned long nr_pages,
 				 struct page **pages, unsigned int gup_flags);
+
+static inline void static_key_deferred_flush(struct static_key_deferred *key)
+{
+	flush_delayed_work(&key->work);
+}
 #else
 #define kvm_get_user_pages_remote get_user_pages_remote
 #define kvm_get_user_pages_unlocked get_user_pages_unlocked
