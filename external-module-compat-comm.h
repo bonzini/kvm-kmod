@@ -1692,9 +1692,6 @@ void cpuhp_remove_state_nocalls(enum kvm_cpuhp_state state);
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,9,0)
-int kvm___get_user_pages_unlocked(struct task_struct *tsk, struct mm_struct *mm,
-			 unsigned long addr, int nr_pages,
-			 struct page **pagep, int flags);
 long kvm_get_user_pages(unsigned long start, unsigned long nr_pages,
 		 	unsigned int gup_flags, struct page **pages,
 			struct vm_area_struct **vmas);
@@ -1713,7 +1710,17 @@ struct kthread_worker *kthread_create_worker(unsigned int flags,
 #define kthread_flush_worker  flush_kthread_worker
 #define __ro_after_init
 #else
-#define kvm___get_user_pages_unlocked __get_user_pages_unlocked
 #define kvm_get_user_pages get_user_pages
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
+long kvm_get_user_pages_remote(struct task_struct *tsk, struct mm_struct *mm,
+			       unsigned long start, unsigned long nr_pages,
+			       unsigned int gup_flags, struct page **pages,
+			       struct vm_area_struct **vmas, int *locked);
+long kvm_get_user_pages_unlocked(unsigned long start, unsigned long nr_pages,
+				 struct page **pages, unsigned int gup_flags);
+#else
+#define kvm_get_user_pages_remote get_user_pages_remote
+#define kvm_get_user_pages_unlocked get_user_pages_unlocked
+#endif

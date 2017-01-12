@@ -382,16 +382,17 @@ bool single_task_running(void)
 }
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)
 /* Instead of backporting everything, just include the code from 3.19's
  * kvm_get_user_page_io, which was generalized into __get_user_pages_unlocked.
  */
-int kvm___get_user_pages_unlocked(struct task_struct *tsk, struct mm_struct *mm,
-			 unsigned long addr, int nr_pages,
-			 struct page **pagep, int flags)
+static long kvm_get_user_pages_locked(struct task_struct *tsk, struct mm_struct *mm,
+	 			      unsigned long addr, int nr_pages, struct page **pagep,
+				      struct vm_area_struct **vmas, int *locked,
+				      bool notify_drop, unsigned int flags)
 {
 	int npages;
-	int locked = 1;
 	flags |= (pagep ? FOLL_GET : 0);
 
 	BUG_ON(nr_pages != 1);
@@ -401,10 +402,9 @@ int kvm___get_user_pages_unlocked(struct task_struct *tsk, struct mm_struct *mm,
 	 * to wait on the page lock. We should now allow waiting on the IO with
 	 * the mmap semaphore released.
 	 */
-	down_read(&mm->mmap_sem);
-	npages = __get_user_pages(tsk, mm, addr, nr_pages, flags, pagep, NULL,
-				  &locked);
-	if (!locked) {
+	npages = __get_user_pages(tsk, mm, addr, nr_pages, flags, pagep, vmas,
+				  locked);
+	if (!*locked) {
 		VM_BUG_ON(npages);
 
 		if (!pagep)
@@ -416,21 +416,47 @@ int kvm___get_user_pages_unlocked(struct task_struct *tsk, struct mm_struct *mm,
 		 * schedule async IO (see e.g. filemap_fault).
 		 */
 		down_read(&mm->mmap_sem);
+		*locked = 1;
 		npages = __get_user_pages(tsk, mm, addr, nr_pages, flags | FOLL_TRIED,
-					  pagep, NULL, NULL);
+					  pagep, vmas, NULL);
+		if (notify_drop) {
+			/*
+			 * We must let the caller know we temporarily dropped the lock
+			 * and so the critical section protected by it was lost.
+			 */
+			up_read(&mm->mmap_sem);
+			*locked = 0;
+		}
 	}
-	up_read(&mm->mmap_sem);
 	return npages;
 }
-#elif LINUX_VERSION_CODE < KERNEL_VERSION(4,9,0)
-int kvm___get_user_pages_unlocked(struct task_struct *tsk, struct mm_struct *mm,
-			 unsigned long addr, int nr_pages, struct page **pagep, int flags)
+#else
+#define kvm_get_user_pages_locked __get_user_pages_locked
+#endif
+
+long kvm_get_user_pages_remote(struct task_struct *tsk, struct mm_struct *mm,
+			       unsigned long start, unsigned long nr_pages,
+			       unsigned int gup_flags, struct page **pages,
+			       struct vm_area_struct **vmas, int *locked)
 {
-	/*
-	 * FOLL_WRITE and FOLL_FORCE are already included in the
-	 * flags argument, so pass write=force=0.
-	 */ 
-	return __get_user_pages_unlocked(tsk, mm, addr, nr_pages, 0, 0, pagep, flags);
+	return kvm_get_user_pages_locked(tsk, mm, start, nr_pages, pages, vmas,
+					 locked, true,
+					 gup_flags | FOLL_TOUCH | FOLL_REMOTE);
+}
+
+long kvm_get_user_pages_unlocked(unsigned long addr, unsigned long nr_pages,
+				 struct page **pagep, unsigned int flags)
+{
+	long ret;
+	int locked = 1;
+
+	down_read(&current->mm->mmap_sem);
+	ret = kvm_get_user_pages_locked(current, current->mm, addr, nr_pages,
+					pagep, NULL, &locked, false,
+					flags | FOLL_TOUCH);
+	if (locked)
+		up_read(&current->mm->mmap_sem);
+	return ret;
 }
 #endif
 
