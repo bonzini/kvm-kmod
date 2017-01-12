@@ -424,6 +424,8 @@ def hack_content(fname, data):
             w('#include <asm/fpu-internal.h>')
             w('#include <asm/xcr.h>')
             line = '#endif'
+        if match(r'(remaining|target_expiration) = 0;$'):
+	    line = sub('0', 'ktime_set(0, 0)', line)
 
         w(line)
 
