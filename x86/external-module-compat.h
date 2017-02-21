@@ -1895,3 +1895,43 @@ static inline int get_scattered_cpuid_leaf(int eax, int ecx, enum cpuid_regs_idx
 	return 0;
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,11,0)
+#include <asm/desc.h>
+
+static inline unsigned long kvm_read_tr_base(struct kvm_desc_ptr *gdt)
+{
+	struct desc_struct *descs = (void *)gdt->address;
+	struct desc_struct *d = &descs[GDT_ENTRY_TSS];
+	unsigned long v;
+
+	v = get_desc_base(d);
+#ifdef CONFIG_X86_64
+	v |= ((unsigned long)((struct ldttss_desc64 *)d)->base3) << 32;
+#endif
+	return v;
+}
+#else
+static inline unsigned long kvm_read_tr_base(void)
+{
+        return this_cpu_ptr(&cpu_tss);
+}
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,11,0)
+/* BUILD_BUG_ON in vmx.c is unnecessary if TR is always force-reloaded.  */
+#undef IO_BITMAP_OFFSET
+#define IO_BITMAP_OFFSET 0x68
+
+static inline void kvm_reload_tss(struct kvm_desc_ptr *gdt)
+{
+	/*
+	 * VT restores TR but not its size.  Useless.
+	 */
+	struct desc_struct *descs;
+
+	descs = (void *)gdt->address;
+	descs[GDT_ENTRY_TSS].type = 9; /* available TSS */
+	load_TR_desc();
+}
+#endif

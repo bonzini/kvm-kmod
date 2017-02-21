@@ -355,6 +355,13 @@ def hack_content(fname, data):
         if match(r'^\t+POSTED_INTR_VECTOR\);$'):
             w(line)
             line = '#endif'
+	if line == '\tinvalidate_tss_limit();':
+            w('#if LINUX_VERSION_CODE < KERNEL_VERSION(4,11,0)')
+            w('\tkvm_reload_tss(this_cpu_ptr(&host_gdt));')
+            w('#else')
+            w(line)
+            line = '#endif'
+        line = sub(r'this_cpu_ptr\(&cpu_tss\)', 'kvm_read_tr_base(this_cpu_ptr(&host_gdt))', line)
         if line == '\tif (!static_cpu_has_bug(X86_BUG_AMD_TLB_MMATCH))':
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)')
             w(line)
