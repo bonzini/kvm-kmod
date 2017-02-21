@@ -511,6 +511,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_OSPKE	(16*32+ 4) /* OS Protection Keys Enable */
 #endif
 
+#ifndef X86_FEATURE_AVX512_VPOPCNTDQ
+#define X86_FEATURE_AVX512_VPOPCNTDQ (16*32+14) /* POPCNT for vectors of DW/QW */
+#endif
+
 #ifndef X86_FEATURE_RDPID
 #define X86_FEATURE_RDPID	(16*32+22) /* User-Mode Instruction Prevention */
 #endif
