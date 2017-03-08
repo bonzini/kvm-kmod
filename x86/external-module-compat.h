@@ -1270,8 +1270,12 @@ static inline int kvm_init_fpu(struct task_struct *tsk)
 #define XFEATURE_MASK_AVX512   (XFEATURE_MASK_OPMASK | XFEATURE_MASK_ZMM_Hi256 | XFEATURE_MASK_Hi16_ZMM)
 #endif
 
+#ifndef FXSAVE_SIZE
+#define FXSAVE_SIZE         512
+#endif
+
 #ifndef XSAVE_HDR_OFFSET
-#define XSAVE_HDR_OFFSET    512
+#define XSAVE_HDR_OFFSET    FXSAVE_SIZE
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
