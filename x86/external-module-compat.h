@@ -1853,7 +1853,6 @@ enum cpuid_leafs
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,7,0)
 #define gsbase gs
-#endif
 
 static __always_inline
 cycle_t kvm___pvclock_read_cycles(const struct pvclock_vcpu_time_info *src,
@@ -1864,6 +1863,9 @@ cycle_t kvm___pvclock_read_cycles(const struct pvclock_vcpu_time_info *src,
                                              src->tsc_shift);
         return src->system_time + offset;
 }
+#else
+#define kvm___pvclock_read_cycles __pvclock_read_cycles
+#endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,9,0)
 struct amd_iommu_pi_data {
