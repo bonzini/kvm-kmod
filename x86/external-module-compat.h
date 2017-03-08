@@ -1859,11 +1859,11 @@ enum cpuid_leafs
 #define gsbase gs
 
 static __always_inline
-cycle_t kvm___pvclock_read_cycles(const struct pvclock_vcpu_time_info *src,
-				  u64 tsc)
+u64 kvm___pvclock_read_cycles(const struct pvclock_vcpu_time_info *src,
+			      u64 tsc)
 {
         u64 delta = tsc - src->tsc_timestamp;
-        cycle_t offset = pvclock_scale_delta(delta, src->tsc_to_system_mul,
+        u64 offset = pvclock_scale_delta(delta, src->tsc_to_system_mul,
                                              src->tsc_shift);
         return src->system_time + offset;
 }

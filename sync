@@ -293,7 +293,7 @@ def hack_content(fname, data):
         if (inside_block('#ifdef CONFIG_X86_64', '#endif') and \
             (line == 'struct pvclock_gtod_data {' or \
              line == 'static atomic_t kvm_guest_has_master_clock = ATOMIC_INIT(0);' or \
-             line == 'static cycle_t read_tsc(void)' or \
+             line == 'static u64 read_tsc(void)' or \
              line == 'static void pvclock_gtod_update_fn(struct work_struct *work)' or \
              line == '\tbool vcpus_matched;' or \
              match(r'^\tpvclock_gtod_(un)*register_notifier'))) or \
