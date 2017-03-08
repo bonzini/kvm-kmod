@@ -1087,7 +1087,7 @@ struct kvm_pvclock_vcpu_time_info {
 #define MSR_IA32_MCx_STATUS(x)		(MSR_IA32_MC0_STATUS + 4*(x))
 #endif
 
-#include <asm/i387.h>
+#include <asm/fpu/api.h>
 #include <asm/fpu-internal.h>
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35)
