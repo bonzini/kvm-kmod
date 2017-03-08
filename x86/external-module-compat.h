@@ -1739,7 +1739,13 @@ static inline void kvm_fpstate_init(struct kvm_compat_fpu *fpu)
 		return;
 	kvm_fpu_finit(fpu);
 }
+#else
+static inline void kvm_fpu_free(struct kvm_compat_fpu *fpu)
+{
+}
+#endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,2,0)
 enum irq_remap_cap {
 	IRQ_POSTING_CAP = 0,
 };
