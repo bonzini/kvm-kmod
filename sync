@@ -42,7 +42,7 @@ def hack_content(fname, data):
         'monotonic_to_bootbased '
         'check_tsc_unstable native_store_gdt native_store_idt '
         'set_desc_base set_desc_limit pvclock_vcpu_time_info tboot_enabled '
-        'native_write_msr_safe '
+        'native_write_msr_safe mmget mmgrab '
         'fpregs_state xregs_state fxregs_state fpregs_active '
         'load_gdt store_gdt xstate_size cpu_has_xsave cpu_has_xsaves '
         '__get_user_pages_fast set_64bit siginfo_t use_mm get_user_pages '
@@ -128,8 +128,6 @@ def hack_content(fname, data):
             w('\tkvm_exit_srcu();')
         if match(r'MODULE_AUTHOR'):
             w('MODULE_INFO(version, "%s");' % (version,))
-        if match(r'atomic_inc\(&kvm->mm->mm_count\);'):
-            line = '\tmmget(&kvm->mm->mm_count);'
         if match(r'_stat_get|lost_records_get'):
             if match(r'DEFINE_SIMPLE_ATTRIBUTE'):
                 name = sub(r',', '', f[1])
@@ -433,6 +431,13 @@ def hack_content(fname, data):
             line = '#endif'
         if match(r'(remaining|target_expiration) = 0;$'):
 	    line = sub('0', 'ktime_set(0, 0)', line)
+	if match(r'\(struct vm_fault \*vmf\)'):
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,11,0)')
+            w(line)
+            w('#else')
+	    w(sub(r'\(.*\)', '(struct vm_area_struct *vma, struct vm_fault *vmf)', line))
+            line = '#endif'
+	line = sub('vmf->vma', 'vma', line);
 
         w(line)
 
@@ -440,6 +445,10 @@ def hack_content(fname, data):
             w('#endif')
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
+        if match_block_end(r'\(struct vm_area_struct *vma, struct vm_fault \*vmf\)', r'^{'):
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,11,0)')
+            w('\tstruct vm_area_struct *vma = vmf->vma;')
+            w('#endif)')
         if match_block_end(r'(\tcase KVM_IOEVENTFD: {)', r'^\t}'):
             w('#endif')
         if line == '\t\tprintk(KERN_ERR "kvm: disabled by bios\\n");':

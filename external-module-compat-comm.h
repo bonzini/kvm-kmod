@@ -1729,3 +1729,18 @@ static inline void static_key_deferred_flush(struct static_key_deferred *key)
 #define kvm_get_user_pages_remote get_user_pages_remote
 #define kvm_get_user_pages_unlocked get_user_pages_unlocked
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,11,0)
+static inline void kvm_mmget(struct mm_struct *mm)
+{
+       atomic_inc(&mm->mm_users);
+}
+
+static inline void kvm_mmgrab(struct mm_struct *mm)
+{
+       atomic_inc(&mm->mm_count);
+}
+#else
+#define kvm_mmget mmget
+#define kvm_mmgrab mmgrab
+#endif
