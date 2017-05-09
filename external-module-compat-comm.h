@@ -1701,3 +1701,19 @@ static inline void kvm_mmgrab(struct mm_struct *mm)
 #define kvm_mmget mmget
 #define kvm_mmgrab mmgrab
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
+extern void *kvmalloc_node(size_t size, gfp_t flags, int node);
+static inline void *kvmalloc(size_t size, gfp_t flags)
+{
+	return kvmalloc_node(size, flags, NUMA_NO_NODE);
+}
+static inline void *kvzalloc_node(size_t size, gfp_t flags, int node)
+{
+	return kvmalloc_node(size, flags | __GFP_ZERO, node);
+}
+static inline void *kvzalloc(size_t size, gfp_t flags)
+{
+	return kvmalloc(size, flags | __GFP_ZERO);
+}
+#endif
