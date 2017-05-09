@@ -40,11 +40,11 @@ def hack_content(fname, data):
         'user_return_notifier_register user_return_notifier_unregister '
         'synchronize_srcu synchronize_srcu_expedited '
         'monotonic_to_bootbased '
-        'check_tsc_unstable native_store_gdt native_store_idt '
+        'check_tsc_unstable native_store_idt invalidate_tss_limit '
         'set_desc_base set_desc_limit pvclock_vcpu_time_info tboot_enabled '
         'native_write_msr_safe mmget mmgrab '
         'fpregs_state xregs_state fxregs_state fpregs_active '
-        'load_gdt store_gdt xstate_size cpu_has_xsave cpu_has_xsaves '
+        'xstate_size cpu_has_xsave cpu_has_xsaves '
         '__get_user_pages_fast set_64bit siginfo_t use_mm get_user_pages '
         'unuse_mm request_threaded_irq init_fpu __this_cpu_read '
         '__this_cpu_write sigset_from_compat get_user_pages_remote '
@@ -348,13 +348,9 @@ def hack_content(fname, data):
         if match(r'^\t+POSTED_INTR_VECTOR\);$'):
             w(line)
             line = '#endif'
-	if line == '\tinvalidate_tss_limit();':
-            w('#if LINUX_VERSION_CODE < KERNEL_VERSION(4,11,0)')
-            w('\tkvm_reload_tss(this_cpu_ptr(&host_gdt));')
-            w('#else')
-            w(line)
-            line = '#endif'
-        line = sub(r'this_cpu_ptr\(&cpu_tss\)', 'kvm_read_tr_base(this_cpu_ptr(&host_gdt))', line)
+	if match(r'^\tret = kvm_x86_ops->hardware_enable\(\);$'):
+	    w('\tkvm_do_store_gdt();');
+        line = sub(r'this_cpu_ptr\(&cpu_tss\)', 'kvm_read_tr_base()', line)
         if line == '\tif (!static_cpu_has_bug(X86_BUG_AMD_TLB_MMATCH))':
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)')
             w(line)

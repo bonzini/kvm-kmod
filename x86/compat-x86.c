@@ -87,3 +87,32 @@ bool kvm_boot_cpu_has(unsigned int bit)
 }
 EXPORT_SYMBOL_GPL(kvm_boot_cpu_has);
 #endif /* < 2.6.37 */
+
+#include <asm/desc.h>
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
+DEFINE_PER_CPU(struct kvm_desc_ptr, kvm_host_gdt);
+EXPORT_SYMBOL_GPL(kvm_host_gdt);
+
+static inline void kvm_native_load_gdt(const struct kvm_desc_ptr *dtr)
+{
+	asm volatile("lgdt %0"::"m" (*dtr));
+}
+
+static inline void kvm_native_store_gdt(struct kvm_desc_ptr *dtr)
+{
+	asm volatile("sgdt %0":"=m" (*dtr));
+}
+
+void load_fixmap_gdt(int processor_id)
+{
+	kvm_native_load_gdt(this_cpu_ptr(&kvm_host_gdt));
+}
+EXPORT_SYMBOL_GPL(load_fixmap_gdt);
+
+void kvm_do_store_gdt(void)
+{
+	kvm_native_store_gdt(this_cpu_ptr(&kvm_host_gdt));
+}
+
+#endif

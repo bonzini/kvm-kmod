@@ -47,6 +47,7 @@ static inline uint32_t hypervisor_cpuid_base(const char *sig, uint32_t leaves)
 
 #include <asm/msr.h>
 #include <asm/asm.h>
+#include <asm/desc.h>
 
 #ifndef CONFIG_HAVE_KVM_EVENTFD
 #define CONFIG_HAVE_KVM_EVENTFD 1
@@ -765,13 +766,6 @@ kvm_set_desc_limit(struct kvm_desc_struct *desc, unsigned long limit)
 static inline void kvm_load_gdt(const struct kvm_desc_ptr *dtr)
 {
 	asm volatile("lgdt %0"::"m" (*dtr));
-}
-
-#define kvm_store_gdt	kvm_native_store_gdt
-
-static inline void kvm_native_store_gdt(struct kvm_desc_ptr *dtr)
-{
-	asm volatile("sgdt %0":"=m" (*dtr));
 }
 
 static inline void kvm_native_store_idt(struct kvm_desc_ptr *dtr)
@@ -1932,25 +1926,50 @@ static inline int get_scattered_cpuid_leaf(int eax, int ecx, enum cpuid_regs_idx
 }
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,11,0)
-#include <asm/desc.h>
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0)
+extern DEFINE_PER_CPU(struct kvm_desc_ptr, kvm_host_gdt);
 
-static inline unsigned long kvm_read_tr_base(struct kvm_desc_ptr *gdt)
+static inline struct kvm_desc_struct *get_current_gdt_rw(void)
 {
-	struct desc_struct *descs = (void *)gdt->address;
-	struct desc_struct *d = &descs[GDT_ENTRY_TSS];
+	struct kvm_desc_ptr *gdt_descr = this_cpu_ptr(&kvm_host_gdt);
+	return (struct kvm_desc_struct *)gdt_descr->address;
+}
+
+static inline struct kvm_desc_struct *get_current_gdt_ro(void)
+{
+	struct kvm_desc_ptr *gdt_descr = this_cpu_ptr(&kvm_host_gdt);
+	return (struct kvm_desc_struct *)gdt_descr->address;
+}
+
+static inline unsigned long get_current_gdt_ro_vaddr(void)
+{
+	struct kvm_desc_ptr *gdt_descr = this_cpu_ptr(&kvm_host_gdt);
+	return gdt_descr->address;
+}
+
+extern void load_fixmap_gdt(int processor_id);
+extern void kvm_do_store_gdt(void);
+#else
+static inline void kvm_do_store_gdt(void) {}
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,11,0)
+static inline unsigned long kvm_read_tr_base(void)
+{
+	struct kvm_desc_struct *descs = get_current_gdt_ro();
+	struct kvm_desc_struct *d = &descs[GDT_ENTRY_TSS];
 	unsigned long v;
 
-	v = get_desc_base(d);
+	v = kvm_get_desc_base(d);
 #ifdef CONFIG_X86_64
-	v |= ((unsigned long)((struct ldttss_desc64 *)d)->base3) << 32;
+	v |= ((unsigned long)((struct kvm_ldttss_desc64 *)d)->base3) << 32;
 #endif
 	return v;
 }
 #else
 static inline unsigned long kvm_read_tr_base(void)
 {
-        return this_cpu_ptr(&cpu_tss);
+        return (unsigned long) this_cpu_ptr(&cpu_tss);
 }
 #endif
 
@@ -1959,15 +1978,17 @@ static inline unsigned long kvm_read_tr_base(void)
 #undef IO_BITMAP_OFFSET
 #define IO_BITMAP_OFFSET 0x68
 
-static inline void kvm_reload_tss(struct kvm_desc_ptr *gdt)
+static inline void kvm_invalidate_tss_limit(void)
 {
 	/*
 	 * VT restores TR but not its size.  Useless.
 	 */
-	struct desc_struct *descs;
+	struct kvm_desc_struct *descs;
 
-	descs = (void *)gdt->address;
+	descs = get_current_gdt_rw();
 	descs[GDT_ENTRY_TSS].type = 9; /* available TSS */
 	load_TR_desc();
 }
+#else
+#define kvm_invalidate_tss_limit invalidate_tss_limit
 #endif
