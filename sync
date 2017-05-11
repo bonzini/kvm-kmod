@@ -428,7 +428,11 @@ def hack_content(fname, data):
             w('#else')
 	    w(sub(r'\(.*\)', '(struct vm_area_struct *vma, struct vm_fault *vmf)', line))
             line = '#endif'
-	line = sub('vmf->vma', 'vma', line);
+	if match(r'vmf->vma'):
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,11,0)')
+            w('\tstruct vm_area_struct *vma = vmf->vma;')
+            w('#endif')
+            line = sub('vmf->vma', 'vma', line);
 
         w(line)
 
@@ -436,10 +440,6 @@ def hack_content(fname, data):
             w('#endif')
         if line == '\tkvm_arch_vcpu_put(vcpu);':
             w('\tkvm_fire_urn();')
-        if match_block_end(r'\(struct vm_area_struct *vma, struct vm_fault \*vmf\)', r'^{'):
-            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,11,0)')
-            w('\tstruct vm_area_struct *vma = vmf->vma;')
-            w('#endif)')
         if match_block_end(r'(\tcase KVM_IOEVENTFD: {)', r'^\t}'):
             w('#endif')
         if line == '\t\tprintk(KERN_ERR "kvm: disabled by bios\\n");':

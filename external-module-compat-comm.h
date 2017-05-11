@@ -191,7 +191,7 @@ void kvm_smp_send_reschedule(int cpu);
 #define mmdrop(x) do { (void)(x); } while (0)
 #define mmget(x) do { (void)(x); } while (0)
 
-#else
+#elif LINUX_VERSION_CODE < KERNEL_VERSION(4,11,0)
 
 #define mmget(x) do { atomic_inc(x); } while (0)
 

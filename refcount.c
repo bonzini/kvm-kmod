@@ -37,6 +37,7 @@
 #include <linux/refcount.h>
 #include <linux/bug.h>
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,11,0)
 bool refcount_add_not_zero(unsigned int i, refcount_t *r)
 {
 	unsigned int old, new, val = atomic_read(&r->refs);
@@ -264,4 +265,5 @@ bool refcount_dec_and_lock(refcount_t *r, spinlock_t *lock)
 	return true;
 }
 EXPORT_SYMBOL_GPL(refcount_dec_and_lock);
+#endif
 
