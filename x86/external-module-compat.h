@@ -500,6 +500,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_AVIC	(15*32+13) /* Virtual Interrupt Controller */
 #endif
 
+#ifndef X86_FEATURE_VIRTUAL_VMLOAD_VMSAVE
+#define X86_FEATURE_VIRTUAL_VMLOAD_VMSAVE (15*32+15)
+#endif
+
 #ifndef X86_FEATURE_AVX512VBMI
 #define X86_FEATURE_AVX512VBMI  (16*32+ 1) /* AVX512 Vector Bit Manipulation instructions*/
 #endif
@@ -1995,4 +1999,16 @@ static inline void kvm_invalidate_tss_limit(void)
 }
 #else
 #define kvm_invalidate_tss_limit invalidate_tss_limit
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 13, 0)
+static inline unsigned long __read_cr3(void)
+{
+	return read_cr3();
+}
+
+static inline unsigned long __get_current_cr3_fast(void)
+{
+	return read_cr3();
+}
 #endif

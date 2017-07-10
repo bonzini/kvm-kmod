@@ -1717,3 +1717,17 @@ static inline void *kvzalloc(size_t size, gfp_t flags)
 	return kvmalloc(size, flags | __GFP_ZERO);
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,13,0)
+static inline void __cpumask_set_cpu(unsigned int cpu, struct cpumask *dstp)
+{
+	__set_bit(cpumask_check(cpu), cpumask_bits(dstp));
+}
+
+static inline void __cpumask_clear_cpu(int cpu, struct cpumask *dstp)
+{
+	__clear_bit(cpumask_check(cpu), cpumask_bits(dstp));
+}
+
+#define wait_queue_entry_t wait_queue_t
+#endif
