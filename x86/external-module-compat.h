@@ -500,8 +500,12 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_AVIC	(15*32+13) /* Virtual Interrupt Controller */
 #endif
 
-#ifndef X86_FEATURE_VIRTUAL_VMLOAD_VMSAVE
-#define X86_FEATURE_VIRTUAL_VMLOAD_VMSAVE (15*32+15)
+#ifndef X86_FEATURE_V_VMSAVE_VMLOAD
+#define X86_FEATURE_V_VMSAVE_VMLOAD (15*32+15)
+#endif
+
+#ifndef X86_FEATURE_VGIF
+#define X86_FEATURE_VGIF (15*32+16) /* Virtual GIF */
 #endif
 
 #ifndef X86_FEATURE_AVX512VBMI
@@ -596,6 +600,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 
 #ifndef X86_CR3_PCID_MASK
 #define X86_CR3_PCID_MASK 0x00000fff
+#endif
+
+#ifndef X86_CR4_LA57
+#define X86_CR4_LA57 0x00001000
 #endif
 
 #ifndef X86_CR4_UMIP
@@ -1191,7 +1199,8 @@ static inline void kvm_fpu_finit(struct kvm_compat_fpu *fpu)
 	       0, sizeof(struct kvm_fxregs_state) - after_mxcsr_mask);
 }
 
-static inline int kvm_fpu_restore_checking(struct kvm_compat_fpu *fpu)
+static inline int kvm_fpu_restore_checking(struct kvm_compat_fpu *fpu,
+					   unsigned long mask)
 {
 	kvm_fx_restore(&fpu->state->fxsave);
 	return 0;
@@ -1211,7 +1220,6 @@ void kvm_xstate_size_init(void);
 #define kvm_compat_fpu			fpu
 #define kvm_fpu_alloc			fpu_alloc
 #define kvm_fpu_free			fpu_free
-#define kvm_fpu_restore_checking	fpu_restore_checking
 #define kvm_fpu_save_init		fpu_save_init
 #define kvm_fpu_finit			fpu_finit
 
@@ -1670,6 +1678,10 @@ static inline void update_debugctlmsr(unsigned long debugctlmsr)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0)
 #define POSTED_INTR_VECTOR		0xf2
 #endif
+/* Good enough... */
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,13,0)
+#define POSTED_INTR_NESTED_VECTOR	POSTED_INTR_VECTOR
+#endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,15,0)
 #define VFIO_DMA_CC_IOMMU		4
@@ -1698,14 +1710,6 @@ typedef struct gate_struct gate_desc;
 typedef struct desc_struct gate_desc;
 #endif
 #endif /* < 2.6.25 */
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
-#ifdef CONFIG_X86_64
-#define gate_offset(g) ((g).offset_low | ((unsigned long)(g).offset_middle << 16) | ((unsigned long)(g).offset_high << 32))
-#else
-#define gate_offset(g) (((g).b & 0xffff0000) | ((g).a & 0x0000ffff))
-#endif
-#endif /* < 2.6.28 */
 
 #ifndef HSW_IN_TX
 #define HSW_IN_TX			0
@@ -2011,4 +2015,24 @@ static inline unsigned long __get_current_cr3_fast(void)
 {
 	return read_cr3();
 }
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 0)
+#define __sme_set(x) (x)
+#define __sme_clr(x) (x)
+#define sme_me_mask 0
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 0)
+static inline unsigned long kvm_gate_offset(const gate_desc *g)
+{
+#ifdef CONFIG_X86_64
+       return g->offset_low | ((unsigned long)g->offset_middle << 16) |
+               ((unsigned long) g->offset_high << 32);
+#else
+       return g->offset_low | ((unsigned long)g->offset_middle << 16);
+#endif
+}
+#else
+#define kvm_gate_offset gate_offset
 #endif

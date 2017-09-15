@@ -18,6 +18,7 @@
 #include <linux/time.h>
 #include <linux/ktime.h>
 #include <linux/kernel.h>
+#include <linux/swait.h>
 #include <asm/processor.h>
 #include <linux/hrtimer.h>
 #include <asm/bitops.h>
@@ -1730,4 +1731,19 @@ static inline void __cpumask_clear_cpu(int cpu, struct cpumask *dstp)
 }
 
 #define wait_queue_entry_t wait_queue_t
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 0)
+static inline bool swq_has_sleeper(struct swait_queue_head *wq)
+{
+	/*
+	 * We need to be sure we are in sync with the list_add()
+	 * modifications to the wait queue (task_list).
+	 *
+	 * This memory barrier should be paired with one on the
+	 * waiting side.
+	 */
+	smp_mb();
+	return swait_active(wq);
+}
 #endif
