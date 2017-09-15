@@ -369,10 +369,27 @@ def hack_content(fname, data):
             w('}')
             w('#endif')
             w('')
-            w('static struct shrinker mmu_shrinker = {')
+            w(line)
             w('#if LINUX_VERSION_CODE < KERNEL_VERSION(3,12,0)')
             w('\t.shrink = mmu_shrink,')
             line = '#else'
+        if line == 'static const struct mmu_notifier_ops kvm_mmu_notifier_ops = {':
+            w('#if LINUX_VERSION_CODE < KERNEL_VERSION(4,13,0)')
+            w('static void kvm_mmu_notifier_invalidate_page(struct mmu_notifier *mn,')
+            w('\t\t\t\t\t     struct mm_struct *mm,')
+            w('\t\t\t\t\t     unsigned long page)')
+            w('{')
+            w('\tkvm_mmu_notifier_invalidate_range_start(mn, mm, page, page + PAGE_SIZE);')
+            w('\tkvm_mmu_notifier_invalidate_range(mn, mm, page, page + PAGE_SIZE);')
+            w('\tkvm_mmu_notifier_invalidate_range_end(mn, mm, page, page + PAGE_SIZE);')
+            w('}')
+            w('#endif')
+            w('')
+            w(line)
+            w('#if LINUX_VERSION_CODE < KERNEL_VERSION(4,13,0)')
+            w('\t.invalidate_page = kvm_mmu_notifier_invalidate_page,')
+            line = '#endif'
+
         if eventfd_file and line == '#include <linux/kernel.h>':
             w('#include <linux/module.h>')
 
