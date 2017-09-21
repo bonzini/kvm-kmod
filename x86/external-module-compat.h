@@ -784,7 +784,7 @@ static inline void kvm_load_gdt(const struct kvm_desc_ptr *dtr)
 	asm volatile("lgdt %0"::"m" (*dtr));
 }
 
-static inline void kvm_native_store_idt(struct kvm_desc_ptr *dtr)
+static inline void kvm_store_idt(struct kvm_desc_ptr *dtr)
 {
 	asm volatile("sidt %0":"=m" (*dtr));
 }
