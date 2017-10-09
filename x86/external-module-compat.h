@@ -532,6 +532,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_RDPID	(16*32+22) /* User-Mode Instruction Prevention */
 #endif
 
+#ifndef X86_FEATURE_LA57
+#define X86_FEATURE_LA57	(16*32+16) /* 5-level page tables */
+#endif
+
 #ifndef MSR_AMD64_PATCH_LOADER
 #define MSR_AMD64_PATCH_LOADER         0xc0010020
 #endif
