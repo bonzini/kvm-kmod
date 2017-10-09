@@ -1760,7 +1760,7 @@ static inline void copy_fpregs_to_fpstate(struct kvm_compat_fpu *fpu)
 	kvm_fpu_save_init(fpu);
 }
 
-static inline void fpu__activate_curr(struct kvm_compat_fpu *fpu)
+static inline void fpu__initialize(struct kvm_compat_fpu *fpu)
 {
 	struct task_struct *tsk =
 		container_of(fpu, struct task_struct, thread.fpu);
@@ -1774,6 +1774,10 @@ static inline void kvm_fpstate_init(struct kvm_compat_fpu *fpu)
 	kvm_fpu_finit(fpu);
 }
 #else
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 0)
+#define fpu__initialize fpu__activate_curr
+#endif
+
 static inline void kvm_fpu_free(struct kvm_compat_fpu *fpu)
 {
 }
