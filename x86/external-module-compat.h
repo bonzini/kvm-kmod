@@ -2040,3 +2040,8 @@ static inline unsigned long kvm_gate_offset(const gate_desc *g)
 #else
 #define kvm_gate_offset gate_offset
 #endif
+
+#ifndef ASM_CALL_CONSTRAINT
+register unsigned int __asm_call_sp asm("esp");
+#define ASM_CALL_CONSTRAINT "+r" (__asm_call_sp)
+#endif
