@@ -394,13 +394,12 @@ def hack_content(fname, data):
             w('#include <linux/module.h>')
 
         # Large FPU changes in 4.2
-        if match(r'\b(__copy_kernel_to_fpregs|fpstate_init)\b'):
+        if match(r'\b(kvm___copy_kernel_to_fpregs|fpstate_init)\b'):
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,2,0)')
             w(line)
             w('#else')
             # .state change from union pointer to union.  The older APIs
             # took a struct fpu.
-            line = sub(r'\b__copy_kernel_to_fpregs\b', 'kvm_fpu_restore_checking', line)
             line = sub(r'\bfpstate_init\b', 'kvm_fpstate_init', line)
             line = sub(r'\b.state\b', '', line)
             w(line)
@@ -431,7 +430,7 @@ def hack_content(fname, data):
             w('#include <asm/xsave.h>')
             line = '#endif'
         if match(r'^#include <asm/fpu/internal\.h>'):
-            w('#include "fpu-compat.h"')
+            line = '#include "fpu-compat.h"'
         if match(r'(remaining|target_expiration) = 0;$'):
 	    line = sub('0', 'ktime_set(0, 0)', line)
 	if match(r'\(struct vm_fault \*vmf\)'):

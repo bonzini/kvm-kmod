@@ -24,11 +24,11 @@ static inline void kvm___copy_kernel_to_fpregs(union fpregs_state *fpstate, u64 
 #include <asm/fpu-internal.h>
 #include <asm/xcr.h>
 
-static inline int kvm_fpu_restore_checking(struct kvm_compat_fpu *fpu,
-					   unsigned long mask)
+static inline int kvm___copy_kernel_to_fpregs(struct kvm_compat_fpu *fpu,
+					      unsigned long mask)
 {
 	if (use_xsave()) {
-		xrstor_state(fpu->state->xsave, mask);
+		xrstor_state(&fpu->state->xsave, mask);
 		return 0;
 	} else
 		return fpu_restore_checking(fpu);
