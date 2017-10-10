@@ -1858,6 +1858,41 @@ static inline unsigned long long rdtsc_ordered(void)
 
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,4,0)
+/* Intel MPX support: */
+
+struct mpx_bndreg {
+	u64                             lower_bound;
+	u64                             upper_bound;
+} __packed;
+/*
+ * State component 3 is used for the 4 128-bit bounds registers
+ */
+struct mpx_bndreg_state {
+	struct mpx_bndreg               bndreg[4];
+} __packed;
+
+/*
+ * State component 4 is used for the 64-bit user-mode MPX
+ * configuration register BNDCFGU and the 64-bit MPX status
+ * register BNDSTATUS.  We call the pair "BNDCSR".
+ */
+struct mpx_bndcsr {
+	u64                             bndcfgu;
+	u64                             bndstatus;
+} __packed;
+
+/*
+ * The BNDCSR state is padded out to be 64-bytes in size.
+ */
+struct mpx_bndcsr_state {
+	union {
+		struct mpx_bndcsr               bndcsr;
+		u8                              pad_to_64_bytes[64];
+	};
+} __packed;
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,5,0)
 static inline unsigned int x86_family(unsigned int sig)
 {
