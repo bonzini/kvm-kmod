@@ -1731,6 +1731,10 @@ static inline bool swq_has_sleeper(struct swait_queue_head *wq)
 }
 #endif
 
+#ifndef SLAB_ACCOUNT
+#define SLAB_ACCOUNT 0
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
 int get_compat_sigset(sigset_t *set, const compat_sigset_t __user *compat);
 #endif
