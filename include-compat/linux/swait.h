@@ -79,6 +79,27 @@ extern void __init_swait_queue_head(struct swait_queue_head *q, const char *name
 	DECLARE_SWAIT_QUEUE_HEAD(name)
 #endif
 
+/**
+ * swq_has_sleeper - check if there are any waiting processes
+ * @wq: the waitqueue to test for waiters
+ *
+ * Returns true if @wq has waiting processes
+ *
+ * Please refer to the comment for swait_active.
+ */
+static inline bool swq_has_sleeper(struct swait_queue_head *wq)
+{
+	/*
+	 * We need to be sure we are in sync with the list_add()
+	 * modifications to the wait queue (task_list).
+	 *
+	 * This memory barrier should be paired with one on the
+	 * waiting side.
+	 */
+	smp_mb();
+	return swait_active(wq);
+}
+
 static inline int swait_active(struct swait_queue_head *q)
 {
 	return !list_empty(&q->task_list);
