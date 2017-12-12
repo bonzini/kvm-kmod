@@ -1728,6 +1728,10 @@ static inline int __register_hotcpu_notifier(struct notifier_block *nb)
 #define kvm_cpu_has_xsaves	cpu_has_xsaves
 #endif /* >= 3.17 */
 
+#ifndef MSR_IA32_VMX_MISC_INTEL_PT
+#define MSR_IA32_VMX_MISC_INTEL_PT              (1ULL << 14)
+#endif
+
 #ifndef MSR_IA32_VMX_MISC_VMWRITE_SHADOW_RO_FIELDS
 #define MSR_IA32_VMX_MISC_VMWRITE_SHADOW_RO_FIELDS (1ULL << 29)
 #endif
@@ -2073,4 +2077,31 @@ static inline unsigned long kvm_gate_offset(const gate_desc *g)
 #ifndef ASM_CALL_CONSTRAINT
 register unsigned int __asm_call_sp asm("esp");
 #define ASM_CALL_CONSTRAINT "+r" (__asm_call_sp)
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 15, 0)
+#define MSR_IA32_RTIT_ADDR_COUNT	8
+#define RTIT_CTL_TRACEEN		BIT(0)
+
+enum pt_capabilities {
+	PT_CAP_max_subleaf = 0,
+	PT_CAP_cr3_filtering,
+	PT_CAP_psb_cyc,
+	PT_CAP_ip_filtering,
+	PT_CAP_mtc,
+	PT_CAP_ptwrite,
+	PT_CAP_power_event_trace,
+	PT_CAP_topa_output,
+	PT_CAP_topa_multiple_entries,
+	PT_CAP_single_range_output,
+	PT_CAP_payloads_lip,
+	PT_CAP_num_address_ranges,
+	PT_CAP_mtc_periods,
+	PT_CAP_cycle_thresholds,
+	PT_CAP_psb_periods,
+};
+
+static inline u32 pt_cap_get(enum pt_capabilities cap) {
+	return 0;
+}
 #endif
