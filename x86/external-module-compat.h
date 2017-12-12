@@ -536,6 +536,31 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_LA57	(16*32+16) /* 5-level page tables */
 #endif
 
+#ifndef X86_FEATURE_AVX512_VBMI2
+#define X86_FEATURE_AVX512_VBMI2	(16*32+ 6) /* Additional AVX512 Vector Bit Manipulation Instructions */
+#endif
+
+#ifndef X86_FEATURE_GFNI
+#define X86_FEATURE_GFNI		(16*32+ 8) /* Galois Field New Instructions */
+#endif
+
+#ifndef X86_FEATURE_VAES
+#define X86_FEATURE_VAES		(16*32+ 9) /* Vector AES */
+#endif
+
+#ifndef X86_FEATURE_VPCLMULQDQ
+#define X86_FEATURE_VPCLMULQDQ		(16*32+10) /* Carry-Less Multiplication Double Quadword */
+#endif
+
+#ifndef X86_FEATURE_AVX512_VNNI
+#define X86_FEATURE_AVX512_VNNI		(16*32+11) /* Vector Neural Network Instructions */
+#endif
+
+#ifndef X86_FEATURE_AVX512_BITALG
+#define X86_FEATURE_AVX512_BITALG	(16*32+12) /* Support for VPOPCNT[B,W] and VPSHUF-BITQMB instructions */
+#endif
+
+
 #ifndef MSR_AMD64_PATCH_LOADER
 #define MSR_AMD64_PATCH_LOADER         0xc0010020
 #endif
