@@ -2104,4 +2104,6 @@ enum pt_capabilities {
 static inline u32 pt_cap_get(enum pt_capabilities cap) {
 	return 0;
 }
+
+#define default_cpu_present_to_apicid __default_cpu_present_to_apicid
 #endif
