@@ -19,6 +19,7 @@
 #include <linux/ktime.h>
 #include <linux/kernel.h>
 #include <linux/swait.h>
+#include <linux/compat.h>
 #include <asm/processor.h>
 #include <linux/hrtimer.h>
 #include <asm/bitops.h>
@@ -967,24 +968,6 @@ static inline void rcu_virt_note_context_switch(int cpu)
 }
 #endif
 
-#ifdef CONFIG_COMPAT
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,1,0)
-#include <linux/compat.h>
-static inline
-void kvm_sigset_from_compat(sigset_t *set, compat_sigset_t *compat)
-{
-	switch (_NSIG_WORDS) {
-	case 4: set->sig[3] = compat->sig[6] | (((long)compat->sig[7]) << 32 );
-	case 3: set->sig[2] = compat->sig[4] | (((long)compat->sig[5]) << 32 );
-	case 2: set->sig[1] = compat->sig[2] | (((long)compat->sig[3]) << 32 );
-	case 1: set->sig[0] = compat->sig[0] | (((long)compat->sig[1]) << 32 );
-	}
-}
-#else /* >= 3.1 */
-#define kvm_sigset_from_compat	sigset_from_compat
-#endif /* >= 3.1 */
-#endif /* CONFIG_COMPAT */
-
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,33)
 
 #ifdef CONFIG_PRINTK
@@ -1746,4 +1729,8 @@ static inline bool swq_has_sleeper(struct swait_queue_head *wq)
 	smp_mb();
 	return swait_active(wq);
 }
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
+int get_compat_sigset(sigset_t *set, const compat_sigset_t __user *compat);
 #endif
