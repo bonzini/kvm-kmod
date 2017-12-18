@@ -19,6 +19,11 @@ static inline void kvm___copy_kernel_to_fpregs(union fpregs_state *fpstate, u64 
 			copy_kernel_to_fregs(&fpstate->fsave);
 	}
 }
+
+static inline void kvm_copy_kernel_to_fpregs(union fpregs_state *fpstate)
+{
+	kvm___copy_kernel_to_fpregs(fpstate, -1);
+}
 #else
 #include <asm/i387.h>
 #include <asm/fpu-internal.h>
@@ -32,6 +37,11 @@ static inline int kvm___copy_kernel_to_fpregs(struct kvm_compat_fpu *fpu,
 		return 0;
 	} else
 		return fpu_restore_checking(fpu);
+}
+
+static inline void kvm_copy_kernel_to_fpregs(struct kvm_compat_fpu *fpu)
+{
+	kvm___copy_kernel_to_fpregs(fpu, -1);
 }
 #endif
 
