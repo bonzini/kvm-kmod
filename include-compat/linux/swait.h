@@ -79,6 +79,11 @@ extern void __init_swait_queue_head(struct swait_queue_head *q, const char *name
 	DECLARE_SWAIT_QUEUE_HEAD(name)
 #endif
 
+static inline int swait_active(struct swait_queue_head *q)
+{
+	return !list_empty(&q->task_list);
+}
+
 /**
  * swq_has_sleeper - check if there are any waiting processes
  * @wq: the waitqueue to test for waiters
@@ -98,11 +103,6 @@ static inline bool swq_has_sleeper(struct swait_queue_head *wq)
 	 */
 	smp_mb();
 	return swait_active(wq);
-}
-
-static inline int swait_active(struct swait_queue_head *q)
-{
-	return !list_empty(&q->task_list);
 }
 
 extern void swake_up(struct swait_queue_head *q);
