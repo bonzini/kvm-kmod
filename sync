@@ -55,7 +55,7 @@ def hack_content(fname, data):
         'static_key static_key_deferred static_key_false '
         'static_key_slow_inc static_key_slow_dec static_key_slow_dec_deferred '
         'jump_label_rate_limit fixup_user_fault __pvclock_read_cycles '
-	'__copy_kernel_to_fpregs gate_offset '
+	'__copy_kernel_to_fpregs copy_kernel_to_fpregs gate_offset '
         )
     modparam_vars = str.split(
         'dbg enable_vpid flexpriority_enabled enable_ept '
