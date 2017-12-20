@@ -2141,4 +2141,10 @@ static inline u32 pt_cap_get(enum pt_capabilities cap) {
 }
 
 #define default_cpu_present_to_apicid __default_cpu_present_to_apicid
+
+static inline bool pat_pfn_immune_to_uc_mtrr(u32 pfn)
+{
+	/* Cannot access lookup_memtype, be conservative.  */
+	return true;
+}
 #endif
