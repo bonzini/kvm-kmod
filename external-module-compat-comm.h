@@ -1737,4 +1737,11 @@ static inline bool swq_has_sleeper(struct swait_queue_head *wq)
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
 int get_compat_sigset(sigset_t *set, const compat_sigset_t __user *compat);
+
+static inline void kvm_release_pages(struct page **pages, int nr)
+{
+    release_pages(pages, nr, false);
+}
+#else
+#define kvm_release_pages release_pages
 #endif

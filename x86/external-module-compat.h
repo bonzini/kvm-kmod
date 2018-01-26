@@ -367,6 +367,10 @@ static inline int rdmsrl_safe(unsigned msr, unsigned long long *p)
 #define X86_FEATURE_TBM		(6*32+21) /* trailing bit manipulations */
 #endif
 
+#ifndef X86_FEATURE_SEV
+#define X86_FEATURE_SEV		( 7*32+20) /* AMD Secure Encrypted Virtualization */
+#endif
+
 #ifndef X86_FEATURE_NPT
 #define X86_FEATURE_NPT		(8*32+ 5) /* AMD Nested Page Table support */
 #endif
@@ -1075,12 +1079,6 @@ static inline void hw_breakpoint_restore(void)
 	set_debugreg(current->thread.kvm_compat_debugreg(7), 7);
 }
 
-#endif
-
-#if LINUX_VERSION_CODE <= KERNEL_VERSION(2,6,24) && defined(CONFIG_X86_64)
-#define kvm_check_tsc_unstable()	1
-#else
-#define kvm_check_tsc_unstable		check_tsc_unstable
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,30)
@@ -2147,4 +2145,11 @@ static inline bool pat_pfn_immune_to_uc_mtrr(u32 pfn)
 	/* Cannot access lookup_memtype, be conservative.  */
 	return true;
 }
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 16, 0)
+#define x86_hyper_type 0
+#define X86_HYPER_MS_HYPERV 1
+#define set_hv_tscchange_cb(fn) BUG()
+#define clear_hv_tscchange_cb() BUG()
 #endif
