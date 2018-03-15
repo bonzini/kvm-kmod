@@ -138,6 +138,8 @@ def header_sync(arch):
     rmtree(T)
     for file in (glob('%(linux)s/include/linux/kvm*.h' % { 'linux': linux }) +
                  glob('%(linux)s/include/linux/vfio.h' % { 'linux': linux }) +
+                 glob('%(linux)s/include/linux/hyperv.h' % { 'linux': linux }) +
+                 glob('%(linux)s/include/uapi/linux/hyperv.h' % { 'linux': linux }) +
                  glob('%(linux)s/include/uapi/linux/kvm*.h' % { 'linux': linux })):
         out = ('%(T)s/include/linux/%(name)s'
                % { 'T': T, 'name': os.path.basename(file) })
@@ -159,6 +161,9 @@ def header_sync(arch):
          for dir in ['%(linux)s/arch/%(arch)s/include/asm/kvm*.h',
                      '%(linux)s/arch/%(arch)s/include/asm/vmx.h',
                      '%(linux)s/arch/%(arch)s/include/asm/svm.h',
+                     '%(linux)s/arch/%(arch)s/include/asm/msr-index.h',
+                     '%(linux)s/arch/%(arch)s/include/asm/hyperv-tlfs.h',
+                     '%(linux)s/arch/%(arch)s/include/asm/mshyperv.h',
                      '%(linux)s/arch/%(arch)s/include/asm/virtext*.h']
          for x in glob(dir % { 'arch': arch, 'linux': linux })
          ])
@@ -171,9 +176,7 @@ def header_sync(arch):
         [x
          for dir in ['%(linux)s/arch/%(arch)s/include/uapi/asm/kvm*.h',
                      '%(linux)s/arch/%(arch)s/include/uapi/asm/vmx.h',
-                     '%(linux)s/arch/%(arch)s/include/uapi/asm/svm.h',
-                     '%(linux)s/arch/%(arch)s/include/uapi/asm/msr-index.h',
-                     '%(linux)s/arch/%(arch)s/include/uapi/asm/hyperv.h']
+                     '%(linux)s/arch/%(arch)s/include/uapi/asm/svm.h']
          for x in glob(dir % { 'arch': arch, 'linux': linux })
          ])
     for file in arch_uapi_headers:
