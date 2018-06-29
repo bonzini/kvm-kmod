@@ -13,10 +13,12 @@
 
 #include "../external-module-compat-comm.h"
 
+#include <asm/microcode.h>
 #include <asm/msr.h>
 #include <asm/msr-index.h>
 #include <asm/asm.h>
 #include <asm/desc.h>
+#include <asm/thread_info.h>
 
 #ifndef CONFIG_HAVE_KVM_EVENTFD
 #define CONFIG_HAVE_KVM_EVENTFD 1
@@ -59,6 +61,42 @@
 #endif
 
 #include <linux/smp.h>
+
+#ifndef X86_FEATURE_SSBD
+#define X86_FEATURE_SSBD		( 7*32+17) /* Speculative Store Bypass Disable */
+#endif
+
+#ifndef X86_FEATURE_LS_CFG_SSBD
+#define X86_FEATURE_LS_CFG_SSBD		( 7*32+24)  /* "" AMD SSBD implementation via LS_CFG MSR */
+#endif
+
+#ifndef X86_FEATURE_CLDEMOTE
+#define X86_FEATURE_CLDEMOTE		(16*32+25) /* CLDEMOTE instruction */
+#endif
+
+#ifndef X86_FEATURE_AMD_IBPB
+#define X86_FEATURE_AMD_IBPB		(13*32+12) /* "" Indirect Branch Prediction Barrier */
+#endif
+
+#ifndef X86_FEATURE_AMD_IBRS
+#define X86_FEATURE_AMD_IBRS		(13*32+14) /* "" Indirect Branch Restricted Speculation */
+#endif
+
+#ifndef X86_FEATURE_AMD_SSBD
+#define X86_FEATURE_AMD_SSBD		(13*32+24) /* "" Speculative Store Bypass Disable */
+#endif
+
+#ifndef X86_FEATURE_VIRT_SSBD
+#define X86_FEATURE_VIRT_SSBD		(13*32+25) /* Virtualized Speculative Store Bypass Disable */
+#endif
+
+#ifndef X86_FEATURE_AMD_SSB_NO
+#define X86_FEATURE_AMD_SSB_NO		(13*32+26) /* "" Speculative Store Bypass is fixed in hardware. */
+#endif
+
+#ifndef X86_FEATURE_SPEC_CTRL_SSBD
+#define X86_FEATURE_SPEC_CTRL_SSBD	(18*32+31) /* "" Speculative Store Bypass Disable */
+#endif
 
 #ifndef MSR_F15H_PERF_CTL
 #define MSR_F15H_PERF_CTL               0xc0010200
@@ -120,5 +158,14 @@ static inline void save_fsgs_for_kvm(void)
 		current->thread.fsbase = 0;
         if (unlikely(current->thread.gsindex != 0))
 		current->thread.gsbase = 0;
+}
+#endif
+
+#ifndef _TIF_SSBD
+static inline void x86_virt_spec_ctrl(u64 guest_spec_ctrl, u64 guest_virt_spec_ctrl, bool setguest)
+{
+	/* Is MSR_SPEC_CTRL implemented ? */
+	if (static_cpu_has(X86_FEATURE_SPEC_CTRL) && guest_spec_ctrl != 0)
+		wrmsrl(MSR_IA32_SPEC_CTRL, setguest ? guest_spec_ctrl : 0);
 }
 #endif
