@@ -94,6 +94,10 @@
 #define X86_FEATURE_AMD_SSB_NO		(13*32+26) /* "" Speculative Store Bypass is fixed in hardware. */
 #endif
 
+#ifndef X86_FEATURE_FLUSH_L1D
+#define X86_FEATURE_FLUSH_L1D		(18*32+28) /* IA32_FLUSH_L1D MSR */
+#endif
+
 #ifndef X86_FEATURE_SPEC_CTRL_SSBD
 #define X86_FEATURE_SPEC_CTRL_SSBD	(18*32+31) /* "" Speculative Store Bypass Disable */
 #endif
@@ -167,5 +171,48 @@ static inline void x86_virt_spec_ctrl(u64 guest_spec_ctrl, u64 guest_virt_spec_c
 	/* Is MSR_SPEC_CTRL implemented ? */
 	if (static_cpu_has(X86_FEATURE_SPEC_CTRL) && guest_spec_ctrl != 0)
 		wrmsrl(MSR_IA32_SPEC_CTRL, setguest ? guest_spec_ctrl : 0);
+}
+#endif
+
+#ifndef X86_BUG_L1TF
+#define KVM_KMOD_NEED_L1TF_DEFS
+
+#define X86_BUG_L1TF			X86_BUG(18) /* CPU is affected by L1 Terminal Fault */
+
+enum l1tf_mitigations {
+        L1TF_MITIGATION_OFF,
+        L1TF_MITIGATION_FLUSH_NOWARN,
+        L1TF_MITIGATION_FLUSH,
+        L1TF_MITIGATION_FLUSH_NOSMT,
+        L1TF_MITIGATION_FULL,
+        L1TF_MITIGATION_FULL_FORCE
+};
+
+#define l1tf_mitigation (L1TF_MITIGATION_OFF)
+
+enum cpuhp_smt_control {
+        CPU_SMT_ENABLED,
+        CPU_SMT_DISABLED,
+        CPU_SMT_FORCE_DISABLED,
+        CPU_SMT_NOT_SUPPORTED,
+};
+
+#define cpu_smt_control                (CPU_SMT_ENABLED)
+
+static inline bool kvm_get_cpu_l1tf_flush_l1d(void)
+{
+	return false;
+}
+
+static inline void kvm_clear_cpu_l1tf_flush_l1d(void)
+{
+}
+
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,19,0)
+static inline int hyperv_flush_guest_mapping(u64 as)
+{
+	return -ENOTSUPP;
 }
 #endif

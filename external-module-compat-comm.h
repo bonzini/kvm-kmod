@@ -59,3 +59,8 @@ static inline int vfs_poll(struct file *file, poll_table *pt)
 	return file->f_op->poll(file, pt);
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,19,0)
+#define prepare_to_swait_exclusive prepare_to_swait
+#define swake_up_one               swake_up
+#endif

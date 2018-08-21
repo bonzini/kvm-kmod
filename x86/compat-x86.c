@@ -10,3 +10,10 @@ struct hv_vp_assist_page **hv_vp_assist_page;
 EXPORT_SYMBOL_GPL(hv_vp_assist_page);
 #endif
 #endif
+
+#ifdef KVM_KMOD_NEED_L1TF_DEFS
+#include <asm/vmx.h>
+
+enum vmx_l1d_flush_state l1tf_vmx_mitigation = VMENTER_L1D_FLUSH_NEVER;
+EXPORT_SYMBOL_GPL(l1tf_vmx_mitigation);
+#endif
