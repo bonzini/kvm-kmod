@@ -25,6 +25,7 @@
 #include <asm/bitops.h>
 #include <linux/kconfig.h>
 #include <linux/poll.h>
+#include <linux/bitmap.h>
 
 #include "kvm-kmod-config.h"
 
@@ -63,4 +64,21 @@ static inline int vfs_poll(struct file *file, poll_table *pt)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,19,0)
 #define prepare_to_swait_exclusive prepare_to_swait
 #define swake_up_one               swake_up
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,20,0)
+static inline unsigned long *bitmap_alloc(unsigned int nbits, gfp_t flags)
+{
+	return kmalloc_array(BITS_TO_LONGS(nbits), sizeof(unsigned long), flags);
+}
+
+static inline unsigned long *bitmap_zalloc(unsigned int nbits, gfp_t flags)
+{
+	return bitmap_alloc(nbits, flags | __GFP_ZERO);
+}
+
+static inline void bitmap_free(const unsigned long *bitmap)
+{
+	kfree(bitmap);
+}
 #endif
