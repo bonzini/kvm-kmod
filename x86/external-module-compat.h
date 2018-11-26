@@ -216,3 +216,7 @@ static inline int hyperv_flush_guest_mapping(u64 as)
 	return -ENOTSUPP;
 }
 #endif
+
+#ifndef X86_VENDOR_HYGON
+#define X86_VENDOR_HYGON 9
+#endif
