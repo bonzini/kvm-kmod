@@ -103,9 +103,13 @@ def unifdef(fname):
     file(fname, 'w').write(data)
 
 hack_files = {
-    'x86': str.split('kvm_main.c mmu.c vmx.c svm.c x86.c x86.h irq.h lapic.c'
-                     ' lapic.h i8254.c eventfd.c emulate.c async_pf.c'
-                     ' cpuid.c pmu.c paging_tmpl.h'),
+    'x86': str.split('kvm_main.c mmu.c x86.c x86.h irq.c irq.h lapic.c'
+                     ' lapic.h i8254.c i8259.c eventfd.c emulate.c async_pf.c'
+                     ' cpuid.c pmu.c pmu_amd.c paging_tmpl.h mtrr.c page_track.c'
+		     ' vmx/capabilities.h pmu_amd.c svm.c tss.h'
+		     ' vmx/evmcs.c vmx/evmcs.h vmx/nested.c vmx/nested.h'
+		     ' vmx/pmu_intel.c vmx/vmcs12.c vmx/vmcs12.h vmx/vmcs.h'
+		     ' vmx/vmcs_shadow_fields.h vmx/vmx.c vmx/vmx.h'),
 }
 
 def mkdir(dir):
@@ -194,19 +198,21 @@ def header_sync(arch):
 def source_sync(arch):
     T = 'source'
     rmtree(T)
-    sources = [file
-               for pattern in ['%(linux)s/arch/%(arch)s/kvm/*.[cSh]',
-                               '%(linux)s/virt/kvm/*.[cSh]']
-               for file in glob(pattern % { 'linux': linux, 'arch': arch })
-               if not file.endswith('.mod.c')
-               ]
-    for file in sources:
-        out = ('%(T)s/%(name)s'
-               % { 'T': T, 'name': os.path.basename(file) })
-        cp(file, out)
+    sourcedirs = { '%(linux)s/arch/%(arch)s/kvm': 'source',
+		    '%(linux)s/arch/%(arch)s/kvm/vmx': 'source/vmx',
+		    '%(linux)s/virt/kvm': 'source'}
+    for srcdir, outdir in sourcedirs.items():
+	pattern = (srcdir + '/*.[chS]') % { 'linux': linux, 'arch': arch }
+        sources = [file
+               for file in glob(pattern)
+               if not file.endswith('.mod.c')]
+        for file in sources:
+            out = ('%(outdir)s/%(name)s'
+                   % { 'outdir': outdir, 'name': os.path.basename(file) })
+            cp(file, out)
 
-    for i in glob(T + '/*.c'):
-        unifdef(i)
+            if out[-1] == 'c':
+                unifdef(out)
 
     for i in hack_files[arch]:
         hack_file(T, i)

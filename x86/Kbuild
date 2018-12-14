@@ -6,7 +6,8 @@ kvm-objs := kvm_main.o x86.o mmu.o emulate.o irq.o i8259.o pmu.o \
 ifeq ($(CONFIG_KVM_VFIO),y)
 kvm-objs += vfio.o
 endif
-kvm-intel-objs := vmx.o pmu_intel.o
+kvm-intel-objs := vmx/vmx.o vmx/evmcs.o vmx/nested.o vmx/pmu_intel.o \
+	vmx/vmcs12.o
 kvm-amd-objs := svm.o pmu_amd.o
 
 CFLAGS_kvm_main.o = -DKVM_MAIN
