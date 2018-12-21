@@ -1,4 +1,4 @@
-
+#ifndef __ASSEMBLY__
 /*
  * Compatibility header for building as an external module.
  */
@@ -210,13 +210,21 @@ static inline void kvm_clear_cpu_l1tf_flush_l1d(void)
 
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,19,0)
-static inline int hyperv_flush_guest_mapping(u64 as)
-{
-	return -ENOTSUPP;
-}
-#endif
-
 #ifndef X86_VENDOR_HYGON
 #define X86_VENDOR_HYGON 9
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,21,0)
+#define intel_pt_validate_cap(caps, capability) 0
+#define intel_pt_validate_hw_cap(capability) 0
+
+#endif
+
+#ifndef PT_CPUID_REGS_NUM
+#define PT_CPUID_REGS_NUM 4
+#endif
+#ifndef PT_CPUID_LEAVES
+#define PT_CPUID_LEAVES 2
+#endif
+
 #endif
