@@ -26,7 +26,7 @@ all:: prerequisite
 				-I$(KERNELSOURCEDIR)/arch/${ARCH_DIR}/include \
 				-I$(KERNELSOURCEDIR)/arch/${ARCH_DIR}/include/uapi, \
 				-Iinclude/uapi -Iarch/${ARCH_DIR}/include \
-				-Iarch/${ARCH_DIR}/include/uapi) \
+				-Iarch/${ARCH_DIR}/include/uapi) -I`pwd` \
 			-Iinclude/generated/uapi -Iarch/${ARCH_DIR}/include/generated \
 			-Iarch/${ARCH_DIR}/include/generated/uapi \
 			-I`pwd`/include-compat -I`pwd`/${ARCH_DIR} \

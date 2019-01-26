@@ -84,6 +84,8 @@ def hack_content(fname, data):
         if fname == 'kvm_main.c' and inside_block(r'^int kvm_init\(', r'^}'):
             if match(r'return 0;'):
                 w('\tprintk("loaded kvm module (%s)\\n");\n' % (version,))
+	if match(r'^#define TRACE_INCLUDE_PATH'):
+	    line = '#define TRACE_INCLUDE_PATH x86'
 	if match(r'ms_hyperv\.nested_features & HV_X64_NESTED_GUEST_MAPPING_FLUSH$'):
 	    w(line)
 	    line = '\t    && LINUX_VERSION_CODE >= KERNEL_VERSION(4,21,0)'
