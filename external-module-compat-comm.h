@@ -82,3 +82,16 @@ static inline void bitmap_free(const unsigned long *bitmap)
 	kfree(bitmap);
 }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,0,0)
+struct mmu_notifier_range {
+       struct mm_struct *mm;
+       unsigned long start;
+       unsigned long end;
+       bool blockable;
+};
+
+#define kvm_access_ok(a, b) access_ok(NULL, a, b)
+#else
+#define kvm_access_ok(a, b) access_ok(a, b)
+#endif

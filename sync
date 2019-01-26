@@ -30,7 +30,7 @@ def re_cache(regexp):
 
 def hack_content(fname, data):
     compat_apis = str.split(
-        ''
+        'access_ok'
         )
     result = []
     pr_fmt = ''
@@ -87,6 +87,44 @@ def hack_content(fname, data):
 	if match(r'ms_hyperv\.nested_features & HV_X64_NESTED_GUEST_MAPPING_FLUSH$'):
 	    w(line)
 	    line = '\t    && LINUX_VERSION_CODE >= KERNEL_VERSION(4,21,0)'
+	if match_block_end(r'^static void kvm_mmu_notifier_invalidate_range_end', '^}'):
+	    w(line)
+            w('')
+            w('#if LINUX_VERSION_CODE < KERNEL_VERSION(5,0,0)')
+            w('#if LINUX_VERSION_CODE < KERNEL_VERSION(4,19,0)')
+            w('static void __kvm_mmu_notifier_invalidate_range_start(struct mmu_notifier *mn,')
+            w('                                                      struct mm_struct *mm,')
+            w('                                                      unsigned long start,')
+            w('                                                      unsigned long end) ')
+            w('{')
+            w('        struct mmu_notifier_range r = { mm, start, end, false };')
+            w('        kvm_mmu_notifier_invalidate_range_start(mn, &r);')
+            w('}')
+            w('#else')
+            w('static int __kvm_mmu_notifier_invalidate_range_start(struct mmu_notifier *mn,')
+            w('                                                     struct mm_struct *mm,')
+            w('                                                     unsigned long start,')
+            w('                                                     unsigned long end,')
+            w('                                                     bool blockable)')
+            w('{')
+            w('        struct mmu_notifier_range r = { mm, start, end, blockable };')
+            w('        return kvm_mmu_notifier_invalidate_range_start(mn, &r);')
+            w('}')
+            w('#endif')
+            w('#define kvm_mmu_notifier_invalidate_range_start __kvm_mmu_notifier_invalidate_range_start')
+            w('')
+            w('static void __kvm_mmu_notifier_invalidate_range_end(struct mmu_notifier *mn,')
+            w('                                                   struct mm_struct *mm,')
+            w('                                                   unsigned long start,')
+            w('                                                   unsigned long end)')
+            w('{')
+            w('        struct mmu_notifier_range r = { mm, start, end, false };')
+            w('        kvm_mmu_notifier_invalidate_range_end(mn, &r);')
+            w('}')
+            w('#define kvm_mmu_notifier_invalidate_range_end __kvm_mmu_notifier_invalidate_range_end')
+            w('#endif')
+            line = ''
+
         for ident in compat_apis:
             line = sub(r'\b' + ident + r'\b', 'kvm_' + ident, line)
 
@@ -109,7 +147,7 @@ hack_files = {
     'x86': str.split('kvm_main.c mmu.c x86.c x86.h irq.c irq.h lapic.c'
                      ' lapic.h i8254.c i8259.c eventfd.c emulate.c async_pf.c'
                      ' cpuid.c pmu.c pmu_amd.c paging_tmpl.h mtrr.c page_track.c'
-		     ' vmx/capabilities.h pmu_amd.c svm.c tss.h'
+		     ' vmx/capabilities.h pmu_amd.c svm.c tss.h trace.h'
 		     ' vmx/evmcs.c vmx/evmcs.h vmx/nested.c vmx/nested.h'
 		     ' vmx/pmu_intel.c vmx/vmcs12.c vmx/vmcs12.h vmx/vmcs.h'
 		     ' vmx/vmcs_shadow_fields.h vmx/vmx.c vmx/vmx.h'),

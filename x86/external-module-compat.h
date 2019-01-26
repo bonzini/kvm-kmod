@@ -74,6 +74,10 @@
 #define X86_FEATURE_CLDEMOTE		(16*32+25) /* CLDEMOTE instruction */
 #endif
 
+#ifndef X86_FEATURE_WBNOINVD
+#define X86_FEATURE_WBNOINVD		(13*32+ 9) /* WBNOINVD instruction */
+#endif
+
 #ifndef X86_FEATURE_AMD_IBPB
 #define X86_FEATURE_AMD_IBPB		(13*32+12) /* "" Indirect Branch Prediction Barrier */
 #endif
