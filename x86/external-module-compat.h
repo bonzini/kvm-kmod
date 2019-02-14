@@ -98,6 +98,14 @@
 #define X86_FEATURE_AMD_SSB_NO		(13*32+26) /* "" Speculative Store Bypass is fixed in hardware. */
 #endif
 
+#ifndef X86_FEATURE_MOVDIRI
+#define X86_FEATURE_MOVDIRI		(16*32+27) /* MOVDIRI instruction */
+#endif
+
+#ifndef X86_FEATURE_MOVDIR64B
+#define X86_FEATURE_MOVDIR64B		(16*32+28) /* MOVDIR64B instruction */
+#endif
+
 #ifndef X86_FEATURE_FLUSH_L1D
 #define X86_FEATURE_FLUSH_L1D		(18*32+28) /* IA32_FLUSH_L1D MSR */
 #endif
