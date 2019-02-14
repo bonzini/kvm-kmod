@@ -202,15 +202,6 @@ enum l1tf_mitigations {
 
 #define l1tf_mitigation (L1TF_MITIGATION_OFF)
 
-enum cpuhp_smt_control {
-        CPU_SMT_ENABLED,
-        CPU_SMT_DISABLED,
-        CPU_SMT_FORCE_DISABLED,
-        CPU_SMT_NOT_SUPPORTED,
-};
-
-#define cpu_smt_control                (CPU_SMT_ENABLED)
-
 static inline bool kvm_get_cpu_l1tf_flush_l1d(void)
 {
 	return false;
