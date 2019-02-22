@@ -89,6 +89,15 @@ def hack_content(fname, data):
 	if match(r'ms_hyperv\.nested_features & HV_X64_NESTED_GUEST_MAPPING_FLUSH$'):
 	    w(line)
 	    line = '\t    && LINUX_VERSION_CODE >= KERNEL_VERSION(4,21,0)'
+	if match(r'^static void kvm_handle_intel_pt_intr'):
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,1,0)')
+	if match_block_end(r'^static void kvm_handle_intel_pt_intr', '^}'):
+	    w(line)
+	    line = '#endif'
+	if match(r'handle_intel_pt_intr\s*='):
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,1,0)')
+	    w(line)
+	    line = '#endif'
 	if match_block_end(r'^static void kvm_mmu_notifier_invalidate_range_end', '^}'):
 	    w(line)
             w('')
