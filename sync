@@ -98,6 +98,12 @@ def hack_content(fname, data):
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,1,0)')
 	    w(line)
 	    line = '#endif'
+	if match(r'boot_cpu_data.x86_cache_bits'):
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,19,0)')
+	    w(line)
+	    w('#else')
+	    w(sub('x86_cache_bits', 'x86_phys_bits', line))
+	    line = '#endif'
 	if match_block_end(r'^static void kvm_mmu_notifier_invalidate_range_end', '^}'):
 	    w(line)
             w('')
@@ -135,6 +141,16 @@ def hack_content(fname, data):
             w('#define kvm_mmu_notifier_invalidate_range_end __kvm_mmu_notifier_invalidate_range_end')
             w('#endif')
             line = ''
+	if match(r'freq->policy->cpus'):
+            w('#if LINUX_VERSION_CODE < KERNEL_VERSION(5,2,0)')
+	    w('        cpu = freq->cpu;');
+	    w('#else')
+	    w(line)
+	    line = '#endif'
+	if match(r'DEFINE_STATIC_KEY_FALSE.vmx_l1d_should_flush'):
+            w('#if LINUX_VERSION_CODE < KERNEL_VERSION(5,2,0)')
+            w('static DEFINE_STATIC_KEY_FALSE(mds_user_clear);')
+	    w('#endif')
 
         for ident in compat_apis:
             line = sub(r'\b' + ident + r'\b', 'kvm_' + ident, line)

@@ -60,6 +60,10 @@
 #define CONFIG_HAVE_KVM_CPU_RELAX_INTERCEPT 1
 #endif
 
+#ifndef CONFIG_HAVE_KVM_NO_POLL
+#define CONFIG_HAVE_KVM_NO_POLL 1
+#endif
+
 #include <linux/smp.h>
 
 #ifndef X86_FEATURE_SSBD
@@ -77,6 +81,7 @@
 #ifndef X86_FEATURE_WBNOINVD
 #define X86_FEATURE_WBNOINVD		(13*32+ 9) /* WBNOINVD instruction */
 #endif
+
 
 #ifndef X86_FEATURE_AMD_IBPB
 #define X86_FEATURE_AMD_IBPB		(13*32+12) /* "" Indirect Branch Prediction Barrier */
@@ -104,6 +109,10 @@
 
 #ifndef X86_FEATURE_MOVDIR64B
 #define X86_FEATURE_MOVDIR64B		(16*32+28) /* MOVDIR64B instruction */
+#endif
+
+#ifndef X86_FEATURE_MD_CLEAR
+#define X86_FEATURE_MD_CLEAR		(18*32+10) /* VERW clears CPU buffers */
 #endif
 
 #ifndef X86_FEATURE_FLUSH_L1D
@@ -228,6 +237,39 @@ static inline void kvm_clear_cpu_l1tf_flush_l1d(void)
 #endif
 #ifndef PT_CPUID_LEAVES
 #define PT_CPUID_LEAVES 2
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,2,0)
+static inline bool e820__mapped_raw_any(u64 start, u64 end, int type)
+{
+       return false;
+}
+
+#define fpregs_assert_state_consistent()
+#define TIF_NEED_FPU_LOAD 14
+#define switch_fpu_return() do {} while(0)
+#define fpregs_lock() preempt_disable()
+#define fpregs_unlock() preempt_enable()
+#define fpregs_mark_activate() do {} while(0)
+#define mds_clear_cpu_buffers() do {} while(0)
+
+static inline unsigned int rdpkru(void)
+{
+        unsigned int eax, edx;
+        unsigned int ecx = 0;
+        unsigned int pkru;
+
+        asm volatile(".byte 0x0f,0x01,0xee\n\t"
+                     : "=a" (eax), "=d" (edx)
+                     : "c" (ecx));
+        pkru = eax;
+        return pkru;
+}
+
+static inline bool mmu_notifier_range_blockable(const struct mmu_notifier_range *r)
+{
+	return r->blockable;
+}
 #endif
 
 #endif
