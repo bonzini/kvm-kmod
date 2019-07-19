@@ -17,3 +17,7 @@ EXPORT_SYMBOL_GPL(hv_vp_assist_page);
 enum vmx_l1d_flush_state l1tf_vmx_mitigation = VMENTER_L1D_FLUSH_NEVER;
 EXPORT_SYMBOL_GPL(l1tf_vmx_mitigation);
 #endif
+
+#ifdef KVM_KMOD_NEED_ITLB_DEFS
+int itlb_multihit_kvm_mitigation;
+#endif

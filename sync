@@ -256,6 +256,18 @@ def header_sync(arch):
                % { 'T': T, 'name': os.path.basename(file), 'arch': arch })
         cp(file, out)
         unifdef(out)
+    generic_headers = (
+        [x
+         for dir in ['%(linux)s/include/asm-generic/mshyperv.h',
+		     '%(linux)s/include/clocksource/hyperv_timer.h']
+         for x in glob(dir % { 'arch': arch, 'linux': linux })
+         ])
+    for file in generic_headers:
+        dir = os.path.basename(os.path.dirname(file))
+        out = ('%(T)s/include/%(dir)s/%(name)s'
+               % { 'T': T, 'name': os.path.basename(file), 'dir': dir })
+        cp(file, out)
+        unifdef(out)
     hack_file(T, 'include/linux/kvm_host.h')
     hack_file(T, 'include/asm-%(arch)s/kvm_host.h' % { 'arch': arch })
     if arch == 'x86':

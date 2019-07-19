@@ -95,6 +95,10 @@
 #define X86_FEATURE_AMD_SSBD		(13*32+24) /* "" Speculative Store Bypass Disable */
 #endif
 
+#ifndef X86_FEATURE_AMD_STIBP_ALWAYS_ON
+#define X86_FEATURE_AMD_STIBP_ALWAYS_ON (13*32+17) /* "" Single Thread Indirect Branch Predictors always-on preferred */
+#endif
+
 #ifndef X86_FEATURE_VIRT_SSBD
 #define X86_FEATURE_VIRT_SSBD		(13*32+25) /* Virtualized Speculative Store Bypass Disable */
 #endif
@@ -121,6 +125,10 @@
 
 #ifndef X86_FEATURE_SPEC_CTRL_SSBD
 #define X86_FEATURE_SPEC_CTRL_SSBD	(18*32+31) /* "" Speculative Store Bypass Disable */
+#endif
+
+#ifndef X86_FEATURE_AVX512_BF16
+#define X86_FEATURE_AVX512_BF16		(12*32+ 5) /* AVX512 BFLOAT16 instructions */
 #endif
 
 #ifndef MSR_F15H_PERF_CTL
@@ -272,4 +280,9 @@ static inline bool mmu_notifier_range_blockable(const struct mmu_notifier_range 
 }
 #endif
 
+#endif
+
+#ifndef X86_BUG_ITLB_MULTIHIT
+#define X86_BUG_ITLB_MULTIHIT			X86_BUG(21) /* CPU may incur MCE during certain page attribute changes */
+#define KVM_KMOD_NEED_ITLB_DEFS
 #endif

@@ -95,3 +95,8 @@ struct mmu_notifier_range {
 #else
 #define kvm_access_ok(a, b) access_ok(a, b)
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,3,0)
+#define ktime_get_boottime_ns() ktime_get_boot_ns()
+#define housekeeping_enabled(x) (0)
+#endif
