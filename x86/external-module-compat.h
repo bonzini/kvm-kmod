@@ -6,6 +6,7 @@
 #include <linux/compiler.h>
 #include <linux/version.h>
 #include <linux/kconfig.h>
+#include <linux/perf_event.h>
 
 #include <linux/types.h>
 
@@ -131,6 +132,10 @@
 #define X86_FEATURE_AVX512_BF16		(12*32+ 5) /* AVX512 BFLOAT16 instructions */
 #endif
 
+#ifndef X86_FEATURE_WAITPKG
+#define X86_FEATURE_WAITPKG		(16*32+ 5) /* UMONITOR/UMWAIT/TPAUSE Instructions */
+#endif
+
 #ifndef MSR_F15H_PERF_CTL
 #define MSR_F15H_PERF_CTL               0xc0010200
 #endif
@@ -230,6 +235,10 @@ static inline void kvm_clear_cpu_l1tf_flush_l1d(void)
 
 #endif
 
+#ifndef X86_BUG_MDS
+#define X86_BUG_MDS	X86_BUG(19) /* CPU is affected by Microarchitectural data sampling */
+#endif
+
 #ifndef X86_VENDOR_HYGON
 #define X86_VENDOR_HYGON 9
 #endif
@@ -245,6 +254,10 @@ static inline void kvm_clear_cpu_l1tf_flush_l1d(void)
 #endif
 #ifndef PT_CPUID_LEAVES
 #define PT_CPUID_LEAVES 2
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,4,0)
+static inline u32 get_umwait_control_msr(void) { return 0; }
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(5,2,0)
@@ -276,13 +289,45 @@ static inline unsigned int rdpkru(void)
 
 static inline bool mmu_notifier_range_blockable(const struct mmu_notifier_range *r)
 {
-	return r->blockable;
+	return true;
 }
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,5,0)
+static inline u64 perf_event_pause(struct perf_event *event, bool reset)
+{
+	u64 count;
+
+	WARN_ON_ONCE(event->attr.inherit);
+	perf_event_disable(event);
+	count = local64_read(&event->count);
+	if (reset)
+		local64_set(&event->count, 0);
+
+	return count;
+}
+
+/* Good enough for KVM.  */
+static inline int perf_event_period(struct perf_event *event, u64 value)
+{
+	return -EINVAL;
+}
 #endif
 
 #ifndef X86_BUG_ITLB_MULTIHIT
 #define X86_BUG_ITLB_MULTIHIT			X86_BUG(21) /* CPU may incur MCE during certain page attribute changes */
 #define KVM_KMOD_NEED_ITLB_DEFS
+#endif
+
+#ifndef X86_BUG_TAA
+#define X86_BUG_TAA	X86_BUG(22) /* CPU is affected by TSX Async Abort(TAA) */
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,4,0)
+static inline bool cpu_mitigations_off(void)
+{
+	return false;
+}
+#endif
+
 #endif

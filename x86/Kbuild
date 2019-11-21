@@ -1,8 +1,8 @@
 obj-m := kvm.o kvm-intel.o kvm-amd.o
-kvm-objs := kvm_main.o x86.o mmu.o emulate.o irq.o i8259.o pmu.o \
+kvm-objs := kvm_main.o x86.o emulate.o irq.o i8259.o pmu.o \
 	 lapic.o ioapic.o i8254.o coalesced_mmio.o irq_comm.o \
 	 eventfd.o compat-x86.o async_pf.o cpuid.o irqchip.o mtrr.o \
-	 hyperv.o page_track.o debugfs.o
+	 hyperv.o mmu/mmu.o mmu/page_track.o debugfs.o
 ifeq ($(CONFIG_KVM_VFIO),y)
 kvm-objs += vfio.o
 endif

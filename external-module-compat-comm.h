@@ -100,3 +100,8 @@ struct mmu_notifier_range {
 #define ktime_get_boottime_ns() ktime_get_boot_ns()
 #define housekeeping_enabled(x) (0)
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,4,0)
+#define HRTIMER_MODE_ABS_HARD HRTIMER_MODE_ABS
+static inline bool cpu_smt_possible(void) { return true; }
+#endif

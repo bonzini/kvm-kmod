@@ -151,6 +151,8 @@ def hack_content(fname, data):
             w('#if LINUX_VERSION_CODE < KERNEL_VERSION(5,2,0)')
             w('static DEFINE_STATIC_KEY_FALSE(mds_user_clear);')
 	    w('#endif')
+	if match(r'BUILD_BUG_ON_MSG.*INTEL_PMC_MAX_FIXED'):
+            line = sub(r'!=', '>', line)
 
         for ident in compat_apis:
             line = sub(r'\b' + ident + r'\b', 'kvm_' + ident, line)
@@ -171,9 +173,9 @@ def unifdef(fname):
     file(fname, 'w').write(data)
 
 hack_files = {
-    'x86': str.split('kvm_main.c mmu.c x86.c x86.h irq.c irq.h lapic.c'
+    'x86': str.split('kvm_main.c mmu/mmu.c x86.c x86.h irq.c irq.h lapic.c'
                      ' lapic.h i8254.c i8259.c eventfd.c emulate.c async_pf.c'
-                     ' cpuid.c pmu.c pmu_amd.c paging_tmpl.h mtrr.c page_track.c'
+                     ' cpuid.c pmu.c pmu_amd.c mmu/paging_tmpl.h mtrr.c mmu/page_track.c'
 		     ' vmx/capabilities.h pmu_amd.c svm.c tss.h trace.h'
 		     ' vmx/evmcs.c vmx/evmcs.h vmx/nested.c vmx/nested.h'
 		     ' vmx/pmu_intel.c vmx/vmcs12.c vmx/vmcs12.h vmx/vmcs.h'
@@ -279,6 +281,7 @@ def source_sync(arch):
     T = 'source'
     rmtree(T)
     sourcedirs = { '%(linux)s/arch/%(arch)s/kvm': 'source',
+		    '%(linux)s/arch/%(arch)s/kvm/mmu': 'source/mmu',
 		    '%(linux)s/arch/%(arch)s/kvm/vmx': 'source/vmx',
 		    '%(linux)s/virt/kvm': 'source'}
     for srcdir, outdir in sourcedirs.items():
