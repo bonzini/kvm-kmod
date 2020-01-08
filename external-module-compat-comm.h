@@ -105,3 +105,12 @@ struct mmu_notifier_range {
 #define HRTIMER_MODE_ABS_HARD HRTIMER_MODE_ABS
 static inline bool cpu_smt_possible(void) { return true; }
 #endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,5,0)
+#define rcu_replace_pointer(rcu_ptr, ptr, c)                            	 \
+	({                                                                       \
+	         typeof(ptr) __tmp = rcu_dereference_protected((rcu_ptr), (c));  \
+	         rcu_assign_pointer((rcu_ptr), (ptr));                           \
+	         __tmp;                                                          \
+	 })
+#endif

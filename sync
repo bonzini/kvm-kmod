@@ -39,7 +39,11 @@ def hack_content(fname, data):
 
     def sub(regexp, repl, str):
         return re_cache(regexp).sub(repl, str)
+    def w(line, result = result):
+        result.append(line)
 
+    if fname.endswith('S'):
+        w('#include <linux/version.h>')
     for line in data.splitlines():
         def match(regexp):
             return re_cache(regexp).search(line)
@@ -69,9 +73,6 @@ def hack_content(fname, data):
             elif match(start_regexp):
                 inside_block_state[key] = True
             return False
-
-        def w(line, result = result):
-            result.append(line)
 
         orig = line
         f = line.split()
@@ -153,6 +154,18 @@ def hack_content(fname, data):
 	    w('#endif')
 	if match(r'BUILD_BUG_ON_MSG.*INTEL_PMC_MAX_FIXED'):
             line = sub(r'!=', '>', line)
+	if match(r'^SYM_FUNC_START'):
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,5,0)')
+	    w(line)
+	    w('#else')
+            w(sub(r'^SYM_FUNC_START', 'ENTRY', line))
+	    line = '#endif'
+	if match(r'^SYM_FUNC_END'):
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,5,0)')
+	    w(line)
+	    w('#else')
+            w(sub(r'^SYM_FUNC_END', 'ENDPROC', line))
+	    line = '#endif'
 
         for ident in compat_apis:
             line = sub(r'\b' + ident + r'\b', 'kvm_' + ident, line)
@@ -179,7 +192,7 @@ hack_files = {
 		     ' vmx/capabilities.h pmu_amd.c svm.c tss.h trace.h'
 		     ' vmx/evmcs.c vmx/evmcs.h vmx/nested.c vmx/nested.h'
 		     ' vmx/pmu_intel.c vmx/vmcs12.c vmx/vmcs12.h vmx/vmcs.h'
-		     ' vmx/vmcs_shadow_fields.h vmx/vmx.c vmx/vmx.h'),
+		     ' vmx/vmcs_shadow_fields.h vmx/vmenter.S vmx/vmx.c vmx/vmx.h'),
 }
 
 def mkdir(dir):
