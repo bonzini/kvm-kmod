@@ -154,6 +154,14 @@ def hack_content(fname, data):
 	    w('#endif')
 	if match(r'BUILD_BUG_ON_MSG.*INTEL_PMC_MAX_FIXED'):
             line = sub(r'!=', '>', line)
+	if match(r'BUILD_BUG_ON.*(CPUID_LNX_4|CPUID_7_1_EAX)') or \
+			(inside_block(r'^static .*reverse_cpuid', r'^}') and match('CPUID_7_1_EAX')):
+            w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,3,0)')
+	    w(line)
+            line = '#endif'
+	if match(r'AVX512_BF16'):
+            # For Linux versions that lack CPUID_7_1_EAX
+            line = sub(r'F\(AVX512_BF16\)', '(1u << 5)', line)
 	if match(r'^SYM_FUNC_START'):
             w('#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,5,0)')
 	    w(line)
@@ -187,7 +195,7 @@ def unifdef(fname):
 
 hack_files = {
     'x86': str.split('kvm_main.c mmu/mmu.c x86.c x86.h irq.c irq.h lapic.c'
-                     ' lapic.h i8254.c i8259.c eventfd.c emulate.c async_pf.c'
+                     ' lapic.h i8254.c i8259.c eventfd.c emulate.c async_pf.c cpuid.h'
                      ' cpuid.c pmu.c pmu_amd.c mmu/paging_tmpl.h mtrr.c mmu/page_track.c'
 		     ' vmx/capabilities.h pmu_amd.c svm.c tss.h trace.h'
 		     ' vmx/evmcs.c vmx/evmcs.h vmx/nested.c vmx/nested.h'

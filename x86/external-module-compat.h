@@ -330,4 +330,22 @@ static inline bool cpu_mitigations_off(void)
 }
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,6,0)
+static inline bool is_transparent_hugepage(struct page *page)
+{
+	if (!PageCompound(page))
+		return 0;
+
+	page = compound_head(page);
+	return is_huge_zero_page(page) ||
+	       page[1].compound_dtor == TRANSHUGE_PAGE_DTOR;
+}
+
+static inline pte_t *lookup_address_in_mm(struct mm_struct *mm, unsigned long address,
+			    unsigned int *level)
+{
+	return lookup_address_in_pgd(pgd_offset(mm, address), address, level);
+}
+#endif
+
 #endif
