@@ -1,13 +1,14 @@
 obj-m := kvm.o kvm-intel.o kvm-amd.o
-kvm-objs := kvm_main.o x86.o emulate.o irq.o i8259.o pmu.o \
-	 lapic.o ioapic.o i8254.o coalesced_mmio.o irq_comm.o \
-	 eventfd.o compat-x86.o async_pf.o cpuid.o irqchip.o mtrr.o \
-	 hyperv.o mmu/mmu.o mmu/page_track.o debugfs.o
+kvm-objs := async_pf.o binary_stats.o coalesced_mmio.o compat-x86.o cpuid.o debugfs.o dirty_ring.o \
+	 emulate.o eventfd.o hyperv.o i8254.o i8259.o ioapic.o irq_comm.o irq.o irqchip.o \
+	 kvm_main.o kvm_onhyperv.o lapic.o \
+	 mmu/mmu.o mmu/page_track.o mmu/spte.o mmu/tdp_iter.o mmu/tdp_mmu.o \
+	 mtrr.o pmu.o x86.o xen.o
 ifeq ($(CONFIG_KVM_VFIO),y)
 kvm-objs += vfio.o
 endif
-kvm-intel-objs := vmx/vmx.o vmx/evmcs.o vmx/nested.o vmx/pmu_intel.o \
-	vmx/vmcs12.o vmx/vmenter.o ../hyperv.o
-kvm-amd-objs := svm.o pmu_amd.o
+kvm-intel-objs := ../hyperv.o vmx/evmcs.o vmx/nested.o vmx/pmu_intel.o vmx/posted_intr.o \
+	 vmx/sgx.o vmx/vmcs12.o vmx/vmenter.o vmx/vmx.o
+kvm-amd-objs := svm/avic.o svm/nested.o svm/pmu.o svm/sev.o svm/svm_onhyperv.o svm/svm.o svm/vmenter.o
 
 CFLAGS_kvm_main.o = -DKVM_MAIN
